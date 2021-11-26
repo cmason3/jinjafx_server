@@ -50,6 +50,13 @@ class JinjaFxServer(HTTPServer):
     pass
 
 
+ class ArgumentParser(argparse.ArgumentParser):
+   def error(self, message):
+     print('URL:\n  https://github.com/cmason3/jinjafx_server\n', file=sys.stderr)
+     print('Usage:\n  ' + self.format_usage()[7:], file=sys.stderr)
+     raise Exception(message)
+
+    
 class JinjaFxRequest(BaseHTTPRequestHandler):
   server_version = 'JinjaFx/' + jinjafx.__version__
   protocol_version = 'HTTP/1.1'
@@ -676,7 +683,7 @@ def main(rflag=[0]):
     print('JinjaFx Server v' + jinjafx.__version__ + ' - Jinja2 Templating Tool')
     print('Copyright (c) 2020-2021 Chris Mason <chris@netnix.org>\n')
 
-    parser = jinjafx.ArgumentParser(add_help=False)
+    parser = ArgumentParser(add_help=False)
     parser.add_argument('-s', action='store_true', required=True)
     parser.add_argument('-l', metavar='<address>', default='127.0.0.1', type=str)
     parser.add_argument('-p', metavar='<port>', default=8080, type=int)
