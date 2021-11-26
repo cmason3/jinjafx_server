@@ -61,6 +61,13 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   server_version = 'JinjaFx/' + jinjafx.__version__
   protocol_version = 'HTTP/1.1'
 
+  def format_bytes(self, b):
+    for u in [ '', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y' ]:
+      if b >= 1000:
+        b /= 1000
+      else:
+        return '{:.2f}'.format(b).rstrip('0').rstrip('.') + u + 'B'
+
   def log_message(self, format, *args):
     path = self.path if hasattr(self, 'path') else ''
     lnumber = " {" + str(self.lnumber) + "}" if hasattr(self, 'lnumber') and 'beta' in jinjafx.__version__ else ''
@@ -95,7 +102,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + lnumber + ' \033[1;' + ansi + 'm' + str(args[2]) + '\033[0m')
           
           elif self.command == 'POST':
-            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + lnumber + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + jinjafx.format_bytes(self.length) + ']')
+            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + lnumber + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + ']')
 
           elif self.command != None:
             if (args[1] != '200' and args[1] != '304') or not re.match(r'.+\.(?:js|css|png)$', path) or verbose:
