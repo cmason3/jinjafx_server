@@ -91,7 +91,7 @@ function getStatusText(code) {
   
     Object.keys(datasets).forEach(function(ds) {
       var a = document.createElement('a');
-      a.classList.add('dropdown-item');
+      a.classList.add('dropdown-item', 'text-decoration-none');
       a.addEventListener('click', select_dataset, false);
       a.href = '#';
       a.ds_name = ds;
