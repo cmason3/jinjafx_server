@@ -20,6 +20,8 @@ from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip
 
+__version__ = '21.11.0'
+
 try:
   import requests
 except:
@@ -58,7 +60,7 @@ class ArgumentParser(argparse.ArgumentParser):
 
     
 class JinjaFxRequest(BaseHTTPRequestHandler):
-  server_version = 'JinjaFx/' + jinjafx.__version__
+  server_version = 'JinjaFx Server/' + __version__
   protocol_version = 'HTTP/1.1'
 
   def format_bytes(self, b):
@@ -70,7 +72,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
   def log_message(self, format, *args):
     path = self.path if hasattr(self, 'path') else ''
-    lnumber = " {" + str(self.lnumber) + "}" if hasattr(self, 'lnumber') and 'beta' in jinjafx.__version__ else ''
 
     if not isinstance(args[0], int) and path != '/ping':
       if args[1] == '200' or args[1] == '204':
@@ -99,14 +100,14 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 ctype = ' (' + self.headers['Content-Type'] + ')'
 
           if str(args[1]) == 'ERR':
-            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + lnumber + ' \033[1;' + ansi + 'm' + str(args[2]) + '\033[0m')
+            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;' + ansi + 'm' + str(args[2]) + '\033[0m')
           
           elif self.command == 'POST':
-            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + lnumber + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + ']')
+            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + ']')
 
           elif self.command != None:
             if (args[1] != '200' and args[1] != '304') or not re.match(r'.+\.(?:js|css|png)$', path) or verbose:
-              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + lnumber + ' ' + self.command + ' ' + path)
+              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path)
 
         
   def encode_link(self, bhash):
@@ -247,7 +248,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         head = True
         r = [ None, 304, None, sys._getframe().f_lineno ]
 
-    self.lnumber = r[3]
+#    self.lnumber = r[3]
     self.send_response(r[1])
 
     if r[1] != 304:
@@ -277,7 +278,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
 
   def do_OPTIONS(self):
-    self.lnumber = sys._getframe().f_lineno
+#    self.lnumber = sys._getframe().f_lineno
     self.send_response(204)
     self.send_header('Allow', 'OPTIONS, HEAD, GET, POST')
     self.end_headers()
@@ -399,7 +400,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
                 z.close()
 
-                self.lnumber = sys._getframe().f_lineno
+#                self.lnumber = sys._getframe().f_lineno
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/zip')
                 self.send_header('Content-Length', str(len(zfile.getvalue())))
@@ -640,7 +641,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     else:
       r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
 
-    self.lnumber = r[3]
+#    self.lnumber = r[3]
     self.send_response(r[1])
 
     r[2] = r[2].encode('utf-8')
@@ -687,7 +688,7 @@ def main(rflag=[0]):
   global verbose
 
   try:
-    print('JinjaFx Server v' + jinjafx.__version__ + ' - Jinja2 Templating Tool')
+    print('JinjaFx Server v' + __version__ + ' - Jinja2 Templating Tool')
     print('Copyright (c) 2020-2021 Chris Mason <chris@netnix.org>\n')
 
     parser = ArgumentParser(add_help=False)
