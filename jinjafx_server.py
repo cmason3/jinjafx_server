@@ -728,7 +728,8 @@ def main(rflag=[0]):
 
       rl_rate = int(args.rl[0])
 
-    jinjafx.import_filters()
+    if jinjafx.import_filters() > 0:
+      print()
 
     def signal_handler(*args):
       rflag[0] = 2
