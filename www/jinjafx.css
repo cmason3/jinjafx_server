@@ -54,3 +54,8 @@ a:link {
 a:hover {
   text-decoration: underline;
 }
+
+:root {
+  --bs-info: #17a2b8;
+  --bs-info-rgb: 23, 162, 184;
+}
