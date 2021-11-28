@@ -5,6 +5,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com; script-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data:">
     <meta name="viewport" content="width=1536, user-scalable=no">
     <meta name="description" content="JinjaFx is a Python based Jinja2 Templating Tool with support for Ansible filters that renders output based on CSV or YAML datasets">
+    <meta name="version" content="{{ jinjafx_server.version }}">
     <title>JinjaFx - Jinja2 Templating Tool</title>
     <script src="obsolete.js"></script>
     <link rel="shortcut icon" href="jinjafx.png">
@@ -136,7 +137,7 @@
             <div id="cdata" class="split-horizontal position-relative">
               <div class="badge bg-secondary text-white float-start labels">D<br />A<br />T<br />A<br />.<br />C<br />S<br />V<br /></div>
               <textarea id="data"></textarea>
-              <div id="csv" class="table-responsive"></div>
+              <div id="csv"></div>
               <span id="ldata" title="Expand" class="expand">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />

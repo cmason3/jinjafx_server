@@ -27,8 +27,11 @@ body {
   border: 1px solid darkgray;
   background-color: lightgray;
 }
+#csv tbody {
+  border-top: none;
+}
 #csv td {
-  border: 1px dashed darkgray;
+  border: 1px solid darkgray;
 }
 #csv th:first-child {
   border-left: none;

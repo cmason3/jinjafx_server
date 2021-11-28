@@ -1233,7 +1233,7 @@ function getStatusText(code) {
     var delim = new RegExp(cc > tc ? '[ \\t]*,[ \\t]*' : ' *\\t *');
     var hrow = datarows[0].split(delim);
   
-    var table = '<table class="table table-hover table-sm">';
+    var table = '<table class="table table-responsive table-hover table-sm">';
     table += '<thead><tr>';
     for (var col = 0; col < hrow.length; col++) {
       table += '<th>' + quote(hrow[col]) + '</th>';
