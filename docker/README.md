@@ -19,7 +19,7 @@ chmod 640 <certificate.pem>
 ```
 podman build --no-cache --pull -t jinjafx_haproxy:latest https://raw.githubusercontent.com/cmason3/jinjafx_server/main/docker/Dockerfile.HAProxy
 
-podman create --name jinjafx_haproxy --tz=local --cap-add net_bind_service --network host -v <certificate.pem>:/usr/local/etc/haproxy/fullchain.pem jinjafx_haproxy:latest
+podman create --name jinjafx_haproxy --tz=local --cap-add net_bind_service --network host -v <certificate.pem>:/usr/local/etc/haproxy/fullchain.pem:Z jinjafx_haproxy:latest
 
 podman generate systemd -n --restart-policy=always jinjafx_haproxy | tee /etc/systemd/system/jinjafx_haproxy.service 1>/dev/null
 
