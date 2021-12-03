@@ -1,5 +1,7 @@
 FROM docker.io/library/python:3.9-slim
 
+ENV PATH ${PATH}:/opt/jinjafx/.local/bin
+
 RUN set -eux; \
 
 groupadd -g 99 -r jinjafx; \
@@ -12,4 +14,4 @@ USER jinjafx
 
 WORKDIR /opt/jinjafx/jinjafx
 
-ENTRYPOINT [ "/usr/local/bin/python3", "-u", ".local/bin/jinjafx_server", "-s", "-l", "0.0.0.0", "-p", "8080" ]
+ENTRYPOINT [ "jinjafx_server", "-s", "-l", "0.0.0.0", "-p", "8080" ]
