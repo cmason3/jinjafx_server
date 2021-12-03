@@ -12,6 +12,6 @@ runuser -u jinjafx -- ansible-galaxy collection install --upgrade ansible.netcom
 
 USER jinjafx
 
-WORKDIR /opt/jinjafx/jinjafx
+WORKDIR /opt/jinjafx
 
 ENTRYPOINT [ "/usr/local/bin/python3", "-u", ".local/bin/jinjafx_server", "-s", "-l", "0.0.0.0", "-p", "8080" ]
