@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S python3 -u
 
 # JinjaFx Server - Jinja2 Templating Tool
 # Copyright (c) 2020-2021 Chris Mason <chris@netnix.org>
