@@ -5,7 +5,7 @@
 
 ## JinjaFx Server - Jinja2 Templating Tool
 
-JinjaFx Server is a lightweight web server that provides a web frontend to JinjaFx. It is a separate Python file which imports the "jinjafx" module to generate outputs from a web interface - it does require the "requests" module which isn't in the base install. Usage instructions are provided below, although it is considered an additional component and not part of the base JinjaFx tool, although it is probably a much easier way to use it.
+JinjaFx Server is a lightweight web server that provides a web frontend to JinjaFx. It is a separate Python module which imports the "jinjafx" module to generate outputs from a web interface - it does require the "requests" module which isn't in the base install. Usage instructions are provided below, although it is considered an additional component and not part of the base JinjaFx tool, although it is probably a much easier way to use it.
 
 ### Installation
 
@@ -18,7 +18,7 @@ python3 -m pip install --upgrade --user jinja_server
 Once JinjaFx Server has been started with the `-s` argument then point your web browser at http://localhost:8080 and you will be presented with a web page that allows you to specify `data.csv`, `template.j2` and `vars.yml` and then generate outputs. If you click on "Export" then it will present you with an output that can be pasted back into any pane of JinjaFx to restore the values.
 
 ```
- jinjafx_server.py -s [-l <address>] [-p <port>] [-r <repository> | -s3 <aws s3 url>] [-rl <rate/limit>] [-api]
+ jinjafx_server -s [-l <address>] [-p <port>] [-r <repository> | -s3 <aws s3 url>] [-rl <rate/limit>] [-api]
    -s                          - start the JinjaFx Server
    -l <address>                - specify a listen address (default is '127.0.0.1')
    -p <port>                   - specify a listen port (default is 8080)
