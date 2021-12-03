@@ -7,7 +7,10 @@ RUN set -eux; \
 groupadd -g 99 -r jinjafx; \
 useradd -m jinjafx -u 99 -g 99 -d /opt/jinjafx -k /dev/null; \
 
-runuser -u jinjafx -- /usr/local/bin/python3 -m pip --disable-pip-version-check --no-cache-dir install --user --upgrade jinja2~=3.0 ansible-core~=2.11 jinjafx-server; \
+runuser -u jinjafx -- /usr/local/bin/python3 -m pip --no-cache-dir install --user pip; \
+runuser -u jinjafx -- /usr/local/bin/python3 -m pip --no-cache-dir install --user jinja2~=3.0 ansible-core~=2.11 jinjafx-server; \
+runuser -u jinjafx -- /usr/local/bin/python3 -m pip uninstall --user pip; \
+
 runuser -u jinjafx -- ansible-galaxy collection install --upgrade ansible.netcommon
 
 USER jinjafx
