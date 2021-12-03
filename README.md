@@ -1,4 +1,4 @@
-![Release](https://img.shields.io/github/v/release/cmason3/jinjafx_server)
+[![PyPI](https://img.shields.io/pypi/v/jinjafx.svg)](https://pypi.python.org/pypi/jinjafx_server/)
 ![Size](https://img.shields.io/github/languages/code-size/cmason3/jinjafx_server?label=size)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [<img src="https://img.shields.io/badge/@-https%3A%2F%2Fjinjafx.io-blue" align="right">](https://jinjafx.io)
@@ -6,6 +6,12 @@
 ## JinjaFx Server - Jinja2 Templating Tool
 
 JinjaFx Server is a lightweight web server that provides a web frontend to JinjaFx. It is a separate Python file which imports the "jinjafx" module to generate outputs from a web interface - it does require the "requests" module which isn't in the base install. Usage instructions are provided below, although it is considered an additional component and not part of the base JinjaFx tool, although it is probably a much easier way to use it.
+
+### Installation
+
+```
+python3 -m pip install --upgrade --user jinja_server ansible-core
+```
 
 ### JinjaFx Server Usage
 

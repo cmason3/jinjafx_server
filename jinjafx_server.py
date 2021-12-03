@@ -142,7 +142,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
     elif not api_only:
-      base = os.path.abspath(os.path.dirname(sys.argv[0]))
+      base = os.path.abspath(os.path.dirname(__file__))
 
       if fpath == '/':
         fpath = '/index.html'

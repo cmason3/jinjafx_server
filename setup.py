@@ -22,7 +22,8 @@ setup(
   ],
   packages=["jinjafx_server"],
   include_package_data=True,
-  install_requires=["jinjafx", "ansible-core", "netaddr", "requests"],
+  package_data={'': ['www/*']},
+  install_requires=["jinjafx", "netaddr", "requests"],
   entry_points={
     "console_scripts": [
       "jinjafx_server=jinjafx_server:main",
