@@ -10,7 +10,7 @@ JinjaFx Server is a lightweight web server that provides a web frontend to Jinja
 ### Installation
 
 ```
-python3 -m pip install --upgrade --user jinja_server
+python3 -m pip install --upgrade --user jinjafx-server
 ```
 
 ### JinjaFx Server Usage
