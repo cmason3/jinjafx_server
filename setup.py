@@ -1,6 +1,11 @@
 import pathlib, re
 from setuptools import setup
 
+for line in open('jinjafx_server.py'):
+  if line.startswith('__version__'):
+    exec(line)
+    break
+
 HERE = pathlib.Path(__file__).parent
 
 README = (HERE / "README.md").read_text()
@@ -8,7 +13,7 @@ README = re.sub(r'<p.+</p>', '', README[README.find('#'):])
 
 setup(
   name="jinjafx_server",
-  version="21.12.1",
+  version=__version__,
   description="JinjaFx Server - Jinja2 Templating Tool",
   long_description=README,
   long_description_content_type="text/markdown",
