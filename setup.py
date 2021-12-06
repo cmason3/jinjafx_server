@@ -9,7 +9,7 @@ for line in open('jinjafx_server.py'):
 HERE = pathlib.Path(__file__).parent
 
 README = (HERE / "README.md").read_text()
-README = re.sub(r'<p.+</p>', '', README[README.find('#'):])
+README = re.sub(r'<p.+</p>', '', README)
 
 setup(
   name="jinjafx_server",
