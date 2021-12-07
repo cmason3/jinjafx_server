@@ -1,5 +1,5 @@
 [![PyPI](https://img.shields.io/pypi/v/jinjafx-server.svg)](https://pypi.python.org/pypi/jinjafx-server/)
-![Python](https://img.shields.io/badge/python-≥&nbsp;3.6-green)
+![Python](https://img.shields.io/badge/python-≥&nbsp;3.6-orange)
 ![Size](https://img.shields.io/github/languages/code-size/cmason3/jinjafx_server?label=size)
 [<img src="https://img.shields.io/badge/url-https%3A%2F%2Fjinjafx.io-blue" align="right">](https://jinjafx.io)
 
