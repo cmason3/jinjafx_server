@@ -105,6 +105,9 @@ body {
   color: blue;
   cursor: pointer;
 }
+.CodeMirror-foldgutter {
+  margin-left: 2px;
+}
 .CodeMirror-foldgutter-open::after {
   content: "\2190";
   color: blue;
