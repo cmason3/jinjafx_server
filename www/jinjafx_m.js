@@ -649,12 +649,7 @@ function getStatusText(code) {
       mode: "yaml",
       viewportMargin: 80,
       smartIndent: false,
-      showTrailingSpace: true,
-      foldGutter: true,
-      foldOptions: { 
-        widget: ' \u22EF '
-      },
-      gutters: ["CodeMirror-foldgutter"]
+      showTrailingSpace: true
     });
 
     CodeMirror.registerHelper("fold", "jinja2", function(cm, start) {
