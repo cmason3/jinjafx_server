@@ -186,11 +186,26 @@ function getStatusText(code) {
       return false;
     }
 
-    var cTemplate = window.cmTemplate.getSearchCursor(/[^\u0000-\u007f]/);
+    var nonAsciiRegex = /[^\u0000-\u007f]+/;
+    var cTemplate = window.cmTemplate.getSearchCursor(nonAsciiRegex);
     if (cTemplate.findNext()) {
       window.cmTemplate.focus();
       window.cmTemplate.setSelection(cTemplate.from(), cTemplate.to());
-      set_status("darkred", "ERROR", "Non ASCII Character in Template");
+      set_status("darkred", "ERROR", "Non ASCII Character(s) in 'template.j2'");
+      return false;
+    }
+    var cData = window.cmData.getSearchCursor(nonAsciiRegex);
+    if (cData.findNext()) {
+      window.cmData.focus();
+      window.cmData.setSelection(cData.from(), cData.to());
+      set_status("darkred", "ERROR", "Non ASCII Character(s) in 'data.csv'");
+      return false;
+    }
+    var cVars = window.cmVars.getSearchCursor(nonAsciiRegex);
+    if (cVars.findNext()) {
+      window.cmVars.focus();
+      window.cmVars.setSelection(cVars.from(), cVars.to());
+      set_status("darkred", "ERROR", "Non ASCII Character(s) in 'vars.yml'");
       return false;
     }
 
@@ -393,7 +408,7 @@ function getStatusText(code) {
     }
     catch (ex) {
       console.log(ex);
-      set_status("darkred", "ERROR", "Invalid Character Encoding in DataTemplate");
+      set_status("darkred", "ERROR", ex);
       clear_wait();
     }
   }
@@ -1455,9 +1470,11 @@ function getStatusText(code) {
           stream.skipToEnd();
           return "comment";
         }
+        /*
         if (stream.match(/[^\t -~]/)) {
           return "jfx-invalid";
         }
+        */
         if ((state.n == 1) && stream.sol()) {
           state.n = 2;
         }
