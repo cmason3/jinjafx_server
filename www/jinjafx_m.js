@@ -185,7 +185,15 @@ function getStatusText(code) {
       set_status("darkred", "ERROR", "No Template");
       return false;
     }
-  
+
+    var cTemplate = window.cmTemplate.getSearchCursor(/[^\u0000-\u007f]/);
+    if (cTemplate.findNext()) {
+      window.cmTemplate.focus();
+      window.cmTemplate.setSelection(cTemplate.from(), cTemplate.to());
+      set_status("darkred", "ERROR", "Non ASCII Character in Template");
+      return false;
+    }
+
     dt = {};
   
     try {
