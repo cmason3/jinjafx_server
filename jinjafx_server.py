@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # JinjaFx Server - Jinja2 Templating Tool
-# Copyright (c) 2020-2021 Chris Mason <chris@netnix.org>
+# Copyright (c) 2020-2022 Chris Mason <chris@netnix.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -20,7 +20,7 @@ from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip
 
-__version__ = '21.12.1'
+__version__ = '21.12.2'
 
 try:
   import requests
@@ -296,7 +296,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     r = [ 'text/plain', 500, '500 Internal Server Error\r\n', sys._getframe().f_lineno ]
 
     if 'Content-Length' in self.headers:
-      if int(self.headers['Content-Length']) < (512 * 1024):
+      if int(self.headers['Content-Length']) < (2048 * 1024):
         postdata = self.rfile.read(int(self.headers['Content-Length']))
         self.length = len(postdata)
 
@@ -689,7 +689,7 @@ def main(rflag=[0]):
 
   try:
     print('JinjaFx Server v' + __version__ + ' - Jinja2 Templating Tool')
-    print('Copyright (c) 2020-2021 Chris Mason <chris@netnix.org>\n')
+    print('Copyright (c) 2020-2022 Chris Mason <chris@netnix.org>\n')
 
     parser = ArgumentParser(add_help=False)
     parser.add_argument('-s', action='store_true', required=True)
