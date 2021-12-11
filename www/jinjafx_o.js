@@ -67,7 +67,10 @@
           xHR.setRequestHeader("Content-Type", "application/json");
 
           var rd = JSON.stringify(obj.outputs);
-          if (rd.length > 1024) {
+          if (rd.length > 2048 * 1024) {
+            set_status("darkred", "ERROR", 'Content Too Large');
+          }
+          else if (rd.length > 1024) {
             xHR.setRequestHeader("Content-Encoding", "gzip");
             xHR.send(pako.gzip(rd));
           }

@@ -130,17 +130,22 @@ function getStatusText(code) {
     dt.id = dt_id;
     dt.dataset = current_ds;
 
-    if (vaulted_vars) {
-      new bootstrap.Modal(document.getElementById('vault_input'), {
-        keyboard: false
-      }).show();
+    if (JSON.stringify(dt).length > 2048 * 1024) {
+      set_status("darkred", "ERROR", 'Content Too Large');
     }
     else {
-      if (dt_id != '') {
-        window.open("output.html?dt=" + dt_id, "_blank");
+      if (vaulted_vars) {
+        new bootstrap.Modal(document.getElementById('vault_input'), {
+          keyboard: false
+        }).show();
       }
       else {
-        window.open("output.html", "_blank");
+        if (dt_id != '') {
+          window.open("output.html?dt=" + dt_id, "_blank");
+        }
+        else {
+          window.open("output.html", "_blank");
+        }
       }
     }
   }
@@ -485,7 +490,10 @@ function getStatusText(code) {
     xHR.setRequestHeader("Content-Type", "application/json");
 
     var rd = JSON.stringify(dt);
-    if (rd.length > 1024) {
+    if (rd.length > 2048 * 1024) {
+      set_status("darkred", "ERROR", 'Content Too Large');
+    }
+    else if (rd.length > 1024) {
       xHR.setRequestHeader("Content-Encoding", "gzip");
       xHR.send(pako.gzip(rd));
     }
