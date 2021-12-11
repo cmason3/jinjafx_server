@@ -55,6 +55,7 @@ function getStatusText(code) {
   var protect_ok = false;
   var csv_on = false;
   var dicon = "ldata";
+  var cDataPos = null;
 
   var jsyaml_schema = {
     schema: jsyaml.DEFAULT_SCHEMA.extend(['scalar', 'sequence', 'mapping'].map(function(kind) {
@@ -201,8 +202,14 @@ function getStatusText(code) {
     }
     var cData = window.cmData.getSearchCursor(nonAsciiRegex);
     if (cData.findNext()) {
-      window.cmData.focus();
-      window.cmData.setSelection(cData.from(), cData.to());
+      if (csv_on) {
+        cDataPos = [cData.from(), cData.to()];
+        document.getElementById("csv").dispatchEvent(new CustomEvent('click'));
+      }
+      else {
+        window.cmData.focus();
+        window.cmData.setSelection(cData.from(), cData.to());
+      }
       set_status("darkred", "ERROR", "Non ASCII Character(s) in 'data.csv'");
       return false;
     }
@@ -768,6 +775,12 @@ function getStatusText(code) {
       document.getElementById(dicon).classList.remove('d-none');
       window.cmData.refresh();
       window.cmData.focus();
+
+      if (cDataPos != null) {
+        window.cmData.setSelection(cDataPos[0], cDataPos[1]);
+        window.cmData.scrollIntoView({from: cDataPos[0], to: cDataPos[1]}, 20);
+        cDataPos = null;
+      }
       csv_on = false;
     };
     
