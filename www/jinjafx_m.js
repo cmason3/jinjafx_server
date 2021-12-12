@@ -55,6 +55,7 @@ function getStatusText(code) {
   var protect_ok = false;
   var csv_on = false;
   var dicon = "ldata";
+  var cDataPos = null;
 
   var jsyaml_schema = {
     schema: jsyaml.DEFAULT_SCHEMA.extend(['scalar', 'sequence', 'mapping'].map(function(kind) {
@@ -130,17 +131,22 @@ function getStatusText(code) {
     dt.id = dt_id;
     dt.dataset = current_ds;
 
-    if (vaulted_vars) {
-      new bootstrap.Modal(document.getElementById('vault_input'), {
-        keyboard: false
-      }).show();
+    if (JSON.stringify(dt).length > 2048 * 1024) {
+      set_status("darkred", "ERROR", 'Content Too Large');
     }
     else {
-      if (dt_id != '') {
-        window.open("output.html?dt=" + dt_id, "_blank");
+      if (vaulted_vars) {
+        new bootstrap.Modal(document.getElementById('vault_input'), {
+          keyboard: false
+        }).show();
       }
       else {
-        window.open("output.html", "_blank");
+        if (dt_id != '') {
+          window.open("output.html?dt=" + dt_id, "_blank");
+        }
+        else {
+          window.open("output.html", "_blank");
+        }
       }
     }
   }
@@ -186,11 +192,32 @@ function getStatusText(code) {
       return false;
     }
 
-    var cTemplate = window.cmTemplate.getSearchCursor(/[^\u0000-\u007f]/);
+    var nonAsciiRegex = /[^\u0000-\u007f]+/;
+    var cTemplate = window.cmTemplate.getSearchCursor(nonAsciiRegex);
     if (cTemplate.findNext()) {
       window.cmTemplate.focus();
       window.cmTemplate.setSelection(cTemplate.from(), cTemplate.to());
-      set_status("darkred", "ERROR", "Non ASCII Character in Template");
+      set_status("darkred", "ERROR", "Non ASCII Character(s) in 'template.j2'");
+      return false;
+    }
+    var cData = window.cmData.getSearchCursor(nonAsciiRegex);
+    if (cData.findNext()) {
+      if (csv_on) {
+        cDataPos = [cData.from(), cData.to()];
+        document.getElementById("csv").dispatchEvent(new CustomEvent('click'));
+      }
+      else {
+        window.cmData.focus();
+        window.cmData.setSelection(cData.from(), cData.to());
+      }
+      set_status("darkred", "ERROR", "Non ASCII Character(s) in 'data.csv'");
+      return false;
+    }
+    var cVars = window.cmVars.getSearchCursor(nonAsciiRegex);
+    if (cVars.findNext()) {
+      window.cmVars.focus();
+      window.cmVars.setSelection(cVars.from(), cVars.to());
+      set_status("darkred", "ERROR", "Non ASCII Character(s) in 'vars.yml'");
       return false;
     }
 
@@ -393,7 +420,7 @@ function getStatusText(code) {
     }
     catch (ex) {
       console.log(ex);
-      set_status("darkred", "ERROR", "Invalid Character Encoding in DataTemplate");
+      set_status("darkred", "ERROR", ex);
       clear_wait();
     }
   }
@@ -470,7 +497,10 @@ function getStatusText(code) {
     xHR.setRequestHeader("Content-Type", "application/json");
 
     var rd = JSON.stringify(dt);
-    if (rd.length > 1024) {
+    if (rd.length > 2048 * 1024) {
+      set_status("darkred", "ERROR", 'Content Too Large');
+    }
+    else if (rd.length > 1024) {
       xHR.setRequestHeader("Content-Encoding", "gzip");
       xHR.send(pako.gzip(rd));
     }
@@ -745,6 +775,12 @@ function getStatusText(code) {
       document.getElementById(dicon).classList.remove('d-none');
       window.cmData.refresh();
       window.cmData.focus();
+
+      if (cDataPos != null) {
+        window.cmData.setSelection(cDataPos[0], cDataPos[1]);
+        window.cmData.scrollIntoView({from: cDataPos[0], to: cDataPos[1]}, 20);
+        cDataPos = null;
+      }
       csv_on = false;
     };
     
@@ -1454,9 +1490,6 @@ function getStatusText(code) {
         if (stream.sol() && stream.match(/[ \t]*#/)) {
           stream.skipToEnd();
           return "comment";
-        }
-        if (stream.match(/[^\t -~]/)) {
-          return "jfx-invalid";
         }
         if ((state.n == 1) && stream.sol()) {
           state.n = 2;

@@ -20,7 +20,7 @@ from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip
 
-__version__ = '21.12.2'
+__version__ = '21.12.3'
 
 try:
   import requests
