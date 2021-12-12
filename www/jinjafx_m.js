@@ -1491,11 +1491,6 @@ function getStatusText(code) {
           stream.skipToEnd();
           return "comment";
         }
-        /*
-        if (stream.match(/[^\t -~]/)) {
-          return "jfx-invalid";
-        }
-        */
         if ((state.n == 1) && stream.sol()) {
           state.n = 2;
         }
