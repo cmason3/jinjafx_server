@@ -18,7 +18,7 @@
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
-import os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
+import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 
 __version__ = '22.1.2'
@@ -30,14 +30,9 @@ try:
 except:
   pass
 
-base = os.path.abspath(os.path.dirname(__file__))
-sys.path.append(base)
-
-import jinjafx
-
 lock = threading.RLock()
-
-print("base is " + base)
+base = os.path.abspath(os.path.dirname(__file__))
+os.chdir(base)
 
 aws_s3_url = None
 aws_access_key = None
