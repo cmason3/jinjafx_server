@@ -2,7 +2,7 @@ from jinja2.ext import Extension
 
 import hashlib
 
-class AddExtension(Extension):
+class JinjaFxExtension(Extension):
   def __init__(self, environment):
     Extension.__init__(self, environment)
     environment.filters['cisco_snmpv3_key'] = self.__cisco_snmpv3_key

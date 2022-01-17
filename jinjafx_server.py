@@ -20,7 +20,7 @@ from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 
-__version__ = '22.1.0'
+__version__ = '22.1.1'
 
 try:
   from ansible.constants import DEFAULT_VAULT_ID_MATCH
@@ -299,9 +299,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         if fpath == '/jinjafx':
           if self.headers['Content-Type'] == 'application/json':
             try:
-              gvars = {
-                'jinja2_extensions': [ 'jinjafx_extension.AddExtension' ]
-              }
+              gvars = {}
 
               if 'Content-Encoding' in self.headers and self.headers['Content-Encoding'] == 'gzip':
                 postdata = gzip.decompress(postdata)
@@ -328,6 +326,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 if y != None:
                   gvars.update(y)
   
+              if 'jinja2_extensions' in gvars:
+                gvars['jinja2_extensions'].append('jinjafx_extension.JinjaFxExtension')
+
+              else:
+                gvars['jinja2_extensions'] = ['jinjafx_extension.JinjaFxExtension']
+
               st = round(time.time() * 1000)
               outputs = jinjafx.JinjaFx().jinjafx(template, data, gvars, 'Output')
               ocount = 0
