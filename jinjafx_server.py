@@ -18,14 +18,9 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
-import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip
+import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 
-__version__ = '21.12.3'
-
-try:
-  import requests
-except:
-  pass
+__version__ = '22.1.0'
 
 try:
   from ansible.constants import DEFAULT_VAULT_ID_MATCH
@@ -304,7 +299,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         if fpath == '/jinjafx':
           if self.headers['Content-Type'] == 'application/json':
             try:
-              gvars = {}
+              gvars = {
+                'jinja2_extensions': [ 'jinjafx_extension.AddExtension' ]
+              }
 
               if 'Content-Encoding' in self.headers and self.headers['Content-Encoding'] == 'gzip':
                 postdata = gzip.decompress(postdata)
@@ -706,8 +703,6 @@ def main(rflag=[0]):
     verbose = args.v
     
     if args.s3 is not None:
-      import requests
-
       aws_s3_url = args.s3
       aws_access_key = os.getenv('AWS_ACCESS_KEY')
       aws_secret_key = os.getenv('AWS_SECRET_KEY')
