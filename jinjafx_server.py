@@ -15,8 +15,13 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
+
+base = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(base)
+
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 
@@ -30,8 +35,6 @@ except:
   pass
 
 lock = threading.RLock()
-base = os.path.abspath(os.path.dirname(__file__))
-sys.path.append(base)
 
 print("base is " + base)
 
