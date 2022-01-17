@@ -30,6 +30,7 @@ except:
   pass
 
 lock = threading.RLock()
+base = os.path.abspath(os.path.dirname(__file__))
 
 aws_s3_url = None
 aws_access_key = None
@@ -137,8 +138,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
     elif not api_only:
-      base = os.path.abspath(os.path.dirname(__file__))
-
       if fpath == '/':
         fpath = '/index.html'
 
@@ -332,6 +331,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               else:
                 gvars['jinja2_extensions'] = ['jinjafx_extension.JinjaFxExtension']
 
+              sys.path.append(base)
               st = round(time.time() * 1000)
               outputs = jinjafx.JinjaFx().jinjafx(template, data, gvars, 'Output')
               ocount = 0
