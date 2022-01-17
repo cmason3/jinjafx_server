@@ -32,7 +32,7 @@ except:
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
-os.chdir(base . '/extensions')
+os.chdir(base + '/extensions')
 
 aws_s3_url = None
 aws_access_key = None
