@@ -18,11 +18,7 @@
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
-
-base = os.path.abspath(os.path.dirname(__file__))
-sys.path.append(base)
-
-import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
+import os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 
 __version__ = '22.1.2'
@@ -33,6 +29,11 @@ try:
   from ansible.parsing.vault import VaultSecret
 except:
   pass
+
+base = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(base)
+
+import jinjafx
 
 lock = threading.RLock()
 
