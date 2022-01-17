@@ -20,7 +20,7 @@ from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 
-__version__ = '22.1.1'
+__version__ = '22.1.2'
 
 try:
   from ansible.constants import DEFAULT_VAULT_ID_MATCH
@@ -31,6 +31,9 @@ except:
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(base)
+
+print("base is " + base)
 
 aws_s3_url = None
 aws_access_key = None
@@ -331,7 +334,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               else:
                 gvars['jinja2_extensions'] = ['jinjafx_extension.JinjaFxExtension']
 
-              sys.path.append(base)
               st = round(time.time() * 1000)
               outputs = jinjafx.JinjaFx().jinjafx(template, data, gvars, 'Output')
               ocount = 0
