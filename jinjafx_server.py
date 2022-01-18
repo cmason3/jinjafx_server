@@ -21,7 +21,7 @@ from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 
-__version__ = '22.1.2'
+__version__ = '22.1.3'
 
 try:
   from ansible.constants import DEFAULT_VAULT_ID_MATCH
@@ -104,7 +104,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + ']')
 
           elif self.command != None:
-            if (args[1] != '200' and args[1] != '304') or not re.match(r'.+\.(?:js|css|png)$', path) or verbose:
+            if (args[1] != '200' and args[1] != '304') or (not path.endswith('.js') and not path.endswith('.css') and not path.endswith('.png')) or verbose:
               log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path)
 
         
@@ -393,7 +393,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   outputs[o] = re.sub(r'\r?\n', lterminator, base64.b64decode(outputs[o]).decode('utf-8'))
 
                   if '.' not in ofile:
-                    if re.search(r'<html.*?>[\s\S]+<\/html>', outputs[o], re.IGNORECASE):
+                    if '<html' in outputs[o].lower() and '<\/html>' in outputs[o].lower():
                       ofile += '.html'
                     else:
                       ofile += '.txt'
