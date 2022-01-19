@@ -90,3 +90,26 @@ Gender: {{ jinjafx_input['gender'] }}
 ```
 
 If you specify the same `data-var` value more than once in the input form then the variable will be converted into a list using the values in the order they appear in the form.
+
+### Custom Filters
+
+JinjaFx Server comes with a built in Jinja2 Extension (`extensions/jinjafx_extension.py`) which provides the following custom filters:
+
+- <b><code>cisco_snmpv3_key("engineid", [algorithm="sha1"])</code></b>
+
+This filter is used to generate localised SNMPv3 authentication and privacy keys (section A.2 of [RFC3414](https://datatracker.ietf.org/doc/html/rfc3414#appendix-A.2)) for use by Cisco devices, e.g:
+
+```jinja2
+snmp-server engineID local {{ engineID }}
+snmp-server user {{ snmpUser }} {{ snmpGroup }} v3 encrypted auth sha {{ authPassword|cisco_snmpv3_key(engineID) }} priv aes 128 {{ privPassword|cisco_snmpv3_key(engineID) }}
+```
+
+- <b><code>junos_snmpv3_key("engineid", [algorithm="sha1"])</code></b>
+
+This filter is used to generate localised SNMPv3 authentication and privacy keys (section A.2 of [RFC3414](https://datatracker.ietf.org/doc/html/rfc3414#appendix-A.2)) for use by Juniper devices, e.g:
+
+```jinja2
+set snmp engine-id local {{ engineID }}
+set snmp v3 usm local-engine user {{ snmpUser }} authentication-sha authentication-key {{ authPassword|junos_snmpv3_key(engineID) }}
+set snmp v3 usm local-engine user {{ snmpUser }} privacy-aes128 privacy-key {{ privPassword|junos_snmpv3_key(engineID) }}
+```
