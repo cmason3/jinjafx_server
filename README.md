@@ -113,3 +113,12 @@ set snmp engine-id local {{ engineID }}
 set snmp v3 usm local-engine user {{ snmpUser }} authentication-sha authentication-key {{ authPassword|junos_snmpv3_key(engineID) }}
 set snmp v3 usm local-engine user {{ snmpUser }} privacy-aes128 privacy-key {{ privPassword|junos_snmpv3_key(engineID) }}
 ```
+
+- <b><code>cisco7encode("string", ["seed"])</code></b>
+
+This filter will encode a string using Cisco's Type 7 encoding scheme. An optional "seed" can be provided which makes the encoded string deterministic for idempotent operations.
+
+- <b><code>junos9encode("string", ["seed"])</code></b>
+
+This filter will encode a string using Juniper's Type 9 encoding scheme. An optional "seed" can be provided which makes the encoded string deterministic for idempotent operations.
+
