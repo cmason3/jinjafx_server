@@ -91,7 +91,7 @@ Gender: {{ jinjafx_input['gender'] }}
 
 If you specify the same `data-var` value more than once in the input form then the variable will be converted into a list using the values in the order they appear in the form.
 
-### Custom Filters
+### Custom Jinja2 Filters
 
 JinjaFx Server comes with a built in Jinja2 Extension (`extensions/jinjafx_extension.py`) which provides the following custom filters:
 
