@@ -27,7 +27,7 @@ setup(
   ],
   packages=["jinjafx_server"],
   include_package_data=True,
-  package_data={'': ['www/*', 'extensions/*.py']},
+  package_data={'': ['www/*']},
   install_requires=["jinjafx", "netaddr", "requests"],
   entry_points={
     "console_scripts": [
