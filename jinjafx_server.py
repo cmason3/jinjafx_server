@@ -20,7 +20,7 @@ from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 
-__version__ = '22.1.7'
+__version__ = '22.2.1'
 
 try:
   from ansible.constants import DEFAULT_VAULT_ID_MATCH
@@ -304,8 +304,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 postdata = gzip.decompress(postdata)
 
               dt = json.loads(postdata.decode('utf-8'))
-              template = base64.b64decode(dt['template']) if 'template' in dt and len(dt['template'].strip()) > 0 else ''
-              data = base64.b64decode(dt['data']) if 'data' in dt and len(dt['data'].strip()) > 0 else ''
+              template = base64.b64decode(dt['template']) if 'template' in dt and len(dt['template'].strip()) > 0 else b''
+              data = base64.b64decode(dt['data']) if 'data' in dt and len(dt['data'].strip()) > 0 else b''
   
               if 'vars' in dt and len(dt['vars'].strip()) > 0:
                 gyaml = base64.b64decode(dt['vars'])
@@ -326,7 +326,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   gvars.update(y)
   
               st = round(time.time() * 1000)
-              outputs = jinjafx.JinjaFx().jinjafx(template, data, gvars, 'Output')
+              outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output')
               ocount = 0
   
               jsr = {
