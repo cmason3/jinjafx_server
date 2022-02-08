@@ -242,7 +242,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         head = True
         r = [ None, 304, None, sys._getframe().f_lineno ]
 
-#    self.lnumber = r[3]
     self.send_response(r[1])
 
     if r[1] != 304:
@@ -272,7 +271,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
 
   def do_OPTIONS(self):
-#    self.lnumber = sys._getframe().f_lineno
     self.send_response(204)
     self.send_header('Allow', 'OPTIONS, HEAD, GET, POST')
     self.end_headers()
@@ -294,7 +292,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         postdata = self.rfile.read(int(self.headers['Content-Length']))
         self.length = len(postdata)
 
-      # if (len(postdata) < (512 * 1024)) or (fpath == '/download'):
         if fpath == '/jinjafx':
           if self.headers['Content-Type'] == 'application/json':
             try:
@@ -394,7 +391,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
                 z.close()
 
-#                self.lnumber = sys._getframe().f_lineno
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/zip')
                 self.send_header('Content-Length', str(len(zfile.getvalue())))
@@ -635,7 +631,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     else:
       r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
 
-#    self.lnumber = r[3]
     self.send_response(r[1])
 
     r[2] = r[2].encode('utf-8')
