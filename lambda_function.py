@@ -33,17 +33,22 @@ def lambda_handler(event, context):
         data = f.read()
 
         if pathname == '/index.html':
-          data = data.decode('utf-8').replace('{{ jinjafx.version }}', 'JinjaFx vX.Y.Z / Jinja2 vX.Y.Z').replace('{{ get_link }}', 'false').encode('utf-8')
+          from jinja2 import __version__ as jinja2_version
+          from jinjafx import __version__ as jinjafx_version
+          data = data.decode('utf-8').replace('{{ jinjafx.version }}', 'JinjaFx v' + jinjafx_version + ' / Jinja2 v' + jinja2_version).replace('{{ get_link }}', 'false').encode('utf-8')
 
         if pathname.endswith('.js'):
           headers['content-type'] = 'text/javascript'
+
         elif pathname.endswith('.css'):
           headers['content-type'] = 'text/css'
+
         elif pathname.endswith('.png'):
           import base64
           headers['content-type'] = 'image/png'
           data = base64.b64encode(data).decode('utf-8')
           isBase64Encoded = True
+
         else:
           headers['content-type'] = 'text/html'
     
