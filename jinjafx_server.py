@@ -20,7 +20,7 @@ from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 
-__version__ = '22.2.1'
+__version__ = '22.2.2'
 
 try:
   from ansible.constants import DEFAULT_VAULT_ID_MATCH
@@ -138,7 +138,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
     elif not api_only:
-      if fpath == '/':
+      if fpath == '/' or re.search(r'^/dt/[A-Za-z0-9_-]{1,24}$', fpath):
         fpath = '/index.html'
 
       if re.search(r'^/get_dt/[A-Za-z0-9_-]{1,24}$', fpath):
@@ -511,7 +511,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                         raise Exception("invalid link format")
 
                     else:
-                      dt_link = self.encode_link(hashlib.sha256((str(uuid.uuid1()) + ':' + dt_yml).encode('utf-8')).digest()[:12])
+                      dt_link = self.encode_link(hashlib.sha256((str(uuid.uuid1()) + ':' + dt_yml).encode('utf-8')).digest()[:6])
 
                     dt_filename = 'jfx_' + dt_link + '.yml'
 
