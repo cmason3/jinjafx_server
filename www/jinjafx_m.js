@@ -142,10 +142,10 @@ function getStatusText(code) {
       }
       else {
         if (dt_id != '') {
-          window.open("output.html?dt=" + dt_id, "_blank");
+          window.open("/output.html?dt=" + dt_id, "_blank");
         }
         else {
-          window.open("output.html", "_blank");
+          window.open("/output.html", "_blank");
         }
       }
     }
@@ -251,7 +251,7 @@ function getStatusText(code) {
                 if (vars['jinjafx_input'].hasOwnProperty('body')) {
                   if (input_form !== vars['jinjafx_input']['body']) {
                     var xHR = new XMLHttpRequest();
-                    xHR.open("POST", 'jinjafx?dt=jinjafx_input', true);
+                    xHR.open("POST", '/jinjafx?dt=jinjafx_input', true);
   
                     r_input_form = null;
   
@@ -400,10 +400,10 @@ function getStatusText(code) {
   
         if (method === "export") {
           if (dt_id != '') {
-            window.open("dt.html?dt=" + dt_id, "_blank");
+            window.open("/dt.html?dt=" + dt_id, "_blank");
           }
           else {
-            window.open("dt.html", "_blank");
+            window.open("/dt.html", "_blank");
           }
         }
         else {
@@ -429,7 +429,7 @@ function getStatusText(code) {
     var xHR = new XMLHttpRequest();
   
     if (v_dt_id !== null) {
-      xHR.open("POST", "get_link?id=" + v_dt_id, true);
+      xHR.open("POST", "/get_link?id=" + v_dt_id, true);
       if (dt_password !== null) {
         xHR.setRequestHeader("X-Dt-Password", dt_password);
       }
@@ -442,7 +442,7 @@ function getStatusText(code) {
       xHR.setRequestHeader("X-Dt-Revision", revision + 1);
     }
     else {
-      xHR.open("POST", "get_link", true);
+      xHR.open("POST", "/get_link", true);
     }
   
     xHR.onload = function() {
@@ -462,7 +462,7 @@ function getStatusText(code) {
         }
         else {
           window.removeEventListener('beforeunload', onBeforeUnload);
-          window.location.href = window.location.pathname + "?dt=" + this.responseText.trim();
+          window.location.href = '/dt/' + this.responseText.trim(); // window.location.pathname + "?dt=" + this.responseText.trim();
         }
         document.title = 'JinjaFx - Jinja2 Templating Tool';
         dirty = false;
@@ -508,13 +508,33 @@ function getStatusText(code) {
       xHR.send(rd);
     }
   }
+
+  function reset_location(suffix) {
+    if (window.location.pathname.startsWith('/dt/')) {
+      window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('/dt/')) + suffix);
+    }
+    else if (window.location.href.indexOf('/index.html?') > -1) {
+      if (suffix.length == 0) {
+        window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
+      }
+      else {
+        window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('/index.html?')) + suffix);
+      }
+    }
+    else if (window.location.href.indexOf('/?') > -1) {
+      window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('/?')) + suffix);
+    }
+    else if (window.location.href.indexOf('?') > -1) {
+      window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')) + suffix);
+    }
+  }
   
   function try_to_load() {
     try {
       if (qs.hasOwnProperty('dt')) {
         set_wait();
         var xHR = new XMLHttpRequest();
-        xHR.open("GET", "get_dt/" + qs.dt, true);
+        xHR.open("GET", "/get_dt/" + qs.dt, true);
 
         xHR.onload = function() {
           if (this.status === 401) {
@@ -548,18 +568,21 @@ function getStatusText(code) {
                 revision = 1;
               }
   
-              window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')) + '?dt=' + dt_id);
+              reset_location('/dt/' + dt_id);
+              // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')) + '?dt=' + dt_id);
             }
             catch (e) {
               console.log(e);
               set_status("darkred", "INTERNAL ERROR", e);
-              window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
+              reset_location('');
+              // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
             }
           }
           else {
             var sT = (this.statusText.length == 0) ? getStatusText(this.status) : this.statusText;
             set_status("darkred", "HTTP ERROR " + this.status, sT);
-            window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
+            reset_location('');
+            // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
           }
           document.getElementById('lbuttons').classList.remove('d-none');
           loaded = true;
@@ -568,14 +591,16 @@ function getStatusText(code) {
     
         xHR.onerror = function() {
           set_status("darkred", "ERROR", "XMLHttpRequest.onError()");
-          window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
+          reset_location('');
+          // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
           document.getElementById('lbuttons').classList.remove('d-none');
           loaded = true;
           clear_wait();
         };
         xHR.ontimeout = function() {
           set_status("darkred", "ERROR", "XMLHttpRequest.onTimeout()");
-          window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
+          reset_location('');
+          // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
           document.getElementById('lbuttons').classList.remove('d-none');
           loaded = true;
           clear_wait();
@@ -588,7 +613,7 @@ function getStatusText(code) {
         xHR.send(null);
       }
       else {
-        update_from_qs();
+        // update_from_qs();
         document.getElementById('lbuttons').classList.remove('d-none');
         loaded = true;
       }
@@ -605,7 +630,7 @@ function getStatusText(code) {
     dayjs.extend(window.dayjs_plugin_relativeTime);
 
     var xHR = new XMLHttpRequest();
-    xHR.open("GET", "jinjafx.html" + window.location.search, true);
+    xHR.open("GET", "/jinjafx.html" + window.location.search, true);
     xHR.send(null);
 
     document.getElementById('delete_ds').onclick = function() { jinjafx('delete_dataset'); };
@@ -948,10 +973,10 @@ function getStatusText(code) {
     document.getElementById('ml-vault-ok').onclick = function() {
       dt.vault_password = window.btoa(document.getElementById("vault").value);
       if (dt_id != '') {
-        window.open("output.html?dt=" + dt_id, "_blank");
+        window.open("/output.html?dt=" + dt_id, "_blank");
       }
       else {
-        window.open("output.html", "_blank");
+        window.open("/output.html", "_blank");
       }
     };
 
@@ -1044,7 +1069,8 @@ function getStatusText(code) {
         }
         else {
           if (protect_action == 1) {
-            window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
+            reset_location('');
+            // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
             dt_password = null;
           }
           loaded = true;
@@ -1054,7 +1080,8 @@ function getStatusText(code) {
       }
       else {
         if (protect_action == 1) {
-          window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
+          reset_location('');
+          // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
           document.getElementById('lbuttons').classList.remove('d-none');
           dt_password = null;
           loaded = true;
@@ -1184,7 +1211,26 @@ function getStatusText(code) {
       };
     });
 
-    if (window.location.href.indexOf('?') > -1) {
+    if (window.location.pathname.startsWith('/dt/') && (window.location.pathname.length > 4)) {
+      qs['dt'] = decodeURIComponent(window.location.pathname.substr(4));
+
+      if (document.getElementById('get_link').value != 'false') {
+        try_to_load();
+
+        document.getElementById('lbuttons').classList.remove('d-none');
+        
+        if (fe != window.cmData) {
+          onDataBlur();
+        }
+      }
+      else {
+        set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
+        reset_location('');
+        // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('/dt/')));
+        loaded = true;
+      }
+    }
+    else if (window.location.href.indexOf('?') > -1) {
       var v = window.location.href.substr(window.location.href.indexOf('?') + 1).split('&');
   
       for (var i = 0; i < v.length; i++) {
@@ -1203,7 +1249,8 @@ function getStatusText(code) {
       }
       else {
         set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
-        window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
+        reset_location('');
+        // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
         loaded = true;
       }
     }
@@ -1327,9 +1374,10 @@ function getStatusText(code) {
   
   function apply_dt() {
     load_datatemplate(pending_dt, null);
-    if (window.location.href.indexOf('?') > -1) {
-      window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
-    }
+    reset_location('');
+    //if (window.location.href.indexOf('?') > -1) {
+    //  window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
+    //}
     dt_id = '';
     dt_password = null;
     dt_opassword = null;
@@ -1442,6 +1490,7 @@ function getStatusText(code) {
     }
   }
   
+  /*
   function update_from_qs() {
     try {
       var _data = qs.hasOwnProperty('data') ? window.atob(qs.data) : null;
@@ -1463,6 +1512,7 @@ function getStatusText(code) {
       set_status("darkred", "ERROR", ex);
     }
   }
+  */
   
   function set_status(color, title, message, delay, mline) {
     clearTimeout(tid);

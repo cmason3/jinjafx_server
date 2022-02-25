@@ -93,7 +93,7 @@
         qs = (_qs.length > 0) ? '?' + _qs.join('&') : '';
   
         var xHR = new XMLHttpRequest();
-        xHR.open("POST", 'jinjafx' + qs, true);
+        xHR.open("POST", '/jinjafx' + qs, true);
   
         xHR.onload = function() {
           if (this.status === 200) {
