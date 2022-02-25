@@ -35,7 +35,7 @@ def lambda_handler(event, context):
         if pathname == '/index.html':
           from jinja2 import __version__ as jinja2_version
           from jinjafx import __version__ as jinjafx_version
-          data = data.decode('utf-8').replace('{{ jinjafx.version }}', 'JinjaFx v' + jinjafx_version + ' / Jinja2 v' + jinja2_version).replace('{{ get_link }}', 'false').encode('utf-8')
+          data = data.decode('utf-8').replace('{{ jinjafx.version }}', jinjafx_version + ' / Jinja2 v' + jinja2_version).replace('{{ get_link }}', 'false').encode('utf-8')
 
         if pathname.endswith('.js'):
           headers['content-type'] = 'text/javascript'
