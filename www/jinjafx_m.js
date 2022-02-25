@@ -462,7 +462,7 @@ function getStatusText(code) {
         }
         else {
           window.removeEventListener('beforeunload', onBeforeUnload);
-          window.location.href = '/dt/' + this.responseText.trim(); // window.location.pathname + "?dt=" + this.responseText.trim();
+          window.location.href = '/dt/' + this.responseText.trim();
         }
         document.title = 'JinjaFx - Jinja2 Templating Tool';
         dirty = false;
@@ -569,20 +569,17 @@ function getStatusText(code) {
               }
   
               reset_location('/dt/' + dt_id);
-              // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')) + '?dt=' + dt_id);
             }
             catch (e) {
               console.log(e);
               set_status("darkred", "INTERNAL ERROR", e);
               reset_location('');
-              // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
             }
           }
           else {
             var sT = (this.statusText.length == 0) ? getStatusText(this.status) : this.statusText;
             set_status("darkred", "HTTP ERROR " + this.status, sT);
             reset_location('');
-            // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
           }
           document.getElementById('lbuttons').classList.remove('d-none');
           loaded = true;
@@ -592,7 +589,6 @@ function getStatusText(code) {
         xHR.onerror = function() {
           set_status("darkred", "ERROR", "XMLHttpRequest.onError()");
           reset_location('');
-          // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
           document.getElementById('lbuttons').classList.remove('d-none');
           loaded = true;
           clear_wait();
@@ -600,7 +596,6 @@ function getStatusText(code) {
         xHR.ontimeout = function() {
           set_status("darkred", "ERROR", "XMLHttpRequest.onTimeout()");
           reset_location('');
-          // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
           document.getElementById('lbuttons').classList.remove('d-none');
           loaded = true;
           clear_wait();
@@ -1070,7 +1065,6 @@ function getStatusText(code) {
         else {
           if (protect_action == 1) {
             reset_location('');
-            // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
             dt_password = null;
           }
           loaded = true;
@@ -1081,7 +1075,6 @@ function getStatusText(code) {
       else {
         if (protect_action == 1) {
           reset_location('');
-          // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
           document.getElementById('lbuttons').classList.remove('d-none');
           dt_password = null;
           loaded = true;
@@ -1226,7 +1219,6 @@ function getStatusText(code) {
       else {
         set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
         reset_location('');
-        // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('/dt/')));
         loaded = true;
       }
     }
@@ -1250,7 +1242,6 @@ function getStatusText(code) {
       else {
         set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
         reset_location('');
-        // window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
         loaded = true;
       }
     }
@@ -1375,9 +1366,6 @@ function getStatusText(code) {
   function apply_dt() {
     load_datatemplate(pending_dt, null);
     reset_location('');
-    //if (window.location.href.indexOf('?') > -1) {
-    //  window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')));
-    //}
     dt_id = '';
     dt_password = null;
     dt_opassword = null;
