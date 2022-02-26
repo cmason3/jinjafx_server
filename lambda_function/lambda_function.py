@@ -13,8 +13,6 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-# zip jinjafx_lambda.zip lambda_function.py www/*
-
 import os, re
 
 def lambda_handler(event, context):
