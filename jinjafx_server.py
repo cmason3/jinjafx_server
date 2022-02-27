@@ -225,7 +225,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               else:
                 get_link = 'false'
 
-              r[2] = r[2].decode('utf-8').replace('{{ jinjafx.version }}', jinjafx.__version__ + ' / Jinja2 v' + jinja2_version).replace('{{ jinjafx_server.version }}', __version__).replace('{{ get_link }}', get_link).encode('utf-8')
+              r[2] = r[2].decode('utf-8').replace('{{ jinjafx.version }}', jinjafx.__version__ + ' / Jinja2 v' + jinja2_version).replace('{{ get_link }}', get_link).encode('utf-8')
 
         except Exception:
           traceback.print_exc()

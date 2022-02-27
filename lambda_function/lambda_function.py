@@ -13,7 +13,8 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import os, re
+import sys, os, re
+sys.path.append(os.environ['LAMBDA_TASK_ROOT'] + '/lib')
 
 def lambda_handler(event, context):
   method = event['requestContext']['http']['method']
