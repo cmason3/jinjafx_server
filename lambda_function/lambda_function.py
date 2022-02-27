@@ -21,7 +21,7 @@ def lambda_handler(event, context):
   method = event['requestContext']['http']['method']
   pathname = event['rawPath']
 
-	logger.setLevel(logging.INFO)
+  logger.setLevel(logging.INFO)
 
   if method == 'GET':
     if pathname == '/':
