@@ -14,7 +14,6 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import sys, os, re, logging
-sys.path.append(os.environ['LAMBDA_TASK_ROOT'] + '/lib')
 
 def lambda_handler(event, context):
   logger = logging.getLogger()

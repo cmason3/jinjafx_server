@@ -4,7 +4,8 @@ all: clean
 	@find . -type d -exec chmod 755 {} +
 	@find . -type f -exec chmod 644 {} +
 	@rm -r lib/bin
-	zip jinjafx_lambda.zip lambda_function.py www/* lib/*
+	cd lib; zip ../jinjafx_imports.zip -r *
+	zip jinjafx_lambda.zip lambda_function.py www/*
 
 clean:
-	@rm -rf lib jinjafx_lambda.zip
+	@rm -rf lib jinjafx_imports.zip jinjafx_lambda.zip
