@@ -1,11 +1,22 @@
-all: clean
-	python3 -m pip --disable-pip-version-check --no-cache-dir install -t lib jinjafx
-	@find lib/ -name "*.dist-info" -type d -exec rm -r {} +
+all: imports lambda
+
+imports: clean-imports
+	python3 -m pip --disable-pip-version-check --no-cache-dir install -t python jinjafx
+	@find python/ -name "*.dist-info" -type d -exec rm -r {} +
+	@rm -r python/bin
 	@find . -type d -exec chmod 755 {} +
 	@find . -type f -exec chmod 644 {} +
-	@rm -r lib/bin
-	cd lib; zip ../jinjafx_imports.zip -r *
+	zip jinjafx_imports.zip -r python/*
+
+lambda: clean-lambda
+	@find . -type d -exec chmod 755 {} +
+	@find . -type f -exec chmod 644 {} +
 	zip jinjafx_lambda.zip lambda_function.py www/*
 
-clean:
-	@rm -rf lib jinjafx_imports.zip jinjafx_lambda.zip
+clean: clean-imports clean-lambda
+
+clean-imports:
+	@rm -rf python jinjafx_imports.zip
+
+clean-lambda:
+	@rm -rf jinjafx_lambda.zip
