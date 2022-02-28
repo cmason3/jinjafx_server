@@ -18,6 +18,7 @@ Using the AWS CLI we can run the following commands to bring our Lambda online -
 
 ```
 aws iam create-role --role-name JinjaFx-Lambda-Role --assume-role-policy-document file://JinjaFx-Lambda-Role.json
+
 aws iam attach-role-policy --role-name JinjaFx-Lambda-Role --policy-arn 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
 ```
 
