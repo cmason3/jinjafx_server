@@ -29,18 +29,18 @@ aws lambda create-function --function-name JinjaFx --timeout 5 --memory-size 256
 
 aws lambda publish-layer-version --layer-name JinjaFx-Imports --zip-file fileb://jinjafx_imports.zip --compatible-runtimes python3.7
 
-aws lambda update-function-configuration --function-name JinjaFx --layers 'arn:aws:lambda:eu-west-2:${ACCOUNT_ID}:layer:JinjaFx-Imports:${LAYER_VERSION}'
+aws lambda update-function-configuration --function-name JinjaFx --layers 'arn:aws:lambda:${AWS_REGION}:${ACCOUNT_ID}:layer:JinjaFx-Imports:${LAYER_VERSION}'
 ```
 
 Finaly we need to create an API Gateway (HTTP API) endpoint using the following commands:
 
 ```
-aws apigatewayv2 create-api --name JinjaFx --protocol-type HTTP --target 'arn:aws:lambda:eu-west-2:${ACCOUNT_ID}:function:JinjaFx'
+aws apigatewayv2 create-api --name JinjaFx --protocol-type HTTP --target 'arn:aws:lambda:${AWS_REGION}:${ACCOUNT_ID}:function:JinjaFx'
 
-aws lambda add-permission --function-name JinjaFx --source-arn 'arn:aws:execute-api:eu-west-2:${ACCOUNT_ID}:${API_ID}/*/$default' --principal apigateway.amazonaws.com --statement-id 1 --action lambda:InvokeFunction
+aws lambda add-permission --function-name JinjaFx --source-arn 'arn:aws:execute-api:${AWS_REGION}:${ACCOUNT_ID}:${API_ID}/*/$default' --principal apigateway.amazonaws.com --statement-id 1 --action lambda:InvokeFunction
 ```
 
-You should then be able to navigate to your API endpoint URL (i.e. https://${API_ID}.execute-api.eu-west-2.amazonaws.com) and it should work.
+You should then be able to navigate to your API endpoint URL (i.e. https://${API_ID}.execute-api.${AWS_REGION}.amazonaws.com) and it should work.
 
 If you wish to update the running code that your Lambda uses then you can use the following command to update it:
 
