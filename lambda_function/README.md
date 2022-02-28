@@ -42,3 +42,8 @@ aws lambda add-permission --function-name JinjaFx --source-arn 'arn:aws:execute-
 
 You should then be able to navigate to your API endpoint URL (i.e. https://${API_ID}.execute-api.eu-west-2.amazonaws.com) and it should work.
 
+If you wish to update the running code that your Lambda uses then you can use the following command to update it:
+
+```
+aws lambda update-function-code --function-name JinjaFx --zip-file fileb://jinjafx_lambda.zip
+```
