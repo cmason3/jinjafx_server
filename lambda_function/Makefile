@@ -1,6 +1,7 @@
 all: imports lambda
 
 imports: clean-imports
+	python3 -m pip --disable-pip-version-check --no-cache-dir install --platform manylinux2010_x86_64 --only-binary=:all: -t python cryptography
 	python3 -m pip --disable-pip-version-check --no-cache-dir install -t python jinjafx
 	@find python/ -name "*.dist-info" -type d -exec rm -r {} +
 	@rm -r python/bin
