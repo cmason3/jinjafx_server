@@ -13,14 +13,16 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import sys, os, re, logging
+#
+# TODO
+#  - Caching with E-Tags
+#
+
+import sys, os, re
 
 def lambda_handler(event, context):
-  logger = logging.getLogger()
   method = event['requestContext']['http']['method']
   pathname = event['rawPath']
-
-  logger.setLevel(logging.INFO)
 
   if method == 'GET':
     if pathname == '/':
@@ -67,7 +69,103 @@ def lambda_handler(event, context):
 
   elif method == 'POST':
     if pathname == '/jinjafx':
-      pass
+      import json, yaml, base64, time, traceback, jinjafx
+
+      try:
+        gvars = {}
+
+        dt = json.loads(event['body'])
+        template = base64.b64decode(dt['template']) if 'template' in dt and len(dt['template'].strip()) > 0 else b''
+        data = base64.b64decode(dt['data']) if 'data' in dt and len(dt['data'].strip()) > 0 else b''
+
+        if 'vars' in dt and len(dt['vars'].strip()) > 0:
+          gyaml = base64.b64decode(dt['vars'])
+
+          y = yaml.load(gyaml, Loader=yaml.SafeLoader)
+          if y != None:
+            gvars.update(y)
+
+        st = round(time.time() * 1000)
+        outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output')
+        ocount = 0
+
+        jsr = {
+          'status': 'ok',
+          'elapsed': round(time.time() * 1000) - st,
+          'outputs': {}
+        }
+
+        for o in outputs:
+          output = '\n'.join(outputs[o]) + '\n'
+          if len(output.strip()) > 0:
+            jsr['outputs'].update({ o: base64.b64encode(output.encode('utf-8')).decode('utf-8') })
+            if o != '_stderr_':
+              ocount += 1
+
+        if ocount == 0:
+          raise Exception('nothing to output')
+
+      except Exception as e:
+        tb = traceback.format_exc()
+        match = re.search(r'[\s\S]*File "<(?:template|unknown)>", line ([0-9]+), in.*template', tb, re.IGNORECASE)
+        if match:
+          error = 'error[template.j2:' + match.group(1) + ']: ' + type(e).__name__ + ': ' + str(e)
+        elif 'yaml.SafeLoader' in tb:
+          error = 'error[vars.yml]: ' + type(e).__name__ + ': ' + str(e)
+        else:
+          error = 'error[' + str(sys.exc_info()[2].tb_lineno) + ']: ' + type(e).__name__ + ': ' + str(e)
+
+        jsr = {
+          'status': 'error',
+          'error': error
+        }
+      
+      return {
+        "headers": {
+          "content-type": "application/json"
+        },
+        "statusCode": 200,
+        "body": json.dumps(jsr)
+      }
+
+    elif pathname == '/download':
+      import json, io, zipfile, datetime, base64
+
+      try:
+        outputs = json.loads(event['body'])
+
+        zfile = io.BytesIO()
+        z = zipfile.ZipFile(zfile, 'w', zipfile.ZIP_DEFLATED)
+
+        for o in outputs:
+          ofile = re.sub(r'_+', '_', re.sub(r'[^A-Za-z0-9_. -/]', '_', os.path.normpath(o)))
+          outputs[o] = base64.b64decode(outputs[o]).decode('utf-8')
+
+          if '.' not in ofile:
+            if '<html' in outputs[o].lower() and '<\/html>' in outputs[o].lower():
+              ofile += '.html'
+            else:
+              ofile += '.txt'
+
+          z.writestr(ofile, outputs[o])
+
+        z.close()
+
+        return {
+          "headers": {
+            "content-type": "application/zip",
+            "x-download-filename": "Outputs." + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".zip"
+          },
+          "statusCode": 200,
+          "isBase64Encoded": True,
+          "body": base64.b64encode(zfile.getvalue()).decode('utf-8')
+        }
+
+      except:
+        return {
+          "statusCode": 400,
+          "body": "Bad Request"
+        }
  
     return {
       "statusCode": 404,
