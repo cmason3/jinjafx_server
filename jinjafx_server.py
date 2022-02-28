@@ -77,33 +77,33 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       else:
         ansi = '31'
 
-      if (path.split('?')[0] != '/' and path.split('?')[0] != '/index.html') or verbose:
-        if not verbose:
-          path = path.replace('/jinjafx.html', '/')
+      #if (path.split('?')[0] != '/' and path.split('?')[0] != '/index.html') or verbose:
+        #if not verbose:
+        #  path = path.replace('/jinjafx.html', '/')
 
-        if (args[1] != '204' and args[1] != '404' and args[1] != '501') or hasattr(self, 'critical') or verbose:
-          src = str(self.client_address[0])
-          ctype = ''
+      if (args[1] != '204' and args[1] != '404' and args[1] != '501') or hasattr(self, 'critical') or verbose:
+        src = str(self.client_address[0])
+        ctype = ''
 
-          if hasattr(self, 'headers'):
-            if 'X-Forwarded-For' in self.headers:
-              src = self.headers['X-Forwarded-For']
+        if hasattr(self, 'headers'):
+          if 'X-Forwarded-For' in self.headers:
+            src = self.headers['X-Forwarded-For']
 
-            if 'Content-Type' in self.headers:
-              if 'Content-Encoding' in self.headers:
-                ctype = ' (' + self.headers['Content-Type'] + ':' + self.headers['Content-Encoding'] + ')'
-              else:
-                ctype = ' (' + self.headers['Content-Type'] + ')'
+          if 'Content-Type' in self.headers:
+            if 'Content-Encoding' in self.headers:
+              ctype = ' (' + self.headers['Content-Type'] + ':' + self.headers['Content-Encoding'] + ')'
+            else:
+              ctype = ' (' + self.headers['Content-Type'] + ')'
 
-          if str(args[1]) == 'ERR':
-            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;' + ansi + 'm' + str(args[2]) + '\033[0m')
-          
-          elif self.command == 'POST':
-            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + ']')
+        if str(args[1]) == 'ERR':
+          log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;' + ansi + 'm' + str(args[2]) + '\033[0m')
+        
+        elif self.command == 'POST':
+          log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + ']')
 
-          elif self.command != None:
-            if (args[1] != '200' and args[1] != '304') or (not path.endswith('.js') and not path.endswith('.css') and not path.endswith('.png')) or verbose:
-              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path)
+        elif self.command != None:
+          if (args[1] != '200' and args[1] != '304') or (not path.endswith('.js') and not path.endswith('.css') and not path.endswith('.png')) or verbose:
+            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path)
 
         
   def encode_link(self, bhash):
@@ -133,7 +133,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
     r = [ 'text/plain', 500, '500 Internal Server Error\r\n', sys._getframe().f_lineno ]
 
-    if fpath == '/ping' or fpath == '/jinjafx.html':
+    if fpath == '/ping': # or fpath == '/jinjafx.html':
       cache = False
       r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 

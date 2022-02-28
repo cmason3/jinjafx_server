@@ -13,18 +13,21 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-#
-# TODO
-#  - Caching with E-Tags
-#
-
-import sys, os, re
+import sys, os, re, hashlib
 
 def lambda_handler(event, context):
   method = event['requestContext']['http']['method']
   pathname = event['rawPath']
 
-  if method == 'GET':
+  if method == 'OPTIONS':
+    return {
+      "headers": {
+        "allow": "OPTIONS, GET, POST"
+      },
+      "statusCode": 204
+    }
+
+  elif method == 'GET':
     if pathname == '/':
       pathname = '/index.html'
   
@@ -40,6 +43,10 @@ def lambda_handler(event, context):
           from jinjafx import __version__ as jinjafx_version
           data = data.decode('utf-8').replace('{{ jinjafx.version }}', jinjafx_version + ' / Jinja2 v' + jinja2_version).replace('{{ get_link }}', 'false').encode('utf-8')
 
+        etag = hashlib.sha256(data).hexdigest()
+        headers['cache-control'] = 'max-age=0, must-revalidate'
+        headers['etag'] = etag
+
         if pathname.endswith('.js'):
           headers['content-type'] = 'text/javascript'
 
@@ -54,13 +61,20 @@ def lambda_handler(event, context):
 
         else:
           headers['content-type'] = 'text/html'
-    
-        return {
-          "headers": headers,
-          "statusCode": 200,
-          "isBase64Encoded": isBase64Encoded,
-          "body": data
-        }
+
+        if 'if-none-match' in event['headers'] and event['headers']['if-none-match'] == etag:
+          return {
+            "headers": headers,
+            "statusCode": 304
+          }
+
+        else:
+          return {
+            "headers": headers,
+            "statusCode": 200,
+            "isBase64Encoded": isBase64Encoded,
+            "body": data
+          }
     
     return {
       "statusCode": 404,
