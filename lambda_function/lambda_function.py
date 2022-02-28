@@ -56,7 +56,7 @@ def lambda_handler(event, context):
         elif pathname.endswith('.png'):
           import base64
           headers['content-type'] = 'image/png'
-          data = base64.b64encode(data).decode('utf-8')
+          data = base64.b64encode(data)
           isBase64Encoded = True
 
         else:
@@ -73,12 +73,12 @@ def lambda_handler(event, context):
             "headers": headers,
             "statusCode": 200,
             "isBase64Encoded": isBase64Encoded,
-            "body": data
+            "body": data.decode('utf-8')
           }
     
     return {
       "statusCode": 404,
-      "body": "Not Found"
+      "body": "Not Found - " + str(event)
     }
 
   elif method == 'POST':
