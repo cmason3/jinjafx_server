@@ -37,7 +37,7 @@ Finaly we need to create an API Gateway (HTTP API) endpoint using the following 
 ```
 aws apigatewayv2 create-api --name JinjaFx --protocol-type HTTP --target 'arn:aws:lambda:${AWS_REGION}:${ACCOUNT_ID}:function:JinjaFx'
 
-aws apigatewayv2 update-stage --api-id ${API_ID} --stage-name '$default' --route-settings '{"$default":{"ThrottlingBurstLimit":100,"ThrottlingRateLimit":500}}'
+aws apigatewayv2 update-stage --api-id ${API_ID} --stage-name '$default' --default-route-settings '{"ThrottlingBurstLimit":50,"ThrottlingRateLimit":250}'
 
 aws lambda add-permission --function-name JinjaFx --source-arn 'arn:aws:execute-api:${AWS_REGION}:${ACCOUNT_ID}:${API_ID}/*/$default' --principal apigateway.amazonaws.com --statement-id 1 --action lambda:InvokeFunction
 ```
