@@ -17,7 +17,7 @@ This will result in `jinjafx_lambda.zip` (the Lambda itself) and `jinjafx_import
 Using the AWS CLI we can run the following commands to bring our Lambda online - the first two commands create a new role which we can use to associate our Lambda with the `AWSLambdaBasicExecutionRole` role.
 
 ```
-aws iam create-role --role-name JinjaFx-Lambda-Role --assume-role-policy-document file://JinjaFx-Lambda-Role.json
+aws iam create-role --role-name JinjaFx-Lambda-Role --assume-role-policy-document '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"lambda.amazonaws.com"},"Action":"sts:AssumeRole"}]}'
 
 aws iam attach-role-policy --role-name JinjaFx-Lambda-Role --policy-arn 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
 ```
