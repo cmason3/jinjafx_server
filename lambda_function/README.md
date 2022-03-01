@@ -1,6 +1,6 @@
 ## JinjaFx as a Lambda
 
-JinjaFx can also be used as an AWS Lambda (Faas) using API Gateway as a front end. There are two components, the Lambda itself and a Lambda layer which consists of the Python modules that JinjaFx depends on.
+JinjaFx can also be used as an AWS Lambda (FaaS) using API Gateway as a front end. There are two components, the Lambda itself and a Lambda layer which consists of the Python modules that JinjaFx depends on.
 
 The first step is to clone the Git repository and then build the separate components:
 
