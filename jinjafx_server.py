@@ -292,13 +292,13 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         postdata = self.rfile.read(int(self.headers['Content-Length']))
         self.length = len(postdata)
 
+        if 'Content-Encoding' in self.headers and self.headers['Content-Encoding'] == 'gzip':
+          postdata = gzip.decompress(postdata)
+
         if fpath == '/jinjafx':
           if self.headers['Content-Type'] == 'application/json':
             try:
               gvars = {}
-
-              if 'Content-Encoding' in self.headers and self.headers['Content-Encoding'] == 'gzip':
-                postdata = gzip.decompress(postdata)
 
               dt = json.loads(postdata.decode('utf-8'))
               template = base64.b64decode(dt['template']) if 'template' in dt and len(dt['template'].strip()) > 0 else b''
@@ -367,9 +367,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           if fpath == '/download':
             if self.headers['Content-Type'] == 'application/json':
               lterminator = '\r\n' if 'User-Agent' in self.headers and 'windows' in self.headers['User-Agent'].lower() else '\n'
-
-              if 'Content-Encoding' in self.headers and self.headers['Content-Encoding'] == 'gzip':
-                postdata = gzip.decompress(postdata)
 
               try:
                 outputs = json.loads(postdata.decode('utf-8'))
@@ -443,9 +440,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                       rtable[remote_addr] = rtable[remote_addr][-rl_rate:]
 
                   if not ratelimit:
-                    if 'Content-Encoding' in self.headers and self.headers['Content-Encoding'] == 'gzip':
-                      postdata = gzip.decompress(postdata)
-
                     dt = json.loads(postdata.decode('utf-8'))
 
                     vdt = {}

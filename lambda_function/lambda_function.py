@@ -13,11 +13,12 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import sys, os, re, hashlib
+import sys, os, re, hashlib, gzip, base64
 
 def lambda_handler(event, context):
   method = event['requestContext']['http']['method']
   pathname = event['rawPath']
+  isBase64Encoded = False
 
   if method == 'OPTIONS':
     return {
@@ -33,7 +34,6 @@ def lambda_handler(event, context):
   
     if re.search(r'^/[A-Z0-9_-]+\.[A-Z0-9]+$', pathname, re.IGNORECASE) and os.path.isfile(os.environ['LAMBDA_TASK_ROOT'] + '/www' + pathname):
       with open(os.environ['LAMBDA_TASK_ROOT'] + '/www' + pathname, 'rb') as f:
-        isBase64Encoded = False
         headers = {}
         
         data = f.read()
@@ -54,7 +54,6 @@ def lambda_handler(event, context):
           headers['content-type'] = 'text/css'
 
         elif pathname.endswith('.png'):
-          import base64
           headers['content-type'] = 'image/png'
           data = base64.b64encode(data)
           isBase64Encoded = True
@@ -69,6 +68,12 @@ def lambda_handler(event, context):
           }
 
         else:
+          if not isBase64Encoded and len(data) > 1024 and 'accept-encoding' in event['headers']:
+            if 'gzip' in event['headers']['accept-encoding']:
+              headers['content-encoding'] = 'gzip'
+              data = base64.b64encode(gzip.compress(data))
+              isBase64Encoded = True
+
           return {
             "headers": headers,
             "statusCode": 200,
@@ -82,8 +87,13 @@ def lambda_handler(event, context):
     }
 
   elif method == 'POST':
+    import json
+
+    if 'content-encoding' in event['headers'] and event['headers']['content-encoding'] == 'gzip':
+      event['body'] = gzip.decompress(base64.b64decode(event['body'])).decode('utf-8')
+
     if pathname == '/jinjafx':
-      import json, yaml, base64, time, traceback, jinjafx
+      import yaml, time, traceback, jinjafx
 
       try:
         gvars = {}
@@ -134,16 +144,27 @@ def lambda_handler(event, context):
           'error': error
         }
       
+      headers = {
+        'content-type': 'application/json'
+      }
+
+      data = json.dumps(jsr)
+
+      if len(data) > 1024 and 'accept-encoding' in event['headers']:
+        if 'gzip' in event['headers']['accept-encoding']:
+          headers['content-encoding'] = 'gzip'
+          data = base64.b64encode(gzip.compress(data.encode('utf-8'))).decode('utf-8')
+          isBase64Encoded = True
+
       return {
-        "headers": {
-          "content-type": "application/json"
-        },
+        "headers": headers,
         "statusCode": 200,
-        "body": json.dumps(jsr)
+        "isBase64Encoded": isBase64Encoded,
+        "body": data
       }
 
     elif pathname == '/download':
-      import json, io, zipfile, datetime, base64
+      import io, zipfile, datetime
 
       try:
         outputs = json.loads(event['body'])
