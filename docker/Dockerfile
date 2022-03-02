@@ -8,7 +8,7 @@ groupadd -g 99 -r jinjafx; \
 useradd -m jinjafx -u 99 -g 99 -d /opt/jinjafx -k /dev/null; \
 
 runuser -u jinjafx -- python3 -m pip --disable-pip-version-check --no-cache-dir install --user --upgrade 'jinja2==3.0.*' 'ansible-core==2.12.*' netaddr jinjafx-server; \
-runuser -u jinjafx -- ansible-galaxy collection install --upgrade 'ansible.netcommon:<2.7.0'
+runuser -u jinjafx -- ansible-galaxy collection install --upgrade 'ansible.netcommon:<2.6.0'
 
 USER jinjafx
 
