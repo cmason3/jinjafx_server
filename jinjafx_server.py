@@ -20,7 +20,7 @@ from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 
-__version__ = '22.3.3'
+__version__ = '22.3.4'
 
 try:
   from ansible.constants import DEFAULT_VAULT_ID_MATCH
@@ -709,9 +709,6 @@ def main(rflag=[0]):
         rl_limit = int(args.rl[1][:-1])
 
       rl_rate = int(args.rl[0])
-
-    if jinjafx.import_filters() > 0:
-      print()
 
     def signal_handler(*args):
       rflag[0] = 2
