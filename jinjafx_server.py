@@ -20,14 +20,7 @@ from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 
-__version__ = '22.3.4'
-
-try:
-  from ansible.constants import DEFAULT_VAULT_ID_MATCH
-  from ansible.parsing.vault import VaultLib
-  from ansible.parsing.vault import VaultSecret
-except:
-  pass
+__version__ = '22.3.5'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -305,16 +298,16 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               data = base64.b64decode(dt['data']) if 'data' in dt and len(dt['data'].strip()) > 0 else b''
   
               if 'vars' in dt and len(dt['vars'].strip()) > 0:
-                gyaml = base64.b64decode(dt['vars'])
+                gyaml = base64.b64decode(dt['vars']).decode('utf-8')
 
                 if 'vault_password' in dt:
-                  vault = VaultLib([(DEFAULT_VAULT_ID_MATCH, VaultSecret(base64.b64decode(dt['vault_password'])))])
+                  vpw = base64.b64decode(dt['vault_password']).decode('utf-8')
 
-                  if gyaml.decode('utf-8').startswith('$ANSIBLE_VAULT;'):
-                    gyaml = vault.decrypt(gyaml).decode('utf-8')
+                  if gyaml.startswith('$ANSIBLE_VAULT;'):
+                    gyaml = jinjafx.ansible_vault_decrypt(gyaml, vpw)
 
                   def yaml_vault_tag(loader, node):
-                    return vault.decrypt(node.value).decode('utf-8')
+                    return jinjafx.ansible_vault_decrypt(node.value, vpw)
 
                   yaml.add_constructor('!vault', yaml_vault_tag, yaml.SafeLoader)
 
