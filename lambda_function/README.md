@@ -12,7 +12,7 @@ cd jinjafx_server/lambda_function
 make
 ```
 
-This will result in `jinjafx_lambda.zip` (the Lambda itself) and `jinjafx_imports.zip` (the additional Lambda layer which contains all the Python modules) which can be used to create the Lambda in AWS. It is important the Python runtime version you specify for the Lambda matches the version of Python that is installed on the machine where you created the zip files.
+This will result in `jinjafx_lambda.zip` (the Lambda itself) and `jinjafx_imports.zip` (the additional Lambda layer which contains all the Python modules) which can be used to create the Lambda in AWS. It is important the Python runtime version you specify for the Lambda matches the version of Python that is installed on the machine where you created the zip files (the runtime needs to match for the lambda and the lambda layer).
 
 Using the AWS CLI we can run the following commands to bring our Lambda online - the first two commands create a new role which we can use to associate our Lambda with the `AWSLambdaBasicExecutionRole` role.
 

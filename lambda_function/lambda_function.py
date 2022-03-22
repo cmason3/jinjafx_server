@@ -103,7 +103,18 @@ def lambda_handler(event, context):
         data = base64.b64decode(dt['data']) if 'data' in dt and len(dt['data'].strip()) > 0 else b''
 
         if 'vars' in dt and len(dt['vars'].strip()) > 0:
-          gyaml = base64.b64decode(dt['vars'])
+          gyaml = base64.b64decode(dt['vars']).decode('utf-8')
+
+          if 'vault_password' in dt:
+            vpw = base64.b64decode(dt['vault_password']).decode('utf-8')
+
+            if gyaml.startswith('$ANSIBLE_VAULT;'):
+              gyaml = jinjafx.ansible_vault_decrypt(gyaml, vpw)
+
+            def yaml_vault_tag(loader, node):
+              return jinjafx.ansible_vault_decrypt(node.value, vpw)
+
+            yaml.add_constructor('!vault', yaml_vault_tag, yaml.SafeLoader)
 
           y = yaml.load(gyaml, Loader=yaml.SafeLoader)
           if y != None:
