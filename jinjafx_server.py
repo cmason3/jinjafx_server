@@ -20,7 +20,7 @@ from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 
-__version__ = '22.3.6'
+__version__ = '22.4.0'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -29,7 +29,6 @@ aws_s3_url = None
 aws_access_key = None
 aws_secret_key = None
 repository = None
-api_only = False
 verbose = False
 
 rtable = {}
@@ -62,43 +61,40 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   def log_message(self, format, *args):
     path = self.path if hasattr(self, 'path') else ''
 
-    if not isinstance(args[0], int) and path != '/ping':
-      if args[1] == '200' or args[1] == '204':
-        ansi = '32'
-      elif args[1] == '304':
-        ansi = '33'
-      else:
-        ansi = '31'
+    if not self.hide or verbose:
+      if not isinstance(args[0], int) and path != '/ping':
+        if args[1] == '200' or args[1] == '204':
+          ansi = '32'
+        elif args[1] == '304':
+          ansi = '33'
+        else:
+          ansi = '31'
 
-      #if (path.split('?')[0] != '/' and path.split('?')[0] != '/index.html') or verbose:
-        #if not verbose:
-        #  path = path.replace('/jinjafx.html', '/')
+        if (args[1] != '204' and args[1] != '404' and args[1] != '501') or self.critical or verbose:
+          src = str(self.client_address[0])
+          ctype = ''
 
-      if (args[1] != '204' and args[1] != '404' and args[1] != '501') or hasattr(self, 'critical') or verbose:
-        src = str(self.client_address[0])
-        ctype = ''
+          if hasattr(self, 'headers'):
+            if 'X-Forwarded-For' in self.headers:
+              src = self.headers['X-Forwarded-For']
 
-        if hasattr(self, 'headers'):
-          if 'X-Forwarded-For' in self.headers:
-            src = self.headers['X-Forwarded-For']
+            if 'Content-Type' in self.headers:
+              if 'Content-Encoding' in self.headers:
+                ctype = ' (' + self.headers['Content-Type'] + ':' + self.headers['Content-Encoding'] + ')'
+              else:
+                ctype = ' (' + self.headers['Content-Type'] + ')'
 
-          if 'Content-Type' in self.headers:
-            if 'Content-Encoding' in self.headers:
-              ctype = ' (' + self.headers['Content-Type'] + ':' + self.headers['Content-Encoding'] + ')'
-            else:
-              ctype = ' (' + self.headers['Content-Type'] + ')'
-
-        if str(args[1]) == 'ERR':
-          log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;' + ansi + 'm' + str(args[2]) + '\033[0m')
+          if str(args[1]) == 'ERR':
+            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;' + ansi + 'm' + str(args[2]) + '\033[0m')
         
-        elif self.command == 'POST':
-          log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + ']')
+          elif self.command == 'POST':
+            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + ']')
 
-        elif self.command != None:
-          if (args[1] != '200' and args[1] != '304') or (not path.endswith('.js') and not path.endswith('.css') and not path.endswith('.png')) or verbose:
-            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path)
+          elif self.command != None:
+            if (args[1] != '200' and args[1] != '304') or (not path.endswith('.js') and not path.endswith('.css') and not path.endswith('.png')) or verbose:
+              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path)
 
-        
+
   def encode_link(self, bhash):
     alphabet = b'rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz'
     string = ''
@@ -122,16 +118,23 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
 
   def do_GET(self, head=False, cache=True):
+    self.critical = False
+    self.hide = False
+
     fpath = self.path.split('?', 1)[0]
 
     r = [ 'text/plain', 500, '500 Internal Server Error\r\n', sys._getframe().f_lineno ]
 
-    if fpath == '/ping': # or fpath == '/jinjafx.html':
+    if fpath == '/ping':
       cache = False
       r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
-    elif not api_only:
-      if fpath == '/' or re.search(r'^/dt/[A-Za-z0-9_-]{1,24}$', fpath):
+    else:
+      if fpath == '/':
+        fpath = '/index.html'
+        # self.hide = True
+
+      elif re.search(r'^/dt/[A-Za-z0-9_-]{1,24}$', fpath):
         fpath = '/index.html'
 
       if re.search(r'^/get_dt/[A-Za-z0-9_-]{1,24}$', fpath):
@@ -195,9 +198,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               else:
                 r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
-        else:
-          r = [ 'text/plain', 503, '503 Service Unavailable\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-
       elif re.search(r'^/[A-Z0-9_-]+\.[A-Z0-9]+$', fpath, re.IGNORECASE) and os.path.isfile(base + '/www' + fpath):
         if fpath.endswith('.js'):
           ctype = 'text/javascript'
@@ -225,9 +225,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
       else:
         r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-
-    else:
-      r = [ 'text/plain', 503, '503 Service Unavailable\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
     etag = '"' + hashlib.sha256(r[2]).hexdigest() + '"'
     if 'If-None-Match' in self.headers:
@@ -264,6 +261,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
 
   def do_OPTIONS(self):
+    self.critical = False
+    self.hide = False
     self.send_response(204)
     self.send_header('Allow', 'OPTIONS, HEAD, GET, POST')
     self.end_headers()
@@ -274,6 +273,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
 
   def do_POST(self):
+    self.critical = False
+    self.hide = False
+
     uc = self.path.split('?', 1)
     params = { x[0]: x[1] for x in [x.split('=') for x in uc[1].split('&') ] } if len(uc) > 1 else { }
     fpath = uc[0]
@@ -356,7 +358,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           else:
             r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
   
-        elif not api_only:
+        else:
           if fpath == '/download':
             if self.headers['Content-Type'] == 'application/json':
               lterminator = '\r\n' if 'User-Agent' in self.headers and 'windows' in self.headers['User-Agent'].lower() else '\n'
@@ -609,9 +611,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           else:
             r = [ 'text/plain', 404, '404 Not Found\r\n', sys._getframe().f_lineno ]
 
-        else:
-          r = [ 'text/plain', 503, '503 Service Unavailable\r\n', sys._getframe().f_lineno ]
-                    
       else:
         r = [ 'text/plain', 413, '413 Request Entity Too Large\r\n', sys._getframe().f_lineno ]
 
@@ -660,7 +659,6 @@ def main(rflag=[0]):
   global repository
   global rl_rate
   global rl_limit
-  global api_only
   global verbose
 
   try:
@@ -675,10 +673,8 @@ def main(rflag=[0]):
     group_ex.add_argument('-r', metavar='<repository>', type=w_directory)
     group_ex.add_argument('-s3', metavar='<aws s3 url>', type=str)
     parser.add_argument('-rl', metavar='<rate/limit>', type=rlimit)
-    parser.add_argument('-api', action='store_true', default=False)
     parser.add_argument('-v', action='store_true', default=False)
     args = parser.parse_args()
-    api_only = args.api
     verbose = args.v
     
     if args.s3 is not None:
