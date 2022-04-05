@@ -60,6 +60,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
   def log_message(self, format, *args):
     path = self.path if hasattr(self, 'path') else ''
+    path = path.replace('/jinjafx.html', '/')
 
     if not self.hide or verbose:
       if not isinstance(args[0], int) and path != '/ping':
@@ -132,7 +133,11 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     else:
       if fpath == '/':
         fpath = '/index.html'
-        # self.hide = True
+        self.hide = not verbose
+
+      if fpath == '/jinjafx.html':
+        fpath = '/index.html'
+        self.hide = verbose
 
       elif re.search(r'^/dt/[A-Za-z0-9_-]{1,24}$', fpath):
         fpath = '/index.html'
