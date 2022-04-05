@@ -1232,17 +1232,23 @@ function getStatusText(code) {
         qs[p[0].toLowerCase()] = decodeURIComponent(p.length > 1 ? p[1] : '');
       }
 
-      if (document.getElementById('get_link').value != 'false') {
-        try_to_load();
+      if (qs.hasOwnProperty('dt')) {
+        if (document.getElementById('get_link').value != 'false') {
+          try_to_load();
 
-        document.getElementById('lbuttons').classList.remove('d-none');
+          document.getElementById('lbuttons').classList.remove('d-none');
         
-        if (fe != window.cmData) {
-          onDataBlur();
+          if (fe != window.cmData) {
+            onDataBlur();
+          }
+        }
+        else {
+          set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
+          reset_location('');
+          loaded = true;
         }
       }
       else {
-        set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
         reset_location('');
         loaded = true;
       }
