@@ -109,10 +109,10 @@ def lambda_handler(event, context):
             vpw = base64.b64decode(dt['vault_password']).decode('utf-8')
 
             if gyaml.startswith('$ANSIBLE_VAULT;'):
-              gyaml = jinjafx.ansible_vault_decrypt(gyaml, vpw)
+              gyaml = jinjafx.Vault().decrypt(gyaml.encode('utf-8'), vpw).decode('utf-8')
 
             def yaml_vault_tag(loader, node):
-              return jinjafx.ansible_vault_decrypt(node.value, vpw)
+              return jinjafx.Vault().decrypt(node.value.encode('utf-8'), vpw).decode('utf-8')
 
             yaml.add_constructor('!vault', yaml_vault_tag, yaml.SafeLoader)
 
