@@ -311,10 +311,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   vpw = base64.b64decode(dt['vault_password']).decode('utf-8')
 
                   if gyaml.lstrip().startswith('$ANSIBLE_VAULT;'):
-                    gyaml = jinjafx.Vault().decrypt(gyaml.encode('utf-8'), vpw)
+                    gyaml = jinjafx.Vault().decrypt(gyaml.encode('utf-8'), vpw).decode('utf-8')
 
                   def yaml_vault_tag(loader, node):
-                    return jinjafx.Vault().decrypt(node.value.encode('utf-8'), vpw)
+                    return jinjafx.Vault().decrypt(node.value.encode('utf-8'), vpw).decode('utf-8')
 
                   yaml.add_constructor('!vault', yaml_vault_tag, yaml.SafeLoader)
 
