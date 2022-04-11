@@ -20,7 +20,7 @@ from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 
-__version__ = '22.4.0'
+__version__ = '22.4.1'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -310,11 +310,11 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 if 'vault_password' in dt:
                   vpw = base64.b64decode(dt['vault_password']).decode('utf-8')
 
-                  if gyaml.startswith('$ANSIBLE_VAULT;'):
-                    gyaml = jinjafx.ansible_vault_decrypt(gyaml, vpw)
+                  if gyaml.lstrip().startswith('$ANSIBLE_VAULT;'):
+                    gyaml = jinjafx.Vault().decrypt(gyaml.encode('utf-8'), vpw)
 
                   def yaml_vault_tag(loader, node):
-                    return jinjafx.ansible_vault_decrypt(node.value, vpw)
+                    return jinjafx.Vault().decrypt(node.value.encode('utf-8'), vpw)
 
                   yaml.add_constructor('!vault', yaml_vault_tag, yaml.SafeLoader)
 
