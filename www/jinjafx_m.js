@@ -124,6 +124,27 @@ function getStatusText(code) {
     fe.focus();
   }
 
+  function derive_key(password) {
+    var salt = CryptoJS.lib.WordArray.random(32);
+    var key = CryptoJS.PBKDF2(password, salt, { hasher: CryptoJS.algo.SHA256, keySize: 20, iterations: 10000 });
+    return [salt.toString(CryptoJS.enc.Hex), key.toString(CryptoJS.enc.Hex)];
+  }
+
+  function ansible_vault_encrypt(plaintext, password) {
+    var dk = derive_key(password);
+    var ciphertext = CryptoJS.AES.encrypt(plaintext, CryptoJS.enc.Hex.parse(dk[1].substring(0, 64)), {
+      iv: CryptoJS.enc.Hex.parse(dk[1].substring(128, 160)),
+      mode: CryptoJS.mode.CTR,
+      padding: CryptoJS.pad.Pkcs7
+    }).ciphertext;
+
+    var hmac = CryptoJS.HmacSHA256(ciphertext, CryptoJS.enc.Hex.parse(dk[1].substring(64, 128)));
+    var vtext = dk[0] + '\n' + hmac.toString(CryptoJS.format.hex) + '\n' + ciphertext.toString(CryptoJS.format.hex);
+    var h = CryptoJS.enc.Hex.stringify(CryptoJS.enc.Utf8.parse(vtext));
+    vtext = h.match(/.{1,80}/g).map(x => ' '.repeat(10) + x).join('\n');
+    return '!vault |\n' + ' '.repeat(10) + '$ANSIBLE_VAULT;1.1;AES256\n' + vtext
+  }
+
   function jinjafx_generate() {
     var vaulted_vars = dt.vars.indexOf('$ANSIBLE_VAULT;') > -1;
     dt.vars = window.btoa(dt.vars);
@@ -152,8 +173,7 @@ function getStatusText(code) {
   }
 
   function jinjafx(method) {
-    sobj.innerHTML = "";
-
+    clear_status();
     fe.focus();
 
     if (method == "delete_dataset") {
@@ -638,6 +658,12 @@ function getStatusText(code) {
     document.getElementById('protect').onclick = function() { jinjafx('protect'); };
     document.getElementById('export').onclick = function() { jinjafx('export'); };
     document.getElementById('generate').onclick = function() { jinjafx('generate'); };
+    document.getElementById('encrypt').onclick = function() { 
+      clear_status();
+      new bootstrap.Modal(document.getElementById('vault_encrypt'), {
+        keyboard: false
+      }).show();
+    };
 
     sobj = document.getElementById("status");
 
@@ -967,6 +993,23 @@ function getStatusText(code) {
       document.getElementById("vault").focus();
     });
 
+    document.getElementById('vault_encrypt').addEventListener('shown.bs.modal', function (e) {
+      document.getElementById("vault_string").focus();
+    });
+
+    document.getElementById('vault_encrypt').addEventListener('hidden.bs.modal', function (e) {
+      clear_status();
+      document.getElementById("vault_string").value = '';
+      if (document.getElementById("password_vault1").value != document.getElementById("password_vault2").value) {
+        document.getElementById("password_vault1").value = '';
+        document.getElementById("password_vault2").value = '';
+        document.getElementById('password_vault2').classList.remove('is-invalid');
+        document.getElementById('password_vault2').classList.remove('is-valid');
+        document.getElementById("password_vault2").disabled = true;
+      }
+      fe.focus();
+    });
+
     document.getElementById('ml-vault-ok').onclick = function() {
       dt.vault_password = window.btoa(document.getElementById("vault").value);
       if (dt_id != '') {
@@ -986,6 +1029,45 @@ function getStatusText(code) {
     document.getElementById('protect_dt').addEventListener('shown.bs.modal', function (e) {
       document.getElementById("password_open1").focus();
     });
+
+    document.getElementById('vault_output').addEventListener('shown.bs.modal', function (e) {
+      document.getElementById("vault_text").focus();
+      document.getElementById("vault_text").select();
+    });
+
+    document.getElementById('vault_output').addEventListener('hidden.bs.modal', function (e) {
+      fe.focus();
+    });
+
+    document.getElementById('ml-vault-encrypt-ok').onclick = function() {
+      clear_status();
+      if (document.getElementById('vault_string').value.match(/\S/)) {
+        if (document.getElementById('password_vault1').value.match(/\S/)) {
+          if (document.getElementById('password_vault1').value == document.getElementById('password_vault2').value) {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('vault_encrypt')).hide()
+            document.getElementById('vault_text').value = ansible_vault_encrypt(document.getElementById('vault_string').value, document.getElementById('password_vault1').value);
+            new bootstrap.Modal(document.getElementById('vault_output'), {
+              keyboard: false
+            }).show();
+          }
+          else {
+            set_status("darkred", "ERROR", "Password Verification Failed");
+            document.getElementById('password_vault2').focus();
+            return false;
+          }
+        }
+        else {
+          set_status("darkred", "ERROR", "Password is Required");
+          document.getElementById('password_vault1').focus();
+          return false;
+        }
+      }
+      else {
+        set_status("darkred", "ERROR", "Nothing to Encrypt");
+        document.getElementById('vault_string').focus();
+        return false;
+      }
+    };
 
     document.getElementById('ml-protect-dt-ok').onclick = function() {
       dt_opassword = null;
@@ -1128,7 +1210,40 @@ function getStatusText(code) {
         document.getElementById('password_open2').classList.remove('is-valid');
         document.getElementById('password_open2').classList.add('is-invalid');
       }
-    }
+    };
+
+    function check_vault() {
+      if (document.getElementById('password_vault1').value == document.getElementById('password_vault2').value) {
+        document.getElementById('password_vault2').classList.remove('is-invalid');
+        document.getElementById('password_vault2').classList.add('is-valid');
+      }
+      else {
+        document.getElementById('password_vault2').classList.remove('is-valid');
+        document.getElementById('password_vault2').classList.add('is-invalid');
+      }
+    };
+
+    document.getElementById('password_vault1').onkeyup = function(e) {
+      if (document.getElementById('password_vault1').value.match(/\S/)) {
+        if (document.getElementById('password_vault2').disabled == true) {
+          document.getElementById('password_vault2').disabled = false;
+          document.getElementById('password_vault2').classList.add('is-invalid');
+        }
+        else {
+          check_vault();
+        }
+      }
+      else {
+        document.getElementById('password_vault2').disabled = true;
+        document.getElementById('password_vault2').value = '';
+        document.getElementById('password_vault2').classList.remove('is-valid');
+        document.getElementById('password_vault2').classList.remove('is-invalid');
+      }
+    };
+
+    document.getElementById('password_vault2').onkeyup = function(e) {
+      check_vault();
+    };
 
     document.getElementById('password_open1').onkeyup = function(e) {
       if (document.getElementById('password_open1').value.match(/\S/)) {
@@ -1510,6 +1625,11 @@ function getStatusText(code) {
   }
   */
   
+  function clear_status() {
+    clearTimeout(tid);
+    sobj.innerHTML = "";
+  }
+
   function set_status(color, title, message, delay, mline) {
     clearTimeout(tid);
     if (typeof delay !== 'undefined') {

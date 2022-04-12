@@ -32,6 +32,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.0/dayjs.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.0/plugin/relativeTime.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" crossorigin="anonymous"></script>
     <script src="/jinjafx_m.js"></script>
   </head>
   <body>
@@ -69,6 +70,13 @@
             <button id="delete_ds" type="button" class="btn btn-warning text-black" title="Delete Data Set" disabled>-</button>
             <button id="add_ds" type="button" class="btn btn-warning text-black" title="Add Data Set">+</button>
           </div>
+
+          <button id="encrypt" type="button" class="btn btn-secondary text-white me-2" title="Encrypt String with Ansible Vault">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </button>
 
           <div id="lbuttons" class="btn-group me-2 d-none">
             <button id="get" type="button" class="btn btn-secondary text-white" title="Get Link">
@@ -218,6 +226,52 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             <button id="ml-vault-ok" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="vault_encrypt" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 id="ml-title" class="mt-0">Ansible Vault</h4>
+          </div>
+          <div class="form-group modal-body">
+            <div class="row">
+              <label for="vault_string" class="col-sm-12 col-form-label">String to Encrypt</label>
+              <div class="col-sm-12">
+                <input type="text" class="form-control" id="vault_string">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <label for="password_vault1" class="col-form-label">Vault Password</label>
+                <input type="password" class="form-control" id="password_vault1">
+              </div>
+              <div class="col-6">
+                <label for="password_vault2" class="col-form-label" disabled>Verify Password</label>
+                <input type="password" class="form-control" id="password_vault2" disabled>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button id="ml-vault-encrypt-ok" type="button" class="btn btn-primary">Encrypt</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="vault_output" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 id="ml-title" class="mt-0">Ansible Vault</h4>
+          </div>
+          <div class="form-group row modal-body">
+            <textarea class="form-control" id="vault_text" rows="10" readonly></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
