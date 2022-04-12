@@ -50,9 +50,9 @@ As well as supporting the standard CodeMirror shortcut keys for the "data.csv", 
 
 - Ctrl-F / Cmd-F - Find
 
-### Data Sets
+### DataSets
 
-The Data Set feature allows you to include multiple different "data.csv" and "vars.yml" contents while maintaining the same "template.j2". This is to support scenarios where you have different Data Sets for your Live vs your Test environments, but the template should be the same. There are no limits on the number of different Data Sets that can be added to a single DataTemplate (the name must start with a letter and only contain alphanumerical, "-", " " or "_" characters). When you click "Generate" it will use the currently active Data Set to generate the output - clicking on the name of the current Data Set (by default there is a single "Default" Data Set) allows you to switch between the different Data Sets.
+The DataSet feature allows you to include multiple different "data.csv" and "vars.yml" contents while maintaining the same "template.j2". This is to support scenarios where you have different DataSets for your Live vs your Test environments, but the template should be the same. There are no limits on the number of different DataSets that can be added to a single DataTemplate (the name must start with a letter and only contain alphanumerical, "-", " " or "_" characters). When you click "Generate" it will use the currently active DataSet to generate the output - clicking on the name of the current DataSet (by default there is a single "Default" DataSet) allows you to switch between the different DataSets.
 
 ### Ansible Vault
 
