@@ -54,6 +54,10 @@ As well as supporting the standard CodeMirror shortcut keys for the "data.csv", 
 
 The Data Set feature allows you to include multiple different "data.csv" and "vars.yml" contents while maintaining the same "template.j2". This is to support scenarios where you have different Data Sets for your Live vs your Test environments, but the template should be the same. There are no limits on the number of different Data Sets that can be added to a single DataTemplate (the name must start with a letter and only contain alphanumerical, "-", " " or "_" characters). When you click "Generate" it will use the currently active Data Set to generate the output - clicking on the name of the current Data Set (by default there is a single "Default" Data Set) allows you to switch between the different Data Sets.
 
+### Ansible Vault
+
+JinjaFx Server also supports the ability to perform Ansible Vault encryption of strings from within the browser using client side JavaScript. By clicking on the padlock it will prompt you for your string and the password to use which you can then use with `vars.yml`. JinjaFx doesn't support the ability to use different passwords for different strings within the same DataTemplate so it is important that all Vaulted strings are using the same password within the same DataTemplate.
+
 ### JinjaFx Input
 
 In addition to the prompt syntax (see JinjaFx Input for JinjaFx), which can be specified under `jinjafx_input`, we also support the ability to specify a custom html input form to provide greater flexibility. As JinjaFx is built on Bootstrap 5, it uses the <a href="https://getbootstrap.com/docs/5.1/components/modal/#modal-components">Bootstrap 5 Modal</a> syntax to specify what is contained in the body of your modal form. Bootstrap works on a row and column grid with each row comprising of 12 columns - you use the various "col-n" classes to specify how wide each element is.
