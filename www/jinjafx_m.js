@@ -997,6 +997,12 @@ function getStatusText(code) {
       document.getElementById("vault_string").focus();
     });
 
+    document.getElementById('vault_string').onkeyup = function(e) {
+      if (e.which == 13) {
+        document.getElementById('ml-vault-encrypt-ok').click();
+      }
+    };    
+    
     document.getElementById('vault_encrypt').addEventListener('hidden.bs.modal', function (e) {
       clear_status();
       document.getElementById("vault_string").value = '';
