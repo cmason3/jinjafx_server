@@ -188,7 +188,7 @@ def lambda_handler(event, context):
           outputs[o] = base64.b64decode(outputs[o]).decode('utf-8')
 
           if '.' not in ofile:
-            if '<html' in outputs[o].lower() and '<\/html>' in outputs[o].lower():
+            if '<html' in outputs[o].lower() and '</html>' in outputs[o].lower():
               ofile += '.html'
             else:
               ofile += '.txt'
