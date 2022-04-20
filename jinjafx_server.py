@@ -20,7 +20,7 @@ from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 
-__version__ = '22.4.4'
+__version__ = '22.4.5'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -379,7 +379,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   outputs[o] = re.sub(r'\r?\n', lterminator, base64.b64decode(outputs[o]).decode('utf-8'))
 
                   if '.' not in ofile:
-                    if '<html' in outputs[o].lower() and '<\/html>' in outputs[o].lower():
+                    if '<html' in outputs[o].lower() and '</html>' in outputs[o].lower():
                       ofile += '.html'
                     else:
                       ofile += '.txt'
