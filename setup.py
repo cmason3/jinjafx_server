@@ -8,7 +8,8 @@ for line in open('jinjafx_server.py'):
 
 HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
-README = re.sub(r'<p.+</p>', '', README)
+README = re.sub(r'^.*\[<img', '[<img', README, flags=re.DOTALL)
+README = re.sub(r'<p.+?</p>', '', README, flags=re.DOTALL)    
 
 setup(
   name="jinjafx_server",
