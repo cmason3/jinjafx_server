@@ -7,13 +7,13 @@ for line in open('jinjafx_server.py'):
     break
 
 HERE = pathlib.Path(__file__).parent
-
 README = (HERE / "README.md").read_text()
 README = re.sub(r'<p.+</p>', '', README)
 
 setup(
   name="jinjafx_server",
   version=__version__,
+  python_requires=">=3.6",
   description="JinjaFx Server - Jinja2 Templating Tool",
   long_description=README,
   long_description_content_type="text/markdown",
@@ -22,6 +22,7 @@ setup(
   author_email="chris@netnix.org",
   license="MIT",
   classifiers=[
+    "Development Status :: 5 - Production/Stable",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3"
   ],
