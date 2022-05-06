@@ -30,7 +30,7 @@ setup(
   packages=["jinjafx_server"],
   include_package_data=True,
   package_data={'': ['www/*']},
-  install_requires=["jinjafx", "requests"],
+  install_requires=["jinjafx>=1.11.1", "requests"],
   entry_points={
     "console_scripts": [
       "jinjafx_server=jinjafx_server:main",
