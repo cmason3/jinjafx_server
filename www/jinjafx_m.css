@@ -76,6 +76,12 @@ textarea {
 .expand:hover {
   stroke: black;
 }
+#format {
+  position: absolute;
+  z-index: 2;
+  right: 5px;
+  bottom: 5px;
+}
 .labels {
   height: 100%;
   width: 20px;
