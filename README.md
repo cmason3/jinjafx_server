@@ -57,7 +57,7 @@ The DataSet feature allows you to include multiple different "data.csv" and "var
 
 JinjaFx Server supports the ability to use "output" tags to create different outputs with different names like JinjaFx, but it also allows you to optionally specify how you want the output to be rendered. By default, the output is rendered as "text" but you also have the option to specify "html" and "markdown", which will result in the output being rendered appropriately, e.g:
 
-```
+```jinja2
 <output:html "index.html">
 <html>
 ...
