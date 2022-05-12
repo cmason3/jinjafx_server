@@ -53,6 +53,24 @@ As well as supporting the standard CodeMirror shortcut keys for the "data.csv", 
 
 The DataSet feature allows you to include multiple different "data.csv" and "vars.yml" contents while maintaining the same "template.j2". This is to support scenarios where you have different DataSets for your Live vs your Test environments, but the template should be the same. There are no limits on the number of different DataSets that can be added to a single DataTemplate (the name must start with a letter and only contain alphanumerical, "-", " " or "_" characters). When you click "Generate" it will use the currently active DataSet to generate the output - clicking on the name of the current DataSet (by default there is a single "Default" DataSet) allows you to switch between the different DataSets.
 
+### Output Formats
+
+JinjaFx Server supports the ability to use "output" tags to create different outputs with different names similar to JinjaFx, but it also allows you to optionally specify how you want the output to be rendered. By default the output is rendered as "text" but you also have the option to specify "html" and "markdown", which will result in the output being rendered appropriately, e.g:
+
+```
+<output:html "index.html">
+<html>
+...
+</html>
+</output>
+
+<output:markdown "index.md">
+- Item 1
+- Item 2
+- Item 3
+</output>
+```
+
 ### Ansible Vault
 
 JinjaFx Server supports the ability to perform Ansible Vault encryption of strings from within the browser using client side JavaScript. By clicking on the padlock it will prompt you for your string and the password to use which you can then use within `vars.yml`. JinjaFx doesn't support the ability to use different passwords for different strings within the same DataTemplate so it is important that all vaulted strings are using the same password within the same DataTemplate.

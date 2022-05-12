@@ -76,21 +76,6 @@ textarea {
 .expand:hover {
   stroke: black;
 }
-#format {
-  position: absolute;
-  z-index: 2;
-  right: 5px;
-  bottom: 5px;
-}
-#format-btn {
-  color: gray !important;
-  border-color: gray !important;
-}
-#format-btn:hover {
-  color: black !important;
-  border-color: black !important;
-  background-color: #fff !important;
-}
 .labels {
   height: 100%;
   width: 20px;
