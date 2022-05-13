@@ -1378,6 +1378,7 @@ function getStatusText(code) {
       if (document.getElementById('get_link').value != 'false') {
         document.getElementById('lbuttons').classList.remove('d-none');
       }
+      document.getElementById('template_info').style.display = 'block';
       loaded = true;
     }
   };
@@ -1398,6 +1399,7 @@ function getStatusText(code) {
     document.getElementById('lvars').classList.remove('d-none');
     document.getElementById('ltemplate2').classList.add('d-none');
     document.getElementById('ltemplate').classList.remove('d-none');
+    document.getElementById('template_info').style.display = 'none';
     dicon = 'ldata';
   }
   
@@ -1540,6 +1542,9 @@ function getStatusText(code) {
         window.addEventListener('beforeunload', onBeforeUnload);
         if (document.getElementById('get_link').value != 'false') {
           document.title = 'JinjaFx [unsaved]';
+        }
+        if (window.cmTemplate.getCursor().ch != 0) {
+          document.getElementById('template_info').style.display = 'none';
         }
         dirty = true;
       }
