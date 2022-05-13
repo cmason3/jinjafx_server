@@ -18,9 +18,9 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
-import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
+import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, cmarkgfm
 
-__version__ = '22.5.0'
+__version__ = '22.5.1'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -333,8 +333,16 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               }
 
               for o in outputs:
+                (oname, oformat) = o.rsplit(':', 1) if ':' in o else (o, 'text')
                 output = '\n'.join(outputs[o]) + '\n'
                 if len(output.strip()) > 0:
+                  if oformat == 'markdown':
+                    o = oname + ':html'
+                    options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART)
+                    output = cmarkgfm.github_flavored_markdown_to_html(output, options)
+                    head = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css" crossorigin="anonymous">\n'
+                    output = head + '<div class="markdown-body">\n' + output + '</div>\n'
+
                   jsr['outputs'].update({ o: base64.b64encode(output.encode('utf-8')).decode('utf-8') })
                   if o != '_stderr_':
                     ocount += 1
@@ -375,11 +383,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 z = zipfile.ZipFile(zfile, 'w', zipfile.ZIP_DEFLATED)
 
                 for o in outputs:
-                  ofile = re.sub(r'_+', '_', re.sub(r'[^A-Za-z0-9_. -/]', '_', os.path.normpath(o)))
+                  (oname, oformat) = o.rsplit(':', 1) if ':' in o else (o, 'text')
+                  ofile = re.sub(r'_+', '_', re.sub(r'[^A-Za-z0-9_. -/]', '_', os.path.normpath(oname)))
                   outputs[o] = re.sub(r'\r?\n', lterminator, base64.b64decode(outputs[o]).decode('utf-8'))
 
                   if '.' not in ofile:
-                    if '<html' in outputs[o].lower() and '</html>' in outputs[o].lower():
+                    if oformat == 'html':
                       ofile += '.html'
                     else:
                       ofile += '.txt'

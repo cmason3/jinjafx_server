@@ -76,6 +76,26 @@ textarea {
 .expand:hover {
   stroke: black;
 }
+.code-block {
+  border: 1px dashed gray;
+  background-color: lightgray;
+  border-radius: 0.5rem;
+  padding: 10px;
+}
+.info {
+  position: absolute;
+  border-radius: 0.5rem;
+  border: 1px dashed #ffc720;
+  background-color: #ffffcc;
+  z-index: 2;
+  right: 30px;
+  padding: 10px;
+  top: 30px;
+  bottom: 30px;
+  width: 30%;
+  display: none;
+  overflow-y: scroll;
+}
 .labels {
   height: 100%;
   width: 20px;

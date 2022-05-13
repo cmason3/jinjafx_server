@@ -33,6 +33,7 @@ function getStatusText(code) {
 (function() {
   var loaded = false;
   var dirty = false;
+  var tinfo = true;
   var sobj = undefined;
   var fe = undefined;
   var tid = 0;
@@ -1378,6 +1379,7 @@ function getStatusText(code) {
       if (document.getElementById('get_link').value != 'false') {
         document.getElementById('lbuttons').classList.remove('d-none');
       }
+      document.getElementById('template_info').style.display = 'block';
       loaded = true;
     }
   };
@@ -1398,6 +1400,7 @@ function getStatusText(code) {
     document.getElementById('lvars').classList.remove('d-none');
     document.getElementById('ltemplate2').classList.add('d-none');
     document.getElementById('ltemplate').classList.remove('d-none');
+    document.getElementById('template_info').style.display = 'none';
     dicon = 'ldata';
   }
   
@@ -1542,6 +1545,12 @@ function getStatusText(code) {
           document.title = 'JinjaFx [unsaved]';
         }
         dirty = true;
+      }
+      if (tinfo) {
+        if (window.cmTemplate.getCursor().ch != 0) {
+          document.getElementById('template_info').style.display = 'none';
+          tinfo = false;
+        }
       }
     }
   }

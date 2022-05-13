@@ -49,6 +49,18 @@
         }
       };
 
+      document.getElementById('print').onclick = function() {
+        var t = document.getElementById('t_' + document.querySelector('.tab-content > .active').getAttribute('id'));
+
+        if (t.nodeName == 'IFRAME') {
+          t.contentWindow.print();
+        }
+        else {
+          document.getElementById('print_pre').innerHTML = window.opener.quote(t.value);
+          window.print();
+        }
+      };
+
       document.getElementById('download').onclick = function() {
         sobj.innerHTML = '';
         if (obj != null) {
@@ -119,13 +131,21 @@
                   }
                   return a > b ? 1 : b > a ? -1 : 0;
                 }).forEach(function(output) {
-                  var g = window.opener.quote(output)
+                  var oname = output;
+                  var oformat = 'text';
+
+                  if (output.includes(':')) {
+                    oname = output.substring(0, output.lastIndexOf(':'));
+                    oformat = output.substring(output.lastIndexOf(':') + 1);
+                  }
+
+                  var g = window.opener.quote(oname)
   
                   tabs += '<div id="o' + oid + '" class="h-100 tab-pane fade' + ((oid == 1) ? ' show active' : '') + '">';
                   tabs += '<h4 class="fw-bold">' + g + '</h4>';
   
                   var tc = window.atob(obj.outputs[output]);
-                  if (tc.match(/<html.*?>[\s\S]+<\/html>/i)) {
+                  if (oformat == 'html') {
                     tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + tc.replace(/"/g, "&quot;") + '"></iframe>';
                   }
                   else {

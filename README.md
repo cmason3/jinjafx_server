@@ -4,7 +4,7 @@
 &nbsp;
 <h1 align="center">JinjaFx Server - Jinja2 Templating Tool</h1>
 
-JinjaFx Server is a lightweight web server that provides a web frontend to JinjaFx. It is a separate Python module which imports the "jinjafx" module to generate outputs from a web interface - it does require the "requests" module which isn't in the base install. Usage instructions are provided below, although it is considered an additional component and not part of the base JinjaFx tool, although it is probably a much easier way to use it.
+JinjaFx Server is a lightweight web server that provides a Web UI to JinjaFx. It is a separate Python module which imports the "jinjafx" module to generate outputs from a web interface - it does require the "requests" module which isn't in the base install. Usage instructions are provided below, although it is considered an additional component and not part of the base JinjaFx tool, although it is probably a much easier way to use it.
 
 ### Installation
 
@@ -52,6 +52,24 @@ As well as supporting the standard CodeMirror shortcut keys for the "data.csv", 
 ### DataSets
 
 The DataSet feature allows you to include multiple different "data.csv" and "vars.yml" contents while maintaining the same "template.j2". This is to support scenarios where you have different DataSets for your Live vs your Test environments, but the template should be the same. There are no limits on the number of different DataSets that can be added to a single DataTemplate (the name must start with a letter and only contain alphanumerical, "-", " " or "_" characters). When you click "Generate" it will use the currently active DataSet to generate the output - clicking on the name of the current DataSet (by default there is a single "Default" DataSet) allows you to switch between the different DataSets.
+
+### Output Formats
+
+JinjaFx Server supports the ability to use "output" tags to create different outputs with different names like JinjaFx, but it also allows you to optionally specify how you want the output to be rendered. By default, the output is rendered as "text" but you also have the option to specify "html" and "markdown" (for GitHub Flavoured Markdown), which will result in the output being rendered appropriately, e.g:
+
+```jinja2
+<output:html "index.html">
+<html>
+...
+</html>
+</output>
+
+<output:markdown "index.md">
+- Item 1
+- Item 2
+- Item 3
+</output>
+```
 
 ### Ansible Vault
 
