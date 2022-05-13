@@ -340,10 +340,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     o = oname + ':html'
                     options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART)
                     output = cmarkgfm.github_flavored_markdown_to_html(output, options)
-                    html = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css" crossorigin="anonymous">\n'
-                    html += '<div class="markdown-body">\n' + output + '</div>\n'
+                    head = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css" crossorigin="anonymous">\n'
+                    output = head + '<div class="markdown-body">\n' + output + '</div>\n'
 
-                  jsr['outputs'].update({ o: base64.b64encode(html.encode('utf-8')).decode('utf-8') })
+                  jsr['outputs'].update({ o: base64.b64encode(output.encode('utf-8')).decode('utf-8') })
                   if o != '_stderr_':
                     ocount += 1
   
