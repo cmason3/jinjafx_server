@@ -18,7 +18,7 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
-import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
+import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, cmarkgfm
 
 __version__ = '22.5.1'
 
@@ -333,9 +333,17 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               }
 
               for o in outputs:
+                (oname, oformat) = o.rsplit(':', 1) if ':' in o else (o, 'text')
                 output = '\n'.join(outputs[o]) + '\n'
                 if len(output.strip()) > 0:
-                  jsr['outputs'].update({ o: base64.b64encode(output.encode('utf-8')).decode('utf-8') })
+                  if oformat == 'markdown':
+                    o = oname + ':html'
+                    options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART)
+                    output = cmarkgfm.github_flavored_markdown_to_html(output, options)
+                    html = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css" crossorigin="anonymous">\n'
+                    html += '<div class="markdown-body">\n' + output + '</div>\n'
+
+                  jsr['outputs'].update({ o: base64.b64encode(html.encode('utf-8')).decode('utf-8') })
                   if o != '_stderr_':
                     ocount += 1
   
@@ -382,8 +390,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   if '.' not in ofile:
                     if oformat == 'html':
                       ofile += '.html'
-                    elif oformat == 'markdown':
-                      ofile += '.md'
                     else:
                       ofile += '.txt'
 

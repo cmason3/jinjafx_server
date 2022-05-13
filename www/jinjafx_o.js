@@ -12,7 +12,6 @@
   
   window.onload = function() {
     if (window.opener != null) {
-      var md = window.markdownit();
       var dt = window.opener.dt;
       window.opener.reset_dt();
 
@@ -148,9 +147,6 @@
                   var tc = window.atob(obj.outputs[output]);
                   if (oformat == 'html') {
                     tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + tc.replace(/"/g, "&quot;") + '"></iframe>';
-                  }
-                  else if (oformat == 'markdown') {
-                    tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + md.render(tc) + '"></iframe>';
                   }
                   else {
                     tabs += '<textarea id="t_o' + oid + '" class="output" readonly>' + window.opener.quote(tc) + '</textarea>';
