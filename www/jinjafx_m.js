@@ -33,6 +33,7 @@ function getStatusText(code) {
 (function() {
   var loaded = false;
   var dirty = false;
+  var tinfo = true;
   var sobj = undefined;
   var fe = undefined;
   var tid = 0;
@@ -1543,10 +1544,13 @@ function getStatusText(code) {
         if (document.getElementById('get_link').value != 'false') {
           document.title = 'JinjaFx [unsaved]';
         }
+        dirty = true;
+      }
+      if (tinfo) {
         if (window.cmTemplate.getCursor().ch != 0) {
           document.getElementById('template_info').style.display = 'none';
+          tinfo = false;
         }
-        dirty = true;
       }
     }
   }
