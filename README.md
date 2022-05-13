@@ -77,7 +77,7 @@ JinjaFx Server supports the ability to perform Ansible Vault encryption of strin
 
 ### JinjaFx Input
 
-In addition to the prompt syntax (see JinjaFx Input for JinjaFx), which can be specified under `jinjafx_input`, we also support the ability to specify a custom html input form to provide greater flexibility. As JinjaFx is built on Bootstrap 5, it uses the <a href="https://getbootstrap.com/docs/5.1/components/modal/#modal-components">Bootstrap 5 Modal</a> syntax to specify what is contained in the body of your modal form. Bootstrap works on a row and column grid with each row comprising of 12 columns - you use the various "col-n" classes to specify how wide each element is.
+In addition to the prompt syntax (see JinjaFx Input for JinjaFx), which can be specified under `jinjafx_input`, we also support the ability to specify a custom html input form to provide greater flexibility. As JinjaFx is built on Bootstrap 5, it uses the [Bootstrap 5 Modal](https://getbootstrap.com/docs/5.1/components/modal/#modal-components) syntax to specify what is contained in the body of your modal form. Bootstrap works on a row and column grid with each row comprising of 12 columns - you use the various "col-n" classes to specify how wide each element is.
 
 You can specify a custom input form using the `body` variable under `jinjafx_input` within your "vars.yml" - if this exists then whatever you have in `prompt` is ignored.
 
