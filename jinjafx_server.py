@@ -375,12 +375,15 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 z = zipfile.ZipFile(zfile, 'w', zipfile.ZIP_DEFLATED)
 
                 for o in outputs:
-                  ofile = re.sub(r'_+', '_', re.sub(r'[^A-Za-z0-9_. -/]', '_', os.path.normpath(o)))
+                  (oname, oformat) = o.rsplit(':', 1) if ':' in o else (o, 'text')
+                  ofile = re.sub(r'_+', '_', re.sub(r'[^A-Za-z0-9_. -/]', '_', os.path.normpath(oname)))
                   outputs[o] = re.sub(r'\r?\n', lterminator, base64.b64decode(outputs[o]).decode('utf-8'))
 
                   if '.' not in ofile:
-                    if '<html' in outputs[o].lower() and '</html>' in outputs[o].lower():
+                    if oformat == 'html':
                       ofile += '.html'
+                    elif oformat == 'markdown':
+                      ofile += '.md'
                     else:
                       ofile += '.txt'
 

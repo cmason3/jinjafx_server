@@ -15,12 +15,17 @@ textarea.output {
   outline: none;
 }
 iframe.output {
-  background-color: transparent;
-  border: 0px none transparent;
+  background-color: #fff;
+  border: 1px solid lightgray;
   padding: 0px;
   overflow-y: auto;
   height: 100%;
   width: 100%;
+}
+pre#print_pre {
+  display: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 .ms-10 {
   margin-left: 10px;
@@ -38,4 +43,12 @@ iframe.output {
 }
 .nosb::-webkit-scrollbar {
   width: 0px;
+}
+@media print {
+  div#wrap, div#footer {
+    display: none;
+  }
+  pre#print_pre {
+    display: block;
+  }
 }

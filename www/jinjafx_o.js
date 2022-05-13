@@ -50,6 +50,18 @@
         }
       };
 
+      document.getElementById('print').onclick = function() {
+        var t = document.getElementById('t_' + document.querySelector('.tab-content > .active').getAttribute('id'));
+
+        if (t.nodeName == 'IFRAME') {
+          t.contentWindow.print();
+        }
+        else {
+          document.getElementById('print_pre').innerHTML = window.opener.quote(t.value);
+          window.print();
+        }
+      };
+
       document.getElementById('download').onclick = function() {
         sobj.innerHTML = '';
         if (obj != null) {
