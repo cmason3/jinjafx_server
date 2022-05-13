@@ -110,6 +110,7 @@
         xHR.onload = function() {
           if (this.status === 200) {
             try {
+              console.log(xHR.responseText);
               obj = JSON.parse(xHR.responseText);
               if (obj.status === "ok") {
                 var stderr = null;
@@ -146,6 +147,7 @@
   
                   var tc = window.atob(obj.outputs[output]);
                   if (oformat == 'html') {
+                    // tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + tc.replace(/"/g, "&quot;").replace(/&/g, "&amp;") + '"></iframe>';
                     tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + tc.replace(/"/g, "&quot;") + '"></iframe>';
                   }
                   else {

@@ -337,6 +337,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 text = text.replace('"', "&quot;")
                 text = text.replace('<', "&lt;")
                 text = text.replace('>', "&gt;")
+                text = text.replace('&', "&amp;")
                 return text
 
               for o in outputs:
