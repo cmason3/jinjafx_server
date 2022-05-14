@@ -1547,7 +1547,7 @@ function getStatusText(code) {
         dirty = true;
       }
       if (tinfo) {
-        if (window.cmTemplate.getCursor().ch != 0) {
+        if (fe == window.cmTemplate) {
           document.getElementById('template_info').style.display = 'none';
           tinfo = false;
         }
