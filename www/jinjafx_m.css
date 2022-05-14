@@ -94,18 +94,13 @@ textarea {
   bottom: 30px;
   width: 30%;
   overflow-y: scroll;
-  opacity: 0;
+  visibility: hidden;
 }
 .labels {
   height: 100%;
   width: 20px;
   line-height: 0.8rem;
   overflow-y: hidden;
-}
-.fade-in {
-  visibility: visible;
-  opacity: 1;
-  transition: visibility 500ms linear 0s, opacity 500ms;
 }
 .fade-out {
   visibility: hidden;
