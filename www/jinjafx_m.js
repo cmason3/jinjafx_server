@@ -1379,7 +1379,8 @@ function getStatusText(code) {
       if (document.getElementById('get_link').value != 'false') {
         document.getElementById('lbuttons').classList.remove('d-none');
       }
-      document.getElementById('template_info').style.display = 'block';
+      document.getElementById('template_info').classList.add('fade-in');
+//      document.getElementById('template_info').style.visibility = 'visible';
       loaded = true;
     }
   };
@@ -1400,7 +1401,8 @@ function getStatusText(code) {
     document.getElementById('lvars').classList.remove('d-none');
     document.getElementById('ltemplate2').classList.add('d-none');
     document.getElementById('ltemplate').classList.remove('d-none');
-    document.getElementById('template_info').style.display = 'none';
+    document.getElementById('template_info').classList.add('fade-out');
+    // document.getElementById('template_info').style.display = 'none';
     dicon = 'ldata';
   }
   
@@ -1548,7 +1550,8 @@ function getStatusText(code) {
       }
       if (tinfo) {
         if (fe == window.cmTemplate) {
-          document.getElementById('template_info').style.display = 'none';
+          document.getElementById('template_info').classList.add('fade-out');
+          // document.getElementById('template_info').style.display = 'none';
           tinfo = false;
         }
       }
