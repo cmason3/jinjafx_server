@@ -4,8 +4,13 @@ function reset_dt() {
   dt = {};
 }
 
-function quote(str) {
-  str = str.replace(/&/g, "&amp;");
+function quote(str, not_amp) {
+  if (typeof not_amp === 'undefined') {
+    not_amp = false;
+  }
+  if (!not_amp) {
+    str = str.replace(/&/g, "&amp;");
+  }
   str = str.replace(/>/g, "&gt;");
   str = str.replace(/</g, "&lt;");
   str = str.replace(/"/g, "&quot;");
@@ -1379,7 +1384,7 @@ function getStatusText(code) {
       if (document.getElementById('get_link').value != 'false') {
         document.getElementById('lbuttons').classList.remove('d-none');
       }
-      document.getElementById('template_info').style.display = 'block';
+      document.getElementById('template_info').style.visibility = 'visible';
       loaded = true;
     }
   };
@@ -1400,7 +1405,7 @@ function getStatusText(code) {
     document.getElementById('lvars').classList.remove('d-none');
     document.getElementById('ltemplate2').classList.add('d-none');
     document.getElementById('ltemplate').classList.remove('d-none');
-    document.getElementById('template_info').style.display = 'none';
+    document.getElementById('template_info').classList.add('fade-out');
     dicon = 'ldata';
   }
   
@@ -1547,8 +1552,8 @@ function getStatusText(code) {
         dirty = true;
       }
       if (tinfo) {
-        if (window.cmTemplate.getCursor().ch != 0) {
-          document.getElementById('template_info').style.display = 'none';
+        if (fe == window.cmTemplate) {
+          document.getElementById('template_info').classList.add('fade-out');
           tinfo = false;
         }
       }

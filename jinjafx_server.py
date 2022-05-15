@@ -20,7 +20,7 @@ from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, cmarkgfm
 
-__version__ = '22.5.1'
+__version__ = '22.5.2'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -332,14 +332,21 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 'outputs': {}
               }
 
+              def html_escape(text):
+                text = text.replace("'", "&apos;")
+                text = text.replace('"', "&quot;")
+                text = text.replace('<', "&lt;")
+                text = text.replace('>', "&gt;")
+                return text
+
               for o in outputs:
                 (oname, oformat) = o.rsplit(':', 1) if ':' in o else (o, 'text')
                 output = '\n'.join(outputs[o]) + '\n'
                 if len(output.strip()) > 0:
                   if oformat == 'markdown':
                     o = oname + ':html'
-                    options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART)
-                    output = cmarkgfm.github_flavored_markdown_to_html(output, options)
+                    options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART | cmarkgfm.cmark.Options.CMARK_OPT_UNSAFE)
+                    output = cmarkgfm.github_flavored_markdown_to_html(html_escape(output), options).replace('&amp;amp;', '&amp;').replace('&amp;', '&')
                     head = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css" crossorigin="anonymous">\n'
                     output = head + '<div class="markdown-body">\n' + output + '</div>\n'
 
