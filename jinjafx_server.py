@@ -335,8 +335,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               def html_escape(text):
                 text = text.replace("'", "&apos;")
                 text = text.replace('"', "&quot;")
-                text = text.replace('<', "&lt;")
-                text = text.replace('>', "&gt;")
+                #text = text.replace('<', "&lt;")
+                #text = text.replace('>', "&gt;")
                 return text
 
               for o in outputs:
