@@ -203,6 +203,20 @@
 &lt;output<span class="text-danger">:markdown</span> "Output 2"&gt;
 ...
 &lt;/output&gt;</pre>
+                <br /><h3>Inputs</h3><hr>
+                <p>Normally data is provided to JinjaFx via CSV or YAML using the above panes, but JinjaFx can also prompt the user for input using the "jinjafx_input" variable in "vars.yml", e.g:</p>
+<pre class="code-block">jinjafx_input:
+  prompt:
+    name:
+      text: "Name"
+      required: True
+    age:
+      text: "Age"
+      required: True
+      pattern: "[1-9]+[0-9]*"</pre>
+                <p>These inputs can then be used in your template using the following Jinja2 syntax:</p>
+<pre class="code-block">{{ jinjafx_input['name'] }} is {{ jinjafx_input['age'] }} years old</pre>
+                <p>For more advanced syntax that allows you to specify the format of the input dialog please see <a href="https://github.com/cmason3/jinjafx_server#jinjafx-input" target="_blank">README.md</a> on GitHub.</p>
               </div>
             </span>
           </div>

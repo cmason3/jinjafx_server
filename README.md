@@ -77,7 +77,40 @@ JinjaFx Server supports the ability to perform Ansible Vault encryption of strin
 
 ### JinjaFx Input
 
-In addition to the prompt syntax (see JinjaFx Input for JinjaFx), which can be specified under `jinjafx_input`, we also support the ability to specify a custom html input form to provide greater flexibility. As JinjaFx is built on Bootstrap 5, it uses the <a href="https://getbootstrap.com/docs/5.1/components/modal/#modal-components">Bootstrap 5 Modal</a> syntax to specify what is contained in the body of your modal form. Bootstrap works on a row and column grid with each row comprising of 12 columns - you use the various "col-n" classes to specify how wide each element is.
+There might be some situations where you want inputs to be provided during the generation of the template which are not known beforehand. JinjaFx supports the ability to prompt the user for input using the `jinjafx_input` variable which can be specified in `vars.yml`. The following example demonstrates how we can prompt the user for two inputs ("Name" and "Age") before the template is generated:
+
+```yaml
+---
+jinjafx_input:
+  prompt:
+    name: "Name"
+    age: "Age"
+```
+
+These inputs can then be referenced in your template using `{{ jinjafx_input.name }}` or `{{ jinjafx_input['age'] }}` - the variable name is the field name and the prompt text is the value. However, there might be some situations where you want a certain pattern to be followed or where an input is mandatory, and this is where the advanced syntax comes into play (you can mix and match syntax for different fields):
+
+```yaml
+---
+jinjafx_input:
+  prompt:
+    name:
+      text: "Name"
+      required: True
+    age:
+      text: "Age"
+      required: True
+      pattern: "[1-9]+[0-9]*"
+```
+
+Under the field the `text` key is always mandatory, but the following optional keys are also valid:
+
+- `required` - can be True or False (default is False)
+
+- `pattern` - a regular expression that the input value must match
+
+- `type` - if set to "password" then echo is turned off - used for inputting sensitive values
+
+In addition to the above prompt syntax, we also support the ability to specify a custom html input form to provide greater flexibility. As JinjaFx is built on Bootstrap 5, it uses the <a href="https://getbootstrap.com/docs/5.1/components/modal/#modal-components">Bootstrap 5 Modal</a> syntax to specify what is contained in the body of your modal form. Bootstrap works on a row and column grid with each row comprising of 12 columns - you use the various "col-n" classes to specify how wide each element is.
 
 You can specify a custom input form using the `body` variable under `jinjafx_input` within your "vars.yml" - if this exists then whatever you have in `prompt` is ignored.
 
