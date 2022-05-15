@@ -4,8 +4,13 @@ function reset_dt() {
   dt = {};
 }
 
-function quote(str) {
-  str = str.replace(/&/g, "&amp;");
+function quote(str, not_amp) {
+  if (typeof not_amp === 'undefined') {
+    not_amp = false;
+  }
+  if (!not_amp) {
+    str = str.replace(/&/g, "&amp;");
+  }
   str = str.replace(/>/g, "&gt;");
   str = str.replace(/</g, "&lt;");
   str = str.replace(/"/g, "&quot;");

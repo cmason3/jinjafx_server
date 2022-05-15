@@ -337,7 +337,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 text = text.replace('"', "&quot;")
                 text = text.replace('<', "&lt;")
                 text = text.replace('>', "&gt;")
-                text = text.replace('&', "&amp;")
                 return text
 
               for o in outputs:
@@ -346,8 +345,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 if len(output.strip()) > 0:
                   if oformat == 'markdown':
                     o = oname + ':html'
-                    options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART)
-                    output = cmarkgfm.github_flavored_markdown_to_html(html_escape(output), options)
+                    options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART | cmarkgfm.cmark.Options.CMARK_OPT_UNSAFE)
+                    output = cmarkgfm.github_flavored_markdown_to_html(html_escape(output), options).replace('&amp;amp;', '&amp;').replace('&amp;', '&')
                     head = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css" crossorigin="anonymous">\n'
                     output = head + '<div class="markdown-body">\n' + output + '</div>\n'
 
