@@ -18,9 +18,10 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
-import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, cmarkgfm
+import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
+import cmarkgfm, emoji
 
-__version__ = '22.5.2'
+__version__ = '22.5.3'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -335,8 +336,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               def html_escape(text):
                 text = text.replace("'", "&apos;")
                 text = text.replace('"', "&quot;")
-                text = text.replace('<', "&lt;")
-                text = text.replace('>', "&gt;")
                 return text
 
               for o in outputs:
@@ -348,6 +347,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART | cmarkgfm.cmark.Options.CMARK_OPT_UNSAFE)
                     output = cmarkgfm.github_flavored_markdown_to_html(html_escape(output), options).replace('&amp;amp;', '&amp;').replace('&amp;', '&')
                     head = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css" crossorigin="anonymous">\n'
+                    output = emoji.emojize(output, language='alias').encode('ascii', 'xmlcharrefreplace').decode('utf-8')
                     output = head + '<div class="markdown-body">\n' + output + '</div>\n'
 
                   jsr['outputs'].update({ o: base64.b64encode(output.encode('utf-8')).decode('utf-8') })
