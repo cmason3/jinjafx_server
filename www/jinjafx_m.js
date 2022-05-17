@@ -146,30 +146,6 @@ function getStatusText(code) {
     return '!vault |\n' + ' '.repeat(10) + '$ANSIBLE_VAULT;1.1;AES256\n' + vtext
   }
 
-  /*
-  function utf8_encode(string) {
-    var utftext = "";
-
-    for (var n = 0; n < string.length; n++) {
-      var c = string.charCodeAt(n);
-
-      if (c < 128) {
-        utftext += String.fromCharCode(c);
-      }
-      else if ((c > 127) && (c < 2048)) {
-        utftext += String.fromCharCode((c >> 6) | 192);
-        utftext += String.fromCharCode((c & 63) | 128);
-      }
-      else {
-        utftext += String.fromCharCode((c >> 12) | 224);
-        utftext += String.fromCharCode(((c >> 6) & 63) | 128);
-        utftext += String.fromCharCode((c & 63) | 128);
-      }
-    }
-    return utftext;
-  }
-  */
-
   function jinjafx_generate() {
     var vaulted_vars = dt.vars.indexOf('$ANSIBLE_VAULT;') > -1;
     dt.vars = window.btoa(dt.vars);
@@ -238,15 +214,6 @@ function getStatusText(code) {
     }
 
     var nonASCIIRegex = /[^\u0000-\u007f]+/;
-    /*
-    var cTemplate = window.cmTemplate.getSearchCursor(nonASCIIRegex);
-    if (cTemplate.findNext()) {
-      window.cmTemplate.focus();
-      window.cmTemplate.setSelection(cTemplate.from(), cTemplate.to());
-      set_status("darkred", "ERROR", "Non ASCII Character(s) in 'template.j2'");
-      return false;
-    }
-    */
     var cData = window.cmData.getSearchCursor(nonASCIIRegex);
     if (cData.findNext()) {
       if (csv_on) {
