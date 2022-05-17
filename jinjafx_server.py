@@ -350,6 +350,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     output = emoji.emojize(output, language='alias').encode('ascii', 'xmlcharrefreplace').decode('utf-8')
                     output = head + '<div class="markdown-body">\n' + output + '</div>\n'
 
+                  elif oformat == 'html':
+                    output = output.encode('ascii', 'xmlcharrefreplace').decode('utf-8')
+
                   jsr['outputs'].update({ o: base64.b64encode(output.encode('utf-8')).decode('utf-8') })
                   if o != '_stderr_':
                     ocount += 1

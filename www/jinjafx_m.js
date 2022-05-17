@@ -151,10 +151,32 @@ function getStatusText(code) {
     return '!vault |\n' + ' '.repeat(10) + '$ANSIBLE_VAULT;1.1;AES256\n' + vtext
   }
 
+  function utf8_encode(string) {
+    var utftext = "";
+
+    for (var n = 0; n < string.length; n++) {
+      var c = string.charCodeAt(n);
+
+      if (c < 128) {
+        utftext += String.fromCharCode(c);
+      }
+      else if ((c > 127) && (c < 2048)) {
+        utftext += String.fromCharCode((c >> 6) | 192);
+        utftext += String.fromCharCode((c & 63) | 128);
+      }
+      else {
+        utftext += String.fromCharCode((c >> 12) | 224);
+        utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+        utftext += String.fromCharCode((c & 63) | 128);
+      }
+    }
+    return utftext;
+  }
+
   function jinjafx_generate() {
     var vaulted_vars = dt.vars.indexOf('$ANSIBLE_VAULT;') > -1;
     dt.vars = window.btoa(dt.vars);
-    dt.template = window.btoa(window.cmTemplate.getValue().replace(/\t/g, "  "));
+    dt.template = window.btoa(utf8_encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
     dt.id = dt_id;
     dt.dataset = current_ds;
 
@@ -218,15 +240,17 @@ function getStatusText(code) {
       return false;
     }
 
-    var nonAsciiRegex = /[^\u0000-\u007f]+/;
-    var cTemplate = window.cmTemplate.getSearchCursor(nonAsciiRegex);
+    var nonASCIIRegex = /[^\u0000-\u007f]+/;
+    /*
+    var cTemplate = window.cmTemplate.getSearchCursor(nonASCIIRegex);
     if (cTemplate.findNext()) {
       window.cmTemplate.focus();
       window.cmTemplate.setSelection(cTemplate.from(), cTemplate.to());
       set_status("darkred", "ERROR", "Non ASCII Character(s) in 'template.j2'");
       return false;
     }
-    var cData = window.cmData.getSearchCursor(nonAsciiRegex);
+    */
+    var cData = window.cmData.getSearchCursor(nonASCIIRegex);
     if (cData.findNext()) {
       if (csv_on) {
         cDataPos = [cData.from(), cData.to()];
@@ -239,7 +263,7 @@ function getStatusText(code) {
       set_status("darkred", "ERROR", "Non ASCII Character(s) in 'data.csv'");
       return false;
     }
-    var cVars = window.cmVars.getSearchCursor(nonAsciiRegex);
+    var cVars = window.cmVars.getSearchCursor(nonASCIIRegex);
     if (cVars.findNext()) {
       window.cmVars.focus();
       window.cmVars.setSelection(cVars.from(), cVars.to());
@@ -327,7 +351,7 @@ function getStatusText(code) {
                     xHR.timeout = 10000;
                     xHR.setRequestHeader("Content-Type", "application/json");
 
-                    var rd = JSON.stringify({ "template": window.btoa(rbody) });
+                    var rd = JSON.stringify({ "template": window.btoa(utf8_encode(rbody)) });
                     if (rd.length > 1024) {
                       xHR.setRequestHeader("Content-Encoding", "gzip");
                       xHR.send(pako.gzip(rd));
@@ -408,7 +432,7 @@ function getStatusText(code) {
           return false;
         }
   
-        dt.template = window.btoa(window.cmTemplate.getValue().replace(/\t/g, "  "));
+        dt.template = window.btoa(utf8_encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
   
         if ((current_ds === 'Default') && (Object.keys(datasets).length === 1)) {
           dt.vars = window.btoa(window.cmVars.getValue().replace(/\t/g, "  "));
