@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji
 
-__version__ = '22.5.3'
+__version__ = '22.5.4'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -349,6 +349,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     head = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css" crossorigin="anonymous">\n'
                     output = emoji.emojize(output, language='alias').encode('ascii', 'xmlcharrefreplace').decode('utf-8')
                     output = head + '<div class="markdown-body">\n' + output + '</div>\n'
+
+                  elif oformat == 'html':
+                    output = output.encode('ascii', 'xmlcharrefreplace').decode('utf-8')
 
                   jsr['outputs'].update({ o: base64.b64encode(output.encode('utf-8')).decode('utf-8') })
                   if o != '_stderr_':
