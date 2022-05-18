@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji
 
-__version__ = '22.5.4'
+__version__ = '22.5.5'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -346,9 +346,11 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     o = oname + ':html'
                     options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART | cmarkgfm.cmark.Options.CMARK_OPT_UNSAFE)
                     output = cmarkgfm.github_flavored_markdown_to_html(html_escape(output), options).replace('&amp;amp;', '&amp;').replace('&amp;', '&')
-                    head = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css" crossorigin="anonymous">\n'
+                    head = '<!DOCTYPE html>\n<html>\n<head>\n'
+                    head += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css" crossorigin="anonymous">\n'
+                    head += '<style>\n  pre, code { white-space: pre-wrap !important; word-wrap: break-word !important; }\n</style>\n</head>\n'
                     output = emoji.emojize(output, language='alias').encode('ascii', 'xmlcharrefreplace').decode('utf-8')
-                    output = head + '<div class="markdown-body">\n' + output + '</div>\n'
+                    output = head + '<body>\n<div class="markdown-body">\n' + output + '</div>\n</body>\n</html>\n'
 
                   elif oformat == 'html':
                     output = output.encode('ascii', 'xmlcharrefreplace').decode('utf-8')
