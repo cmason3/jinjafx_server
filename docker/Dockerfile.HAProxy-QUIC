@@ -6,7 +6,7 @@ RUN set -eux; \
  mkdir /var/lib/haproxy; \
  chown haproxy:haproxy /var/lib/haproxy
 
-ENV QUICTLS_URL https://codeload.github.com/quictls/openssl/tar.gz/OpenSSL_1_1_1n+quic
+ENV QUICTLS_URL https://codeload.github.com/quictls/openssl/tar.gz/OpenSSL_1_1_1o+quic
 ENV HAPROXY_URL https://www.haproxy.org/download/2.6/src/devel/haproxy-2.6-dev12.tar.gz
 
 RUN set -eux; \
