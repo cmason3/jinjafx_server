@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji
 
-__version__ = '22.5.8'
+__version__ = '22.5.9'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -82,7 +82,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               src = self.headers['X-Forwarded-For']
 
             if 'X-Forwarded-Proto' in self.headers:
-              http_proto = ' ' + self.headers['X-Forwarded-Proto']
+              http_proto = '{' + self.headers['X-Forwarded-Proto'] + '} '
 
             if 'Content-Type' in self.headers:
               if 'Content-Encoding' in self.headers:
@@ -91,14 +91,14 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 ctype = ' (' + self.headers['Content-Type'] + ')'
 
           if str(args[1]) == 'ERR':
-            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;' + ansi + 'm' + str(args[2]) + '\033[0m')
+            log(http_proto + '[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;' + ansi + 'm' + str(args[2]) + '\033[0m')
         
           elif self.command == 'POST':
-            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + http_proto + ctype + ' [' + self.format_bytes(self.length) + ']')
+            log(http_proto + '[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + ']')
 
           elif self.command != None:
             if (args[1] != '200' and args[1] != '304') or (not path.endswith('.js') and not path.endswith('.css') and not path.endswith('.png')) or verbose:
-              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path + http_proto)
+              log(http_proto + '[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path)
 
 
   def encode_link(self, bhash):
