@@ -49,7 +49,7 @@ class ArgumentParser(argparse.ArgumentParser):
 
     
 class JinjaFxRequest(BaseHTTPRequestHandler):
-  server_version = 'JinjaFx Server/' + __version__
+  server_version = 'JinjaFx/' + __version__
   protocol_version = 'HTTP/1.1'
 
   def format_bytes(self, b):
