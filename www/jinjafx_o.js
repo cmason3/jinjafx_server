@@ -7,7 +7,7 @@
     clearTimeout(tid);
     tid = setTimeout(function() { sobj.innerHTML = "" }, 5000);
     sobj.style.color = color;
-    sobj.innerHTML = "<strong>" + title + "</strong> " + message;
+    sobj.innerHTML = "<strong>" + window.opener.quote(title) + "</strong> " + window.opener.quote(message);
   }
   
   window.onload = function() {
