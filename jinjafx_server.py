@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji
 
-__version__ = '22.6.0'
+__version__ = '22.6.1'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -29,6 +29,8 @@ base = os.path.abspath(os.path.dirname(__file__))
 aws_s3_url = None
 aws_access_key = None
 aws_secret_key = None
+git_repository = None
+git_access_token = None
 repository = None
 verbose = False
 
@@ -430,15 +432,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               if self.headers['Content-Type'] == 'application/json':
                 try:
                   remote_addr = str(self.client_address[0])
-                  user_agent = None
                   dt_password = ''
                   dt_opassword = ''
                   dt_mpassword = ''
                   dt_revision = 1
 
                   if hasattr(self, 'headers'):
-                    if 'User-Agent' in self.headers:
-                      user_agent = self.headers['User-Agent']
                     if 'X-Forwarded-For' in self.headers:
                       remote_addr = self.headers['X-Forwarded-For']
                     if 'X-Dt-Password' in self.headers:
@@ -561,10 +560,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
                       return dt_yml, r
 
-                    def add_client_fields(dt_yml, user_agent, remote_addr):
-                      if user_agent != None:
-                        dt_yml += 'user_agent: "' + user_agent + '"\n'
-
+                    def add_client_fields(dt_yml, remote_addr):
                       dt_yml += 'remote_addr: "' + remote_addr + '"\n'
                       dt_yml += 'updated: "' + str(int(time.time()))  + '"\n'
 
@@ -583,7 +579,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                             dt_yml, r = update_dt(rr.text, dt_yml, r)
 
                         if r[1] == 500 or r[1] == 200:
-                          dt_yml = add_client_fields(dt_yml, user_agent, remote_addr)
+                          dt_yml = add_client_fields(dt_yml, remote_addr)
                           rr = aws_s3_put(aws_s3_url, dt_filename, dt_yml, 'application/yaml')
 
                           if rr.status_code == 200:
@@ -612,7 +608,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                             dt_yml, r = update_dt(rr.decode('utf-8'), dt_yml, r)
 
                         if r[1] == 500 or r[1] == 200:
-                          dt_yml = add_client_fields(dt_yml, user_agent, remote_addr)
+                          dt_yml = add_client_fields(dt_yml, remote_addr)
                           with open(dt_filename, 'w') as f:
                             f.write(dt_yml)
 
@@ -682,6 +678,7 @@ def main(rflag=[0]):
   global aws_s3_url
   global aws_access_key
   global aws_secret_key
+  global git_access_token
   global repository
   global rl_rate
   global rl_limit
@@ -698,6 +695,7 @@ def main(rflag=[0]):
     group_ex = parser.add_mutually_exclusive_group()
     group_ex.add_argument('-r', metavar='<repository>', type=w_directory)
     group_ex.add_argument('-s3', metavar='<aws s3 url>', type=str)
+    group_ex.add_argument('-git', metavar='<git repository>', type=str)
     parser.add_argument('-rl', metavar='<rate/limit>', type=rlimit)
     parser.add_argument('-v', action='store_true', default=False)
     args = parser.parse_args()
@@ -710,6 +708,13 @@ def main(rflag=[0]):
 
       if aws_access_key == None or aws_secret_key == None:
         parser.error("argument -s3: environment variables 'AWS_ACCESS_KEY' and 'AWS_SECRET_KEY' are mandatory")
+
+    if args.git is not None:
+      git_repository = args.git
+      git_access_token = os.getenv('GIT_ACCESS_TOKEN')
+
+      if git_access_token == None:
+        parser.error("argument -gh: environment variable 'GIT_ACCESS_TOKEN' is mandatory")
 
     if args.rl is not None:
       args.rl = args.rl.lower().split('/', 1)
@@ -732,6 +737,9 @@ def main(rflag=[0]):
     signal.signal(signal.SIGTERM, signal_handler)
 
     log('Starting JinjaFx Server (PID is ' + str(os.getpid()) + ') on http://' + args.l + ':' + str(args.p) + '...')
+
+    if args.git is not None:
+      print("Cloning Git Repository...")
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
