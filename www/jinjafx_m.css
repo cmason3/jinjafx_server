@@ -88,12 +88,13 @@ textarea {
   right: 30px;
   top: 30px;
   bottom: 30px;
-  width: 40%;
+  width: 50%;
   visibility: hidden;
 }
 .info-inner {
   border-radius: 0.5rem;
-  border: 1px dashed #ffc720;
+  border: 0.5px solid #cc0;
+  box-shadow: 10px 10px 8px #888;
   background-color: #ffffcc;
   padding: 10px;
   overflow-y: auto;

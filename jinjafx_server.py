@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji
 
-__version__ = '22.6.0'
+__version__ = '22.6.1'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -430,15 +430,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               if self.headers['Content-Type'] == 'application/json':
                 try:
                   remote_addr = str(self.client_address[0])
-                  user_agent = None
                   dt_password = ''
                   dt_opassword = ''
                   dt_mpassword = ''
                   dt_revision = 1
 
                   if hasattr(self, 'headers'):
-                    if 'User-Agent' in self.headers:
-                      user_agent = self.headers['User-Agent']
                     if 'X-Forwarded-For' in self.headers:
                       remote_addr = self.headers['X-Forwarded-For']
                     if 'X-Dt-Password' in self.headers:
@@ -561,10 +558,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
                       return dt_yml, r
 
-                    def add_client_fields(dt_yml, user_agent, remote_addr):
-                      if user_agent != None:
-                        dt_yml += 'user_agent: "' + user_agent + '"\n'
-
+                    def add_client_fields(dt_yml, remote_addr):
                       dt_yml += 'remote_addr: "' + remote_addr + '"\n'
                       dt_yml += 'updated: "' + str(int(time.time()))  + '"\n'
 
@@ -583,7 +577,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                             dt_yml, r = update_dt(rr.text, dt_yml, r)
 
                         if r[1] == 500 or r[1] == 200:
-                          dt_yml = add_client_fields(dt_yml, user_agent, remote_addr)
+                          dt_yml = add_client_fields(dt_yml, remote_addr)
                           rr = aws_s3_put(aws_s3_url, dt_filename, dt_yml, 'application/yaml')
 
                           if rr.status_code == 200:
@@ -612,7 +606,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                             dt_yml, r = update_dt(rr.decode('utf-8'), dt_yml, r)
 
                         if r[1] == 500 or r[1] == 200:
-                          dt_yml = add_client_fields(dt_yml, user_agent, remote_addr)
+                          dt_yml = add_client_fields(dt_yml, remote_addr)
                           with open(dt_filename, 'w') as f:
                             f.write(dt_yml)
 
