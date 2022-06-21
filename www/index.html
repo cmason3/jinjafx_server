@@ -204,6 +204,24 @@
 &lt;output<span class="text-danger">:markdown</span> "Output 2"&gt;
 ...
 &lt;/output&gt;</pre>
+                <br /><h3>Dynamic CSV</h3><hr>
+                <p>Within the "data.csv" pane you can specify regular CSV where each row will be treated as a data set using the header row for variable names. However, it also supports something which I call Dynamic CSV where you can use regular expression based static character classes or static groups as values within the data rows using <code>(value1|value2|value3)</code> or <code>[a-f]</code>. These will then be expanded into multiple rows, e.g:</p>
+<pre class="code-block">DEVICE, TYPE
+us(ma|n[yh]|tx)-pe-1[ab], pe</pre>
+                <p>The above would be expanded to the following, which JinjaFx would then loop through like normal rows (be careful as you can easily create huge data sets) - if you do wish to use literal brackets then they would need to be escaped (e.g. "\[" or "\(").</p>
+<pre class="code-block">DEVICE, TYPE
+usma-pe-1a, pe
+usma-pe-1b, pe
+ustx-pe-1a, pe
+ustx-pe-1b, pe
+usny-pe-1a, pe
+usny-pe-1b, pe
+usnh-pe-1a, pe
+usnh-pe-1b, pe</pre>
+                <p>We also support the ability to expand rows based on numerical counters using the <code>{ start[-end]:step }</code> syntax, e.g:</p>
+<pre class="code-block">INTERFACE
+et-0/0/{0-9:1}</pre>
+                <p>The above syntax would convert one row into ten rows using the values 0 to 9. If the <code>end</code> value is omitted then it is a passive counter and will only increment if something else is expanding the rows.</p>
                 <br /><h3>Inputs</h3><hr>
                 <p>Normally data is provided to JinjaFx via CSV or YAML using the above panes, but JinjaFx can also prompt the user for input using the "jinjafx_input" variable in "vars.yml", e.g:</p>
 <pre class="code-block">jinjafx_input:
