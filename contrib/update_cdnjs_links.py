@@ -29,8 +29,6 @@ if len(sys.argv) == 3:
             else:
               print('warning: can\'t find resource "' + m.group(2) + '" on cdnjs', file=sys.stderr)
 
-              
-
           html.append(ln)
 
       if len(html) > 0:
