@@ -13,11 +13,14 @@ body {
   z-index: 1000;
   cursor: wait;
 }
+#csv * {
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 12px;
+}
 #csv {
   border: 1px solid lightgray;
   white-space: nowrap;
   background-color: #fff;
-  font-size: 12px;
   overflow: auto;
   width: auto;
   height: 100%;
@@ -128,12 +131,13 @@ textarea {
   height: 100%;
   float: left;
 }
+.CodeMirror * {
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 13px;
+}
 .CodeMirror {
-  font-family: "Fira Code";
-  font-variant-ligatures: contextual;
   border: 1px solid lightgray;
   height: 100%;
-  font-size: 12px;
 }
 .CodeMirror-foldmarker {
   color: blue;
