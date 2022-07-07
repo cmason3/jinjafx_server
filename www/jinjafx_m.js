@@ -1645,7 +1645,7 @@ function getStatusText(code) {
     return {
       token: function(stream, state) {
         if (stream.match(/<\/?output.*>/)) {
-          return "jfx-header";
+          return "jfx-output";
         }
         stream.next();
       }

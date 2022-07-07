@@ -161,3 +161,6 @@ textarea {
 .cm-jfx-header {
   font-weight: bold;
 }
+.cm-jfx-output {
+  color: red;
+}
