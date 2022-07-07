@@ -129,6 +129,8 @@ textarea {
   float: left;
 }
 .CodeMirror {
+  font-family: "Fira Code";
+  font-variant-ligatures: contextual;
   border: 1px solid lightgray;
   height: 100%;
   font-size: 12px;
