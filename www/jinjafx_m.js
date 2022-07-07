@@ -1644,7 +1644,7 @@ function getStatusText(code) {
   function cmOutputMode() {
     return {
       token: function(stream, state) {
-        if (stream.match(/<\/?output.*>/)) {
+        if (stream.match(/<\/?output.*>(?:\[-?[0-9]+\])?/)) {
           return "jfx-output";
         }
         stream.next();
