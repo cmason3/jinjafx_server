@@ -48,6 +48,9 @@ body {
 #csv td:last-child {
   border-right: none;
 }
+div#ctemplate * {
+  font-variant-ligatures: normal;
+}
 textarea {
   resize: none;
 }
@@ -150,9 +153,6 @@ textarea {
 .CodeMirror-foldgutter-folded::after {
   content: "\2192";
   color: blue;
-}
-.cm-s-ligatures.CodeMirror * {
-  font-variant-ligatures: normal;
 }
 .cm-trailingspace::after {
   color: steelblue;
