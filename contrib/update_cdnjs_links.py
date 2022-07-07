@@ -2,15 +2,6 @@
 
 import sys, os, re, requests
 
-# bootstrap
-# codemirror
-# pako
-# split.js
-# js-yaml
-# dayjs
-# crypto-js
-# utf8
-
 if len(sys.argv) == 3:
   www = os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + '/../www')
   cdnjs = re.compile(r'https://cdnjs.cloudflare.com/ajax/libs/' + re.escape(sys.argv[1]) + '/(.+?)/(.+?)"')
@@ -37,8 +28,6 @@ if len(sys.argv) == 3:
 
             else:
               print('warning: can\'t find resource "' + m.group(2) + '" on cdnjs', file=sys.stderr)
-
-              
 
           html.append(ln)
 
