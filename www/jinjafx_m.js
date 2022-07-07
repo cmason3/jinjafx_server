@@ -631,7 +631,7 @@ function getStatusText(code) {
       console.log(ex);
       set_status("darkred", "ERROR", ex);
       document.getElementById('lbuttons').classList.remove('d-none');
-      loaded = true; onChange(true);
+      loaded = true; onChange(null, true);
     }
   }
   
@@ -1530,7 +1530,7 @@ function getStatusText(code) {
     e.returnValue = 'Are you sure?';
   }
   
-  function onChange(errflag) {
+  function onChange(editor, errflag) {
     if (loaded) {
       if (!dirty && (errflag !== true)) {
         window.addEventListener('beforeunload', onBeforeUnload);
@@ -1540,7 +1540,7 @@ function getStatusText(code) {
         dirty = true;
       }
       if (tinfo) {
-        if (fe == window.cmTemplate) {
+        if (editor == window.cmTemplate) {
           document.getElementById('template_info').classList.add('fade-out');
           tinfo = false;
         }
@@ -1602,7 +1602,7 @@ function getStatusText(code) {
     catch (ex) {
       console.log(ex);
       set_status("darkred", "ERROR", ex);
-      loaded = true; onChange(true);
+      loaded = true; onChange(null, true);
     }
     if (fe != window.cmData) {
       onDataBlur();

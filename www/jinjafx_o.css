@@ -4,6 +4,7 @@ div#status {
   margin: 0px;
 }
 textarea.output {
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
   font-size: 12px;
   background: #fff;
   height: 100%;
@@ -23,9 +24,10 @@ iframe.output {
   width: 100%;
 }
 pre#print_pre {
-  display: none;
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
   white-space: pre-wrap;
   word-wrap: break-word;
+  display: none;
 }
 .ms-10 {
   margin-left: 10px;
