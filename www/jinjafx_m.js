@@ -783,6 +783,16 @@ function getStatusText(code) {
       return undefined;
     });
 
+    CodeMirror.defineMode("output", cmOutputMode);
+    CodeMirror.defineMode("template", function(config) {
+      return CodeMirror.multiplexingMode(
+        CodeMirror.getMode(config, 'jinja2'), {
+          open: /</, close: /^/,
+          mode: CodeMirror.getMode(config, 'output'),
+          parseDelimiters: true
+        }
+      );
+    });
     window.cmTemplate = CodeMirror.fromTextArea(template, {
       lineNumbers: true,
       tabSize: 2,
@@ -790,7 +800,7 @@ function getStatusText(code) {
       scrollbarStyle: "null",
       styleSelectedText: false,
       extraKeys: gExtraKeys,
-      mode: "jinja2",
+      mode: "template",
       viewportMargin: 80,
       smartIndent: false,
       showTrailingSpace: true,
@@ -1609,30 +1619,6 @@ function getStatusText(code) {
     }
   }
   
-  /*
-  function update_from_qs() {
-    try {
-      var _data = qs.hasOwnProperty('data') ? window.atob(qs.data) : null;
-      var _template = qs.hasOwnProperty('template') ? window.atob(qs.template) : null;
-      var _vars = qs.hasOwnProperty('vars') ? window.atob(qs.vars) : null;
-  
-      if (_data != null) {
-        window.cmData.setValue(_data);
-      }
-      if (_template != null) {
-        window.cmTemplate.setValue(_template);
-      }
-      if (_vars != null) {
-        window.cmVars.setValue(_vars);
-      }
-    }
-    catch (ex) {
-      console.log(ex);
-      set_status("darkred", "ERROR", ex);
-    }
-  }
-  */
-  
   function clear_status() {
     clearTimeout(tid);
     sobj.innerHTML = "";
@@ -1653,6 +1639,17 @@ function getStatusText(code) {
     else {
       sobj.innerHTML = "<strong>" + quote(title) + "</strong> " + quote(message);
     }
+  }
+
+  function cmOutputMode() {
+    return {
+      token: function(stream, state) {
+        if (stream.match(/<\/?output.*>/)) {
+          return "jfx-header";
+        }
+        stream.next();
+      }
+    };
   }
 
   function cmDataMode() {
