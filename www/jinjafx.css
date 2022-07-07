@@ -1,5 +1,6 @@
 * {
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-variant-ligatures: none;
 }
 html {
   font-size: 14px;

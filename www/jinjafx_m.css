@@ -151,6 +151,9 @@ textarea {
   content: "\2192";
   color: blue;
 }
+.cm-s-ligatures.CodeMirror * {
+  font-variant-ligatures: normal;
+}
 .cm-trailingspace::after {
   color: steelblue;
   content: '$';

@@ -792,6 +792,7 @@ function getStatusText(code) {
       extraKeys: gExtraKeys,
       mode: "jinja2",
       viewportMargin: 80,
+      theme: 'ligatures',
       smartIndent: false,
       showTrailingSpace: true,
       foldGutter: true,
