@@ -28,7 +28,8 @@ body {
 }
 #csv th {
   border: 1px solid darkgray;
-  background-color: lightgray;
+  font-weight: normal;
+  color: blue;
 }
 #csv tbody {
   border-top: none;
@@ -83,6 +84,7 @@ textarea {
   stroke: black;
 }
 .code-block {
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
   border: 1px dashed gray;
   background-color: lightgray;
   border-radius: 0.5rem;
@@ -159,7 +161,7 @@ textarea {
   content: '$';
 }
 .cm-jfx-header {
-  font-weight: bold;
+  color: blue;
 }
 .cm-jfx-output {
   color: red;
