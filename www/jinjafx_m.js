@@ -1431,7 +1431,7 @@ function getStatusText(code) {
     document.getElementById("csv").style.background = '#fff';
     var e = document.getElementById("csv").getElementsByTagName("th");
     for (var i = 0; i < e.length; i++) {
-      e[i].style.background = 'lightgray';
+      e[i].style.background = 'none';
     }
     fe.setOption('readOnly', false);
     document.querySelectorAll('.expand').forEach(function(e, i) {
