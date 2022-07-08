@@ -32,6 +32,7 @@ body {
 #csv th {
   border: 1px solid darkgray;
   font-weight: normal;
+  background-color: none;
   color: blue;
 }
 #csv tbody {
