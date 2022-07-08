@@ -790,11 +790,13 @@ function getStatusText(code) {
         token: function(stream, state) {
           if (stream.match(/{#/)) {
             state.comment = true;
+            return null;
           }
           else if (stream.match(/#}/)) {
             state.comment = false;
+            return null;
           }
-          if ((!state.comment) && (stream.match(/<\/?output.*>(?:\[-?[0-9]+\])?/))) {
+          if ((!state.comment) && (stream.match(/<\/?output.*?>(?:\[-?[0-9]+\])?/))) {
             return "jfx-output";
           }
           stream.next();

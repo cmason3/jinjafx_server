@@ -158,6 +158,9 @@ textarea {
 .cm-jfx-header {
   color: blue;
 }
+.cm-jfx-output::selection {
+  background-color: pink;
+}
 .cm-jfx-output {
   border-radius: 0.5rem;
   padding: 0.1em;
