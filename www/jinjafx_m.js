@@ -622,7 +622,6 @@ function getStatusText(code) {
         xHR.send(null);
       }
       else {
-        // update_from_qs();
         document.getElementById('lbuttons').classList.remove('d-none');
         loaded = true;
       }
@@ -782,17 +781,31 @@ function getStatusText(code) {
       }
       return undefined;
     });
-
-    CodeMirror.defineMode("output", cmOutputMode);
-    CodeMirror.defineMode("template", function(config) {
-      return CodeMirror.multiplexingMode(
-        CodeMirror.getMode(config, 'jinja2'), {
-          open: /</, close: /^/,
-          mode: CodeMirror.getMode(config, 'output'),
-          parseDelimiters: true
+    
+    function cmOutputMode() {
+      return {
+        startState: function() {
+          return { 'comment': false }
+        },
+        token: function(stream, state) {
+          if (stream.match(/{#/)) {
+            state.comment = true;
+          }
+          else if (stream.match(/#}/)) {
+            state.comment = false;
+          }
+          if ((!state.comment) && (stream.match(/<\/?output.*>(?:\[-?[0-9]+\])?/))) {
+            return "jfx-output";
+          }
+          stream.next();
         }
-      );
+      };
+    }
+
+    CodeMirror.defineMode("template", function(config, parserConfig) {
+      return CodeMirror.overlayMode(CodeMirror.getMode(config, "jinja2"), cmOutputMode());
     });
+
     window.cmTemplate = CodeMirror.fromTextArea(template, {
       lineNumbers: true,
       tabSize: 2,
@@ -1639,17 +1652,6 @@ function getStatusText(code) {
     else {
       sobj.innerHTML = "<strong>" + quote(title) + "</strong> " + quote(message);
     }
-  }
-
-  function cmOutputMode() {
-    return {
-      token: function(stream, state) {
-        if (stream.match(/<\/?output.*>(?:\[-?[0-9]+\])?/)) {
-          return "jfx-output";
-        }
-        stream.next();
-      }
-    };
   }
 
   function cmDataMode() {
