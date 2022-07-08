@@ -14,7 +14,10 @@ body {
   cursor: wait;
 }
 #csv * {
+  /*
   font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+  */
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
   font-size: 12px;
 }
 #csv {
@@ -49,9 +52,11 @@ body {
 #csv td:last-child {
   border-right: none;
 }
+/*
 div#ctemplate * {
   font-variant-ligatures: normal;
 }
+*/
 textarea {
   resize: none;
 }
@@ -84,7 +89,10 @@ textarea {
   stroke: black;
 }
 .code-block {
+  /*
   font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+  */
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
   border: 1px dashed gray;
   background-color: lightgray;
   border-radius: 0.5rem;
@@ -137,7 +145,10 @@ textarea {
   float: left;
 }
 .CodeMirror * {
+  /*
   font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+  */
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
   font-size: 12px;
 }
 .CodeMirror {
@@ -164,5 +175,5 @@ textarea {
   color: blue;
 }
 .cm-jfx-output {
-  color: red;
+  background-color: lightblue;
 }
