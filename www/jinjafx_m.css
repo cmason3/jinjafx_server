@@ -176,5 +176,6 @@ textarea {
   color: blue;
 }
 .cm-jfx-output {
+  border-radius: 0.5rem;
   background-color: lightblue;
 }
