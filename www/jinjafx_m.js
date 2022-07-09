@@ -785,7 +785,7 @@ function getStatusText(code) {
     function cmOutputMode() {
       return {
         startState: function() {
-          return { 'comment': false }
+          return { 'comment': false, 'output': false }
         },
         token: function(stream, state) {
           if (stream.match(/{#/)) {
@@ -796,8 +796,20 @@ function getStatusText(code) {
             state.comment = false;
             return null;
           }
-          if ((!state.comment) && (stream.match(/<\/?output.*?>(?:\[-?[0-9]+\])?/))) {
-            return "jfx-output";
+          if (!state.comment) {
+            if (stream.match(/<output(?=[^><]*>)/) || (stream.match(/<\/output(?=>)/))) {
+              state.output = true;
+              return "jfx-output-left";
+            }
+            else if (state.output) {
+              if (stream.match(/>(?:\[-?[0-9]+\])?/)) {
+                state.output = false;
+                return "jfx-output-right";
+              }
+              else if (stream.match(/./)) {
+                return "jfx-output";
+              }
+            }
           }
           stream.next();
         }
@@ -805,7 +817,7 @@ function getStatusText(code) {
     }
 
     CodeMirror.defineMode("template", function(config, parserConfig) {
-      return CodeMirror.overlayMode(CodeMirror.getMode(config, "jinja2"), cmOutputMode());
+      return CodeMirror.overlayMode(CodeMirror.getMode(config, "jinja2"), cmOutputMode(), true);
     });
 
     window.cmTemplate = CodeMirror.fromTextArea(template, {

@@ -158,8 +158,17 @@ textarea {
 .cm-jfx-header {
   color: blue;
 }
-.cm-jfx-output {
-  border-radius: 0.5rem;
-  padding: 0.1em;
+.cm-jfx-output-left {
+  border-radius: 0.5rem 0 0 0.5rem;
   background: rgba(0, 0, 255, 0.2);
+  padding: 0.1em 0 0.1em 0.1em;
+}
+.cm-jfx-output {
+  padding: 0.1em 0;
+  background: rgba(0, 0, 255, 0.2);
+}
+.cm-jfx-output-right {
+  border-radius: 0 0.5rem 0.5rem 0;
+  background: rgba(0, 0, 255, 0.2);
+  padding: 0.1em 0.1em 0.1em 0;
 }
