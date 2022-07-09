@@ -342,7 +342,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 (oname, oformat) = o.rsplit(':', 1) if ':' in o else (o, 'text')
                 output = '\n'.join(outputs[o]) + '\n'
                 if len(output.strip()) > 0:
-                  if oformat == 'markdown':
+                  if oformat == 'markdown' or oformat == 'md':
                     o = oname + ':html'
                     options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART | cmarkgfm.cmark.Options.CMARK_OPT_UNSAFE)
                     output = cmarkgfm.github_flavored_markdown_to_html(html_escape(output), options).replace('&amp;amp;', '&amp;').replace('&amp;', '&')
