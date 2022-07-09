@@ -104,6 +104,9 @@ textarea {
   overflow-y: auto;
   max-height: 100%;
 }
+.tag {
+  color: #a11;
+}
 .labels {
   height: 100%;
   width: 20px;
@@ -165,6 +168,11 @@ textarea {
 }
 .cm-jfx-output {
   padding: 0.1em 0;
+  background: rgba(0, 0, 255, 0.2);
+}
+.cm-jfx-output-tag {
+  padding: 0.1em 0;
+  color: #a11;
   background: rgba(0, 0, 255, 0.2);
 }
 .cm-jfx-output-right {

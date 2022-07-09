@@ -785,7 +785,7 @@ function getStatusText(code) {
     function cmOutputMode() {
       return {
         startState: function() {
-          return { 'comment': false, 'output': false }
+          return { 'comment': false, 'output': 0 }
         },
         token: function(stream, state) {
           if (stream.match(/{#/)) {
@@ -797,16 +797,21 @@ function getStatusText(code) {
             return null;
           }
           if (!state.comment) {
-            if (stream.match(/<output(?=[^><]*>)/) || (stream.match(/<\/output(?=>)/))) {
-              state.output = true;
+            if (stream.match(/<output(?=[^><]*>)/i) || (stream.match(/<\/output(?=>)/i))) {
+              state.output = 1;
               return "jfx-output-left";
             }
-            else if (state.output) {
+            else if (state.output > 0) {
               if (stream.match(/>(?:\[-?[0-9]+\])?/)) {
-                state.output = false;
+                state.output = 0;
                 return "jfx-output-right";
               }
+              else if ((state.output == 1) && (stream.match(/:(?:html|markdown|md)(?=[ >])/))) {
+                return "jfx-output-tag";
+                state.output = 2;
+              }
               else if (stream.match(/./)) {
+                state.output = 2;
                 return "jfx-output";
               }
             }
