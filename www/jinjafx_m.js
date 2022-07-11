@@ -797,7 +797,7 @@ function getStatusText(code) {
             return null;
           }
           if (!state.comment) {
-            if (stream.match(/<output(?=[^><]*>)/i) || (stream.match(/<\/output(?=>)/i))) {
+            if (stream.match(/<output(?=(?::\S+)? [^><]+>)/i) || (stream.match(/<\/output *(?=>)/i))) {
               state.output = 1;
               return "jfx-output-left";
             }
@@ -806,7 +806,7 @@ function getStatusText(code) {
                 state.output = 0;
                 return "jfx-output-right";
               }
-              else if ((state.output == 1) && (stream.match(/:(?:html|markdown|md)(?=[ >])/))) {
+              else if ((state.output == 1) && (stream.match(/:(?:html|markdown|md) /))) {
                 return "jfx-output-tag";
                 state.output = 2;
               }
