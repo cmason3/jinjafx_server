@@ -175,6 +175,11 @@ textarea {
   color: #a11;
   background: rgba(0, 0, 255, 0.2);
 }
+.cm-jfx-output-number {
+  padding: 0.1em 0;
+  color: #164;
+  background: rgba(0, 0, 255, 0.2);
+}
 .cm-jfx-output-right {
   border-radius: 0 0.5rem 0.5rem 0;
   background: rgba(0, 0, 255, 0.2);

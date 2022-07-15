@@ -785,7 +785,7 @@ function getStatusText(code) {
     function cmOutputMode() {
       return {
         startState: function() {
-          return { 'comment': false, 'output': 0 }
+          return { 'comment': false, 'type': 0, 'output': 0 }
         },
         token: function(stream, state) {
           if (stream.match(/{#/)) {
@@ -797,22 +797,34 @@ function getStatusText(code) {
             return null;
           }
           if (!state.comment) {
-            if (stream.match(/<output(?=(?::\S+)? [^><]+>)/i) || (stream.match(/<\/output *(?=>)/i))) {
+            if (stream.match(/<(?=output(?::\S+)? [^><]+>)/i)) {
+              state.type = 1;
               state.output = 1;
               return "jfx-output-left";
             }
-            else if (state.output > 0) {
-              if (stream.match(/>(?:\[-?[0-9]+\])?/)) {
-                state.output = 0;
+            else if (stream.match(/<(?=\/output *>)/i)) {
+              state.type = 2;
+              state.output = 1;
+              return "jfx-output-left";
+            }
+            else if (state.type > 0) {
+              if ((state.type == 1) && stream.match(/>(?=\[-?[0-9]+\])/)) {
+                state.output = 10000;
+                return "jfx-output";
+              }
+              else if (stream.match(/>/)) {
+                state.type = state.output = 0;
                 return "jfx-output-right";
               }
-              else if ((state.output == 1) && (stream.match(/:(?:html|markdown|md) /))) {
+              else if ((state.output >= 10000) && stream.match(/]/)) {
+                state.type = state.output = 0;
+                return "jfx-output-right";
+              }
+              else if ((state.output == 7) && stream.match(/:(?:html|markdown|md) /)) {
                 return "jfx-output-tag";
-                state.output = 2;
               }
               else if (stream.match(/./)) {
-                state.output = 2;
-                return "jfx-output";
+                return (state.output++ > 10000) ? "jfx-output-number" : "jfx-output";
               }
             }
           }
