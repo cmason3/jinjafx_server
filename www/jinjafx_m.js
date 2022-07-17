@@ -1695,12 +1695,37 @@ function getStatusText(code) {
           stream.skipToEnd();
           return "comment";
         }
-        if ((state.n == 1) && stream.sol()) {
-          state.n = 2;
-        }
-        if ((state.n <= 1) && stream.match(/\S/)) {
+        else if ((state.n == 0) && stream.match(/\S/)) {
           state.n = 1;
+          stream.skipToEnd();
           return "jfx-header";
+        }
+        else {
+          var pc = '';
+          var m = null;
+
+          if (stream.column()) {
+            stream.backUp(1);
+            pc = stream.next();
+          }
+
+          if (pc != '\\') {
+            if (m = stream.match(/\((.+?)(?<!\\)\)/)) {
+              // CHECK IF not escaped | exists or there is \1 in the line
+              return "jfx-tag";
+            }
+            else if (stream.match(/\{[ \t]*[0-9]+(?:-[0-9]+)?:[0-9]+[ \t]*(?<!\\)\}/)) {
+              return "jfx-tag";
+            }
+            else if (m = stream.match(/\[([A-Z0-9\-]+)(?<!\\)\]/i)) {
+              if (!m[1].match(/(?:[A-Z]-[^A-Z]|[a-z]-[^a-z]|[0-9]-[^0-9]|[^A-Za-z0-9]-)/)) {
+                return "jfx-tag";
+              }
+            }
+            else if (stream.match(/%[0-9]+/)) {
+              return "jfx-header";
+            }
+          }
         }
         stream.next();
       }

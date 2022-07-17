@@ -104,9 +104,6 @@ textarea {
   overflow-y: auto;
   max-height: 100%;
 }
-.tag {
-  color: #a11;
-}
 .labels {
   height: 100%;
   width: 20px;
@@ -160,6 +157,9 @@ textarea {
 }
 .cm-jfx-header {
   color: blue;
+}
+.cm-jfx-tag {
+  color: #a11;
 }
 .cm-jfx-output-left {
   border-radius: 0.5rem 0 0 0.5rem;

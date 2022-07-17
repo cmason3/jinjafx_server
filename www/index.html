@@ -198,17 +198,17 @@
 ...
 &lt;/output&gt;</pre>
                 <p>By default an output is rendered as text, but you can also tell JinjaFx to render it as HTML or Markdown (GFM), e.g:</p>
-<pre class="code-block">&lt;output<span class="tag">:html</span> "Output 1"&gt;
+<pre class="code-block">&lt;output<span class="cm-jfx-tag">:html</span> "Output 1"&gt;
 ...
 &lt;/output&gt;
 
-&lt;output<span class="tag">:markdown</span> "Output 2"&gt;
+&lt;output<span class="cm-jfx-tag">:markdown</span> "Output 2"&gt;
 ...
 &lt;/output&gt;</pre>
                 <br /><h3>Dynamic CSV</h3><hr>
-                <p>Within the "data.csv" pane you can specify regular CSV where each row will be treated as a data set using the header row for variable names. However, it also supports something which I call Dynamic CSV where you can use regular expression based static character classes or static groups as values within the data rows using <span class="tag">(value1|value2|value3)</span> or <span class="tag">[a-f]</span>. These will then be expanded into multiple rows, e.g:</p>
+                <p>Within the "data.csv" pane you can specify regular CSV where each row will be treated as a data set using the header row for variable names. However, it also supports something which I call Dynamic CSV where you can use regular expression based static character classes or static groups as values within the data rows using <span class="cm-jfx-tag">(value1|value2|value3)</span> or <span class="cm-jfx-tag">[a-f]</span>. These will then be expanded into multiple rows, e.g:</p>
 <pre class="code-block">DEVICE, TYPE
-us<span class="tag">(ma|n[yh]|tx)</span>-pe-1<span class="tag">[ab]</span>, pe</pre>
+us<span class="cm-jfx-tag">(ma|n[yh]|tx)</span>-pe-1<span class="cm-jfx-tag">[ab]</span>, pe</pre>
                 <p>The above would be expanded to the following, which JinjaFx would then loop through like normal rows (be careful as you can easily create huge data sets) - if you do wish to use literal brackets then they would need to be escaped (e.g. "\[" or "\(").</p>
 <pre class="code-block">DEVICE, TYPE
 usma-pe-1a, pe
@@ -219,10 +219,10 @@ usny-pe-1a, pe
 usny-pe-1b, pe
 usnh-pe-1a, pe
 usnh-pe-1b, pe</pre>
-                <p>We also support the ability to expand rows based on numerical counters using the <span class="tag">{ start[-end]:step }</span> syntax, e.g:</p>
+                <p>We also support the ability to expand rows based on numerical counters using the <span class="cm-jfx-tag">{ start[-end]:step }</span> syntax, e.g:</p>
 <pre class="code-block">INTERFACE
-et-0/0/<span class="tag">{0-9:1}</span></pre>
-                <p>The above syntax would convert one row into ten rows using the values 0 to 9. If the <span class="tag">end</span> value is omitted then it is a passive counter and will only increment if something else is expanding the rows.</p>
+et-0/0/<span class="cm-jfx-tag">{0-9:1}</span></pre>
+                <p>The above syntax would convert one row into ten rows using the values 0 to 9. If the <span class="cm-jfx-tag">end</span> value is omitted then it is a passive counter and will only increment if something else is expanding the rows.</p>
                 <br /><h3>Inputs</h3><hr>
                 <p>Normally data is provided to JinjaFx via CSV or YAML using the above panes, but JinjaFx can also prompt the user for input using the "jinjafx_input" variable in "vars.yml", e.g:</p>
 <pre class="code-block">jinjafx_input:
