@@ -1700,6 +1700,7 @@ function getStatusText(code) {
           stream.skipToEnd();
           return "jfx-header";
         }
+        /*
         else {
           var pc = '';
           var m = null;
@@ -1727,6 +1728,7 @@ function getStatusText(code) {
             }
           }
         }
+        */
         stream.next();
       }
     };
