@@ -29,7 +29,7 @@ body {
   border: 1px solid darkgray;
   font-weight: normal;
   background-color: none !important;
-  color: blue;
+  color: #219;
 }
 #csv tbody {
   border-top: none;
@@ -156,7 +156,7 @@ textarea {
   content: '$';
 }
 .cm-jfx-header {
-  color: blue;
+  color: #219;
 }
 .cm-jfx-tag {
   color: #a11;
