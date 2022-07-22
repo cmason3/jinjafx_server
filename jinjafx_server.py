@@ -35,7 +35,7 @@ verbose = False
 rtable = {}
 rl_rate = 0
 rl_limit = 0
-timelimit = 0
+timelimit = 3
 
 class JinjaFxServer(HTTPServer):
   def handle_error(self, request, client_address):
@@ -329,12 +329,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 ocount = 0
       
                 if timelimit > 0:
-                  outputs = func_timeout.func_timeout(timelimit, jinjafx.JinjaFx().jinjafx, args=(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output'))
+                  outputs = func_timeout.func_timeout(timelimit, jinjafx.JinjaFx().jinjafx, args=(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', sandbox=True))
                 else:
-                  outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output')
+                  outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', sandbox=True)
                             
               except func_timeout.FunctionTimedOut:
-                raise Exception("execution time limit of " + str(self.__g_timelimit) + "s exceeded")
+                raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
   
               jsr = {
                 'status': 'ok',
