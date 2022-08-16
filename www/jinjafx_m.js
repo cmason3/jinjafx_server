@@ -216,14 +216,10 @@ function getStatusText(code) {
     var nonASCIIRegex = /[^\u0000-\u007f]+/;
     var cData = window.cmData.getSearchCursor(nonASCIIRegex);
     if (cData.findNext()) {
-      if (csv_on) {
+      setTimeout(function() {
         cDataPos = [cData.from(), cData.to()];
         document.getElementById("csv").dispatchEvent(new CustomEvent('click'));
-      }
-      else {
-        window.cmData.focus();
-        window.cmData.setSelection(cData.from(), cData.to());
-      }
+      }, 50);
       set_status("darkred", "ERROR", "Non ASCII Character(s) in 'data.csv'");
       return false;
     }
