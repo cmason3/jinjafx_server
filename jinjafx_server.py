@@ -19,9 +19,9 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
-import cmarkgfm, emoji
+import cmarkgfm, emoji, func_timeout
 
-__version__ = '22.7.10'
+__version__ = '22.8.0'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -35,6 +35,7 @@ verbose = False
 rtable = {}
 rl_rate = 0
 rl_limit = 0
+timelimit = 0
 
 class JinjaFxServer(HTTPServer):
   def handle_error(self, request, client_address):
@@ -323,9 +324,17 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 if y != None:
                   gvars.update(y)
   
-              st = round(time.time() * 1000)
-              outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output')
-              ocount = 0
+              try:
+                st = round(time.time() * 1000)
+                ocount = 0
+      
+                if timelimit > 0:
+                  outputs = func_timeout.func_timeout(timelimit, jinjafx.JinjaFx().jinjafx, args=(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True))
+                else:
+                  outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True)
+                            
+              except func_timeout.FunctionTimedOut:
+                raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
   
               jsr = {
                 'status': 'ok',
@@ -679,6 +688,7 @@ def main(rflag=[0]):
   global repository
   global rl_rate
   global rl_limit
+  global timelimit
   global verbose
 
   try:
@@ -693,6 +703,7 @@ def main(rflag=[0]):
     group_ex.add_argument('-r', metavar='<repository>', type=w_directory)
     group_ex.add_argument('-s3', metavar='<aws s3 url>', type=str)
     parser.add_argument('-rl', metavar='<rate/limit>', type=rlimit)
+    parser.add_argument('-tl', metavar='<time limit>', type=int, default=0)
     parser.add_argument('-v', action='store_true', default=False)
     args = parser.parse_args()
     verbose = args.v
@@ -718,6 +729,8 @@ def main(rflag=[0]):
         rl_limit = int(args.rl[1][:-1])
 
       rl_rate = int(args.rl[0])
+
+    timelimit = args.tl
 
     def signal_handler(*args):
       rflag[0] = 2

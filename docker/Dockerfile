@@ -20,4 +20,4 @@ USER jinjafx
 
 WORKDIR /opt/jinjafx
 
-ENTRYPOINT [ "python3", "-u", ".local/bin/jinjafx_server", "-s", "-l", "0.0.0.0", "-p", "8080" ]
+ENTRYPOINT [ "python3", "-u", ".local/bin/jinjafx_server", "-s", "-l", "0.0.0.0", "-p", "8080", "-rl", "5/20s", "-tl", "10" ]
