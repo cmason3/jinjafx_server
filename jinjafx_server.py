@@ -91,7 +91,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;' + ansi + 'm' + str(args[2]) + '\033[0m')
         
           elif self.command == 'POST':
-            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + ']')
+            if self.elapsed is not None:
+              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + '] in ' + str(self.elapsed) + 'ms')
+            else:
+              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + ']')
 
           elif self.command != None:
             if (args[1] != '200' and args[1] != '304') or (not path.endswith('.js') and not path.endswith('.css') and not path.endswith('.png')) or verbose:
@@ -282,6 +285,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   def do_POST(self):
     self.critical = False
     self.hide = False
+    self.elapsed = None
 
     uc = self.path.split('?', 1)
     params = { x[0]: x[1] for x in [x.split('=') for x in uc[1].split('&') ] } if len(uc) > 1 else { }
@@ -341,6 +345,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 'elapsed': round(time.time() * 1000) - st,
                 'outputs': {}
               }
+
+              self.elapsed = jsr['elapsed']
 
               def html_escape(text):
                 text = text.replace("'", "&apos;")
