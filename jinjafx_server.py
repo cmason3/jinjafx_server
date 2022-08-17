@@ -333,6 +333,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 ocount = 0
       
                 if timelimit > 0:
+                  print(f"running with timeout of {timelimit}")
                   outputs = func_timeout.func_timeout(timelimit, jinjafx.JinjaFx().jinjafx, args=(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True))
                 else:
                   outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True)
