@@ -17,11 +17,11 @@
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
-import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
+import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime, resource
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji, func_timeout
 
-__version__ = '22.8.0'
+__version__ = '22.8.1'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -331,6 +331,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               try:
                 st = round(time.time() * 1000)
                 ocount = 0
+
+                resource.setrlimit(resource.RLIMIT_AS, (10**7, 10**7))
       
                 if timelimit > 0:
                   outputs = func_timeout.func_timeout(timelimit, jinjafx.JinjaFx().jinjafx, args=(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True))
