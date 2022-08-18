@@ -332,7 +332,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 st = round(time.time() * 1000)
                 ocount = 0
 
-                resource.setrlimit(resource.RLIMIT_AS, (10**7, 10**7))
+                soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+                # resource.setrlimit(resource.RLIMIT_AS, (maxsize, hard))
+                print(f'soft is {soft} and hard is {hard}')
       
                 if timelimit > 0:
                   outputs = func_timeout.func_timeout(timelimit, jinjafx.JinjaFx().jinjafx, args=(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True))
