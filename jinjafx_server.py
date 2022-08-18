@@ -333,7 +333,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 ocount = 0
 
                 soft, hard = resource.getrlimit(resource.RLIMIT_AS)
-                # resource.setrlimit(resource.RLIMIT_AS, (maxsize, hard))
+                resource.setrlimit(resource.RLIMIT_AS, (128 * 1024 * 1024, hard))
                 print(f'soft is {soft} and hard is {hard}')
       
                 if timelimit > 0:
