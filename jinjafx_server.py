@@ -17,7 +17,7 @@
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
-import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
+import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime, resource
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji, func_timeout
 
@@ -327,7 +327,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 y = yaml.load(gyaml, Loader=yaml.SafeLoader)
                 if y != None:
                   gvars.update(y)
-  
+
               try:
                 st = round(time.time() * 1000)
                 ocount = 0
@@ -339,7 +339,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                             
               except func_timeout.FunctionTimedOut:
                 raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
-  
+
               jsr = {
                 'status': 'ok',
                 'elapsed': round(time.time() * 1000) - st,
@@ -700,6 +700,9 @@ def main(rflag=[0]):
   try:
     print('JinjaFx Server v' + __version__ + ' - Jinja2 Templating Tool')
     print('Copyright (c) 2020-2022 Chris Mason <chris@netnix.org>\n')
+
+    # soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+    # resource.setrlimit(resource.RLIMIT_AS, (2024 * 1024 * 1024, hard))
 
     parser = ArgumentParser(add_help=False)
     parser.add_argument('-s', action='store_true', required=True)
