@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji, func_timeout
 
-__version__ = '22.8.1'
+__version__ = '22.8.2'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -701,9 +701,6 @@ def main(rflag=[0]):
     print('JinjaFx Server v' + __version__ + ' - Jinja2 Templating Tool')
     print('Copyright (c) 2020-2022 Chris Mason <chris@netnix.org>\n')
 
-    # soft, hard = resource.getrlimit(resource.RLIMIT_AS)
-    # resource.setrlimit(resource.RLIMIT_AS, (2024 * 1024 * 1024, hard))
-
     parser = ArgumentParser(add_help=False)
     parser.add_argument('-s', action='store_true', required=True)
     parser.add_argument('-l', metavar='<address>', default='127.0.0.1', type=str)
@@ -713,6 +710,7 @@ def main(rflag=[0]):
     group_ex.add_argument('-s3', metavar='<aws s3 url>', type=str)
     parser.add_argument('-rl', metavar='<rate/limit>', type=rlimit)
     parser.add_argument('-tl', metavar='<time limit>', type=int, default=0)
+    parser.add_argument('-ml', metavar='<memory limit>', type=int, default=0)
     parser.add_argument('-v', action='store_true', default=False)
     args = parser.parse_args()
     verbose = args.v
@@ -746,6 +744,10 @@ def main(rflag=[0]):
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
+
+    if args.ml:
+      soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+      resource.setrlimit(resource.RLIMIT_AS, (args.ml * 1024 * 1024, hard))
 
     log('Starting JinjaFx Server (PID is ' + str(os.getpid()) + ') on http://' + args.l + ':' + str(args.p) + '...')
 
