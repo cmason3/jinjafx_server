@@ -332,14 +332,13 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 st = round(time.time() * 1000)
                 ocount = 0
 
-                #soft, hard = resource.getrlimit(resource.RLIMIT_AS)
-                #resource.setrlimit(resource.RLIMIT_AS, (128 * 1024 * 1024, hard))
-                #print(f'soft is {soft} and hard is {hard}')
+                soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+                resource.setrlimit(resource.RLIMIT_AS, (128 * 1024 * 1024, hard))
       
-                if timelimit > 0:
-                  outputs = func_timeout.func_timeout(timelimit, jinjafx.JinjaFx().jinjafx, args=(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True))
-                else:
-                  outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True)
+                #if timelimit > 0:
+                #  outputs = func_timeout.func_timeout(timelimit, jinjafx.JinjaFx().jinjafx, args=(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True))
+                #else:
+                outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True)
                             
               except func_timeout.FunctionTimedOut:
                 raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
