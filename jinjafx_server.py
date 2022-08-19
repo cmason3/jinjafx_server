@@ -17,7 +17,7 @@
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
-import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime, resource
+import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji, func_timeout
 
@@ -332,13 +332,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 st = round(time.time() * 1000)
                 ocount = 0
 
-                soft, hard = resource.getrlimit(resource.RLIMIT_AS)
-                resource.setrlimit(resource.RLIMIT_AS, (128 * 1024 * 1024, hard))
-      
-                #if timelimit > 0:
-                #  outputs = func_timeout.func_timeout(timelimit, jinjafx.JinjaFx().jinjafx, args=(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True))
-                #else:
-                outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True)
+                if timelimit > 0:
+                  outputs = func_timeout.func_timeout(timelimit, jinjafx.JinjaFx().jinjafx, args=(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True))
+                else:
+                  outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True)
                             
               except func_timeout.FunctionTimedOut:
                 raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
