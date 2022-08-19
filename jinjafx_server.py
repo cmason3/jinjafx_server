@@ -332,9 +332,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 st = round(time.time() * 1000)
                 ocount = 0
 
-                soft, hard = resource.getrlimit(resource.RLIMIT_AS)
-                resource.setrlimit(resource.RLIMIT_AS, (128 * 1024 * 1024, hard))
-                print(f'soft is {soft} and hard is {hard}')
+                #soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+                #resource.setrlimit(resource.RLIMIT_AS, (128 * 1024 * 1024, hard))
+                #print(f'soft is {soft} and hard is {hard}')
       
                 if timelimit > 0:
                   outputs = func_timeout.func_timeout(timelimit, jinjafx.JinjaFx().jinjafx, args=(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True))
@@ -759,7 +759,7 @@ def main(rflag=[0]):
     threads = []
     repository = args.r
 
-    for i in range(64):
+    for i in range(16):
       threads.append(JinjaFxThread(s, (args.l, args.p)))
 
     while rflag[0] < 2:
