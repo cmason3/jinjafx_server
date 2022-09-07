@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji, func_timeout
 
-__version__ = '22.9.0'
+__version__ = '22.9.1'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -123,7 +123,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     return struct.pack('B', version) + struct.pack('B', len(salt)) + salt + hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, pbkdf2_iterations)
 
 
-  def do_GET(self, head=False, cache=True):
+  def do_GET(self, head=False, cache=True, versioned=False):
     self.critical = False
     self.hide = False
 
@@ -146,6 +146,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
       elif re.search(r'^/dt/[A-Za-z0-9_-]{1,24}$', fpath):
         fpath = '/index.html'
+
+      if re.search(r'^/[0-9.]+/', fpath):
+        fpath = fpath[fpath[1:].index('/') + 1:]
+        versioned = True
 
       if re.search(r'^/get_dt/[A-Za-z0-9_-]{1,24}$', fpath):
         dt = ''
@@ -254,7 +258,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       self.send_header('Content-Length', str(len(r[2])))
       self.send_header('X-Content-Type-Options', 'nosniff')
 
-    if not cache:
+    if versioned:
+      self.send_header('Cache-Control', 'public, max-age=31536000')
+
+    elif not cache:
       self.send_header('Cache-Control', 'no-store, max-age=0')
 
     elif r[1] == 200 or r[1] == 304:
