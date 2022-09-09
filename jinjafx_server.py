@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji, func_timeout
 
-__version__ = '22.9.1'
+__version__ = '22.9.2'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -140,11 +140,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         fpath = '/index.html'
         self.hide = not verbose
 
-      if fpath == '/jinjafx.html':
-        fpath = '/index.html'
-        self.hide = verbose
-
-      elif re.search(r'^/dt/[A-Za-z0-9_-]{1,24}$', fpath):
+      if re.search(r'^/dt/[A-Za-z0-9_-]{1,24}$', fpath):
         fpath = '/index.html'
 
       if re.search(r'^/[0-9.]+/', fpath):
@@ -222,20 +218,26 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         else:
           ctype = 'text/html'
 
-        try:
-          with open(base + '/www' + fpath, 'rb') as f:
-            r = [ ctype, 200, f.read(), sys._getframe().f_lineno ]
+        if fpath == '/jinjafx.html':
+          r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+          self.hide = verbose
+          versioned = True
 
-            if fpath == '/index.html':
-              if repository or aws_s3_url:
-                get_link = 'true'
-              else:
-                get_link = 'false'
+        else:
+          try:
+            with open(base + '/www' + fpath, 'rb') as f:
+              r = [ ctype, 200, f.read(), sys._getframe().f_lineno ]
 
-              r[2] = r[2].decode('utf-8').replace('{{ jinjafx.version }}', jinjafx.__version__ + ' / Jinja2 v' + jinja2_version).replace('{{ get_link }}', get_link).encode('utf-8')
+              if fpath == '/index.html':
+                if repository or aws_s3_url:
+                  get_link = 'true'
+                else:
+                  get_link = 'false'
 
-        except Exception:
-          traceback.print_exc()
+                r[2] = r[2].decode('utf-8').replace('{{ jinjafx.version }}', jinjafx.__version__ + ' / Jinja2 v' + jinja2_version).replace('{{ get_link }}', get_link).encode('utf-8')
+
+          except Exception:
+            traceback.print_exc()
 
       else:
         r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
