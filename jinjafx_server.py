@@ -208,7 +208,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               else:
                 r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
-      elif re.search(r'^/[A-Z0-9_-]+\.[A-Z0-9]+$', fpath, re.IGNORECASE) and os.path.isfile(base + '/www' + fpath):
+      elif re.search(r'^/[A-Z0-9_-]+\.[A-Z0-9]+$', fpath, re.IGNORECASE) and (os.path.isfile(base + '/www' + fpath) or fpath == '/jinjafx.html'):
         if fpath.endswith('.js'):
           ctype = 'text/javascript'
         elif fpath.endswith('.css'):
