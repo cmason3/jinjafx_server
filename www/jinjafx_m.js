@@ -645,6 +645,11 @@ function getStatusText(code) {
     document.getElementById('get2').onclick = function() { jinjafx('get_link'); };
     document.getElementById('update').onclick = function() { jinjafx('update_link'); };
     document.getElementById('protect').onclick = function() { jinjafx('protect'); };
+    document.getElementById('load').onclick = function() {
+      if ((!dirty) || (confirm("Are You Sure?") === true)) {
+        document.getElementById('load_file').click();
+      }
+    };
     document.getElementById('export').onclick = function() { jinjafx('export'); };
     document.getElementById('generate').onclick = function() { jinjafx('generate'); };
     document.getElementById('encrypt').onclick = function() { 
@@ -653,6 +658,14 @@ function getStatusText(code) {
         keyboard: false
       }).show();
     };
+
+    document.getElementById('load_file').addEventListener('change', function(e1) {
+      var r = new FileReader();
+      r.onload = function(e2) {
+        alert(e2.target.result);
+      };
+      r.readAsText(e1.target.files[0]);
+    }, false);
 
     sobj = document.getElementById("status");
 
