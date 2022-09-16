@@ -662,7 +662,22 @@ function getStatusText(code) {
     document.getElementById('load_file').addEventListener('change', function(e1) {
       var r = new FileReader();
       r.onload = function(e2) {
-        alert(e2.target.result);
+        console.log(e2.target.result);
+        if (e2.target.result.indexOf('---\ndt:\n') > -1) {
+          var obj = jsyaml.load(e2.target.result, jsyaml_schema);
+          if (obj != null) {
+            pending_dt = obj['dt'];
+            apply_dt();
+            return true;
+          }
+          else {
+            console.log("we are null");
+          }
+        }
+        else {
+          console.log("no text");
+        }
+        set_status("darkred", "ERROR", "Invalid DataTemplate");
       };
       r.readAsText(e1.target.files[0]);
     }, false);
