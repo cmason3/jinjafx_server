@@ -645,9 +645,11 @@ function getStatusText(code) {
     document.getElementById('get2').onclick = function() { jinjafx('get_link'); };
     document.getElementById('update').onclick = function() { jinjafx('update_link'); };
     document.getElementById('protect').onclick = function() { jinjafx('protect'); };
-    document.getElementById('load').onclick = function() {
+    document.getElementById('import').onclick = function() {
+      clear_status();
+      fe.focus();
       if ((!dirty) || (confirm("Are You Sure?") === true)) {
-        document.getElementById('load_file').click();
+        document.getElementById('import_file').click();
       }
     };
     document.getElementById('export').onclick = function() { jinjafx('export'); };
@@ -659,23 +661,16 @@ function getStatusText(code) {
       }).show();
     };
 
-    document.getElementById('load_file').addEventListener('change', function(e1) {
+    document.getElementById('import_file').addEventListener('change', function(e1) {
       var r = new FileReader();
       r.onload = function(e2) {
-        console.log(e2.target.result);
-        if (e2.target.result.indexOf('---\ndt:\n') > -1) {
+        if (e2.target.result.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
           var obj = jsyaml.load(e2.target.result, jsyaml_schema);
           if (obj != null) {
             pending_dt = obj['dt'];
             apply_dt();
             return true;
           }
-          else {
-            console.log("we are null");
-          }
-        }
-        else {
-          console.log("no text");
         }
         set_status("darkred", "ERROR", "Invalid DataTemplate");
       };
@@ -1585,7 +1580,7 @@ function getStatusText(code) {
     if (change.origin === "paste") {
       var t = change.text.join('\n');
   
-      if (t.indexOf('---\ndt:\n') > -1) {
+      if (t.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
         var obj = jsyaml.load(t, jsyaml_schema);
         if (obj != null) {
           change.cancel();
