@@ -221,7 +221,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         if fpath == '/jinjafx.html':
           r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
           self.hide = verbose
-          versioned = True
 
         else:
           try:
