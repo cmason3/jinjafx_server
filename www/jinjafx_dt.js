@@ -72,6 +72,8 @@
         link.setAttribute('href', URL.createObjectURL(b));
         link.setAttribute('download', '');
         link.click();
+
+        document.getElementById('container').focus();
       };
 
       document.getElementById('container').innerHTML = dtx;
