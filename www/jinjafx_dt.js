@@ -66,7 +66,7 @@
         dtx += window.opener.quote(template.replace(/^/gm, '    ')) + '\n';
       }
 
-      document.body.innerHTML = "<pre>" + dtx + "</pre>";
+      document.getElementById('container').innerHTML = dtx;
     }
   };
 })();
