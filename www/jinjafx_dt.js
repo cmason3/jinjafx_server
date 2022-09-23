@@ -66,18 +66,20 @@
         dtx += window.opener.quote(template.replace(/^/gm, '    ')) + '\n';
       }
 
-      document.getElementById('download').onclick = function() {
-        var b = new Blob([dtx], {type: 'text/plain'});
-        var link = document.createElement('a');
-        link.setAttribute('href', URL.createObjectURL(b));
-        link.setAttribute('download', '');
-        link.click();
-
-        document.getElementById('container').focus();
-      };
-
       document.getElementById('container').innerHTML = dtx;
-      document.getElementById('download').classList.remove('d-none');
+
+      if (window.showSaveFilePicker) {
+        document.getElementById('saveas').onclick = function() {
+          var b = new Blob([dtx], { type: 'text/plain' });
+          var link = document.createElement('a');
+          link.setAttribute('href', URL.createObjectURL(b));
+          link.setAttribute('download', '');
+          link.click();
+
+          document.getElementById('container').focus();
+        };
+        document.getElementById('saveas').classList.remove('d-none');
+      }
     }
   };
 })();
