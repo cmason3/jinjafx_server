@@ -7,7 +7,7 @@ RUN set -eux; \
  chown haproxy:haproxy /var/lib/haproxy
 
 ENV QUICTLS_URL https://codeload.github.com/quictls/openssl/tar.gz/OpenSSL_1_1_1q+quic
-ENV HAPROXY_URL http://www.haproxy.org/download/2.6/src/haproxy-2.6.5.tar.gz
+ENV HAPROXY_URL http://www.haproxy.org/download/2.6/src/haproxy-2.6.6.tar.gz
 
 RUN set -eux; \
  savedAptMark="$(apt-mark showmanual)"; \
