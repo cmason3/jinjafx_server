@@ -83,7 +83,7 @@
             suggestedName: 'jinjafx.dt',
             types: [{
               description: 'JinjaFx DataTemplate',
-              accept: { 'text/plain': ['.txt', '.dt'] }
+              accept: { 'text/plain': ['.dt', '.txt'] }
             }],
           });
 
@@ -91,6 +91,7 @@
           const writableStream = await h.createWritable();
           await writableStream.write(b);
           await writableStream.close();
+          this.blur();
         };
         document.getElementById('saveas').classList.remove('d-none');
       }

@@ -645,13 +645,62 @@ function getStatusText(code) {
     document.getElementById('get2').onclick = function() { jinjafx('get_link'); };
     document.getElementById('update').onclick = function() { jinjafx('update_link'); };
     document.getElementById('protect').onclick = function() { jinjafx('protect'); };
-    document.getElementById('import').onclick = function() {
-      clear_status();
-      fe.focus();
-      if ((!dirty) || (confirm("Are You Sure?") === true)) {
-        document.getElementById('import_file').click();
-      }
-    };
+
+    if (window.showOpenFilePicker) {
+      document.getElementById('import').onclick = async() => {
+        clear_status();
+        fe.focus();
+
+        if ((!dirty) || (confirm("Are You Sure?") === true)) {
+          const h = await window.showOpenFilePicker({
+            types: [{
+              description: 'JinjaFx DataTemplates',
+              accept: { 'text/plain', ['.txt', '.dt'] }
+            }]
+          });
+
+          const fh = await h.getFile();
+          const contents = await fh.text();
+
+          if (contents.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
+            var obj = jsyaml.load(contents, jsyaml_schema);
+            if (obj != null) {
+              pending_dt = obj['dt'];
+              apply_dt();
+              return true;
+            }
+          }
+          set_status("darkred", "ERROR", "Invalid DataTemplate");
+        }
+      };
+    }
+    else {
+      document.getElementById('import').onclick = function() {
+        clear_status();
+        fe.focus();
+
+        if ((!dirty) || (confirm("Are You Sure?") === true)) {
+          document.getElementById('import_file').click();
+        }
+      };
+
+      document.getElementById('import_file').addEventListener('change', function(e1) {
+        var r = new FileReader();
+        r.onload = function(e2) {
+          if (e2.target.result.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
+            var obj = jsyaml.load(e2.target.result, jsyaml_schema);
+            if (obj != null) {
+              pending_dt = obj['dt'];
+              apply_dt();
+              return true;
+            }
+          }
+          set_status("darkred", "ERROR", "Invalid DataTemplate");
+        };
+        r.readAsText(e1.target.files[0]);
+      }, false);
+    }
+
     document.getElementById('export').onclick = function() { jinjafx('export'); };
     document.getElementById('generate').onclick = function() { jinjafx('generate'); };
     document.getElementById('encrypt').onclick = function() { 
@@ -660,22 +709,6 @@ function getStatusText(code) {
         keyboard: false
       }).show();
     };
-
-    document.getElementById('import_file').addEventListener('change', function(e1) {
-      var r = new FileReader();
-      r.onload = function(e2) {
-        if (e2.target.result.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
-          var obj = jsyaml.load(e2.target.result, jsyaml_schema);
-          if (obj != null) {
-            pending_dt = obj['dt'];
-            apply_dt();
-            return true;
-          }
-        }
-        set_status("darkred", "ERROR", "Invalid DataTemplate");
-      };
-      r.readAsText(e1.target.files[0]);
-    }, false);
 
     sobj = document.getElementById("status");
 
