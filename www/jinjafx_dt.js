@@ -1,4 +1,3 @@
-  window.onload = function() {
     var dt = window.opener.dt;
     window.opener.reset_dt();
 
@@ -85,4 +84,3 @@
         document.getElementById('saveas').classList.remove('d-none');
       }
     }
-  };
