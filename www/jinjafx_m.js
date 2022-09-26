@@ -655,7 +655,7 @@ function getStatusText(code) {
           const h = await window.showOpenFilePicker({
             types: [{
               description: 'JinjaFx DataTemplates',
-              accept: { 'text/plain', ['.txt', '.dt'] }
+              accept: { 'text/plain': ['.txt', '.dt'] }
             }]
           });
 
