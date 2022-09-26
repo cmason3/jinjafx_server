@@ -1,3 +1,14 @@
+(function() {
+  function unquote(str) {
+    str = str.replace(/&amp;/g, "&");
+    str = str.replace(/&gt;/g, ">");
+    str = str.replace(/&lt;/g, "<");
+    str = str.replace(/&quot;/g, "\"");
+    str = str.replace(/&apos;/g, "'");
+    return str;
+  }
+
+  window.onload = function() {
     var dt = window.opener.dt;
     window.opener.reset_dt();
 
@@ -76,7 +87,7 @@
             }],
           });
 
-          const b = new Blob([dtx])
+          const b = new Blob([unquote(dtx)])
           const writableStream = await h.createWritable();
           await writableStream.write(b);
           await writableStream.close();
@@ -84,3 +95,5 @@
         document.getElementById('saveas').classList.remove('d-none');
       }
     }
+  };
+})();
