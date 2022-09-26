@@ -67,7 +67,7 @@
       document.getElementById('container').innerHTML = dtx;
 
       if (window.showSaveFilePicker) {
-        document.getElementById('saveas').onclick = function() {
+        document.getElementById('saveas').onclick = async() => {
           const h = await window.showSaveFilePicker({
             suggestedName: 'jinjafx.dt',
             types: [{
