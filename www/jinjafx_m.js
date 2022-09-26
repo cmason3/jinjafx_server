@@ -652,7 +652,7 @@ function getStatusText(code) {
         fe.focus();
 
         if ((!dirty) || (confirm("Are You Sure?") === true)) {
-          const h = await window.showOpenFilePicker({
+          const [h] = await window.showOpenFilePicker({
             types: [{
               description: 'JinjaFx DataTemplates',
               accept: { 'text/plain': ['.txt', '.dt'] }

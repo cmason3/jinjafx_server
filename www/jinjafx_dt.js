@@ -93,7 +93,7 @@
           await writableStream.close();
 
           setTimeout(function() {
-            document.getElementById('container').focus();
+            document.getElementById('saveas').blur();
           }, 50);
         };
         document.getElementById('saveas').classList.remove('d-none');
