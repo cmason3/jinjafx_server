@@ -1,4 +1,3 @@
-(function() {
   window.onload = function() {
     var dt = window.opener.dt;
     window.opener.reset_dt();
@@ -87,4 +86,3 @@
       }
     }
   };
-})();
