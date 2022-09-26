@@ -70,13 +70,18 @@
 
       if (window.showSaveFilePicker) {
         document.getElementById('saveas').onclick = function() {
-          var b = new Blob([dtx], { type: 'text/plain' });
-          var link = document.createElement('a');
-          link.setAttribute('href', URL.createObjectURL(b));
-          link.setAttribute('download', '');
-          link.click();
+          const h = await window.showSaveFilePicker({
+            suggestedName: 'jinjafx.dt',
+            types: [{
+              description: 'JinjaFx DataTemplate',
+              accept: { 'text/plain': ['.txt', '.dt'] }
+            }],
+          });
 
-          document.getElementById('container').focus();
+          const b = new Blob([dtx])
+          const writableStream = await h.createWritable();
+          await writableStream.write(b);
+          await writableStream.close();
         };
         document.getElementById('saveas').classList.remove('d-none');
       }
