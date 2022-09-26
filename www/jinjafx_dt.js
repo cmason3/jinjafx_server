@@ -91,7 +91,10 @@
           const writableStream = await h.createWritable();
           await writableStream.write(b);
           await writableStream.close();
-          this.blur();
+
+          setTimeout(function() {
+            document.getElementById('container').focus();
+          }, 50);
         };
         document.getElementById('saveas').classList.remove('d-none');
       }
