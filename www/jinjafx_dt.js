@@ -1,10 +1,10 @@
 (function() {
   function unquote(str) {
-    str = str.replace(/&amp;/g, "&");
     str = str.replace(/&gt;/g, ">");
     str = str.replace(/&lt;/g, "<");
     str = str.replace(/&quot;/g, "\"");
     str = str.replace(/&apos;/g, "'");
+    str = str.replace(/&amp;/g, "&");
     return str;
   }
 
