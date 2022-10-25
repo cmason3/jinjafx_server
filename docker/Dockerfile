@@ -1,4 +1,4 @@
-FROM docker.io/library/python:3-slim
+FROM docker.io/library/python:3.11-slim
 
 ENV PATH ${PATH}:/opt/jinjafx/.local/bin
 
