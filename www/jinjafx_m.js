@@ -1500,6 +1500,7 @@ function getStatusText(code) {
     document.getElementById('ltemplate2').classList.add('d-none');
     document.getElementById('ltemplate').classList.remove('d-none');
     document.getElementById('template_info').classList.add('fade-out');
+    document.getElementById('template_info').style.zIndex = -1000;
     dicon = 'ldata';
   }
   
@@ -1648,6 +1649,7 @@ function getStatusText(code) {
       if (tinfo) {
         if (editor == window.cmTemplate) {
           document.getElementById('template_info').classList.add('fade-out');
+          document.getElementById('template_info').style.zIndex = -1000;
           tinfo = false;
         }
       }
