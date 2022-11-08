@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji, func_timeout
 
-__version__ = '22.10.1'
+__version__ = '22.10.2'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -35,6 +35,7 @@ verbose = False
 rtable = {}
 rl_rate = 0
 rl_limit = 0
+logfile = None
 timelimit = 0
 
 class JinjaFxServer(HTTPServer):
@@ -703,6 +704,7 @@ def main(rflag=[0]):
   global rl_rate
   global rl_limit
   global timelimit
+  global logfile
   global verbose
 
   try:
@@ -719,6 +721,7 @@ def main(rflag=[0]):
     parser.add_argument('-rl', metavar='<rate/limit>', type=rlimit)
     parser.add_argument('-tl', metavar='<time limit>', type=int, default=0)
     parser.add_argument('-ml', metavar='<memory limit>', type=int, default=0)
+    parser.add_argument('-logfile', metavar='<logfile>', type=str)
     parser.add_argument('-v', action='store_true', default=False)
     args = parser.parse_args()
     verbose = args.v
@@ -730,6 +733,9 @@ def main(rflag=[0]):
 
       if aws_access_key == None or aws_secret_key == None:
         parser.error("argument -s3: environment variables 'AWS_ACCESS_KEY' and 'AWS_SECRET_KEY' are mandatory")
+
+    if args.logfile is not None:
+      logfile = args.logfile
 
     if args.rl is not None:
       args.rl = args.rl.lower().split('/', 1)
@@ -790,7 +796,16 @@ def main(rflag=[0]):
 
 def log(t):
   with lock:
-    print('[' + datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19] + '] ' + t)
+    timestamp = datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19]
+    print('[' + timestamp + '] ' + t)
+
+    if logfile is not None:
+      try:
+        with open(logfile, 'at') as f:
+          f.write('[' + timestamp + '] ' + re.sub(r'\033.*?m', '', t) + '\n')
+
+      except Exception as e:
+        print('[' + timestamp + '] ' + str(e))
 
 
 def w_directory(d):
