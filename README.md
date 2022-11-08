@@ -25,7 +25,8 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
    -s3 <aws s3 url>            - specify a repository using aws s3 buckets (allows 'Get Link')
    -rl <rate/limit>            - specify a rate limit (i.e. '5/30s' for 5 requests in 30 seconds)
    -tl <time limit>            - specify a time limit per request (seconds)
-   -ml <memory limit>          - specify a global memory limit (megabytes < total) 
+   -ml <memory limit>          - specify a global memory limit (megabytes < total)
+   -logfile <logfile>          - specify a logfile for persistent logging
    -v                          - log all HTTP requests
 
  Environment Variables:
