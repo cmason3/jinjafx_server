@@ -10,30 +10,31 @@ if len(sys.argv) == 3:
   r = requests.get(api_url + '?fields=sri').json()
 
   if 'sri' in r:
-    for fn in ('index.html', 'output.html'):
-      html = []
+    for fn in os.listdir(www):
+      if fn.endswith('.html'):
+        html = []
 
-      with open(www + '/' + fn, 'rt') as fh:
-        for ln in fh.readlines():
-          m = cdnjs.search(ln)
-          if m:
-            if m.group(2) in r['sri']:
-              if m.group(1) != sys.argv[2]:
-                ln = cdnjs.sub('https://cdnjs.cloudflare.com/ajax/libs/' + sys.argv[1] + '/' + sys.argv[2] + '/' + m.group(2) + '"', ln)
-                ln = re.sub(r'integrity=".+?"', 'integrity="' + r['sri'][m.group(2)] + '"', ln)
-                print(fn + ' - updated ' + sys.argv[1] + '/' + m.group(2) + ' to ' + sys.argv[2])
+        with open(www + '/' + fn, 'rt') as fh:
+          for ln in fh.readlines():
+            m = cdnjs.search(ln)
+            if m:
+              if m.group(2) in r['sri']:
+                if m.group(1) != sys.argv[2]:
+                  ln = cdnjs.sub('https://cdnjs.cloudflare.com/ajax/libs/' + sys.argv[1] + '/' + sys.argv[2] + '/' + m.group(2) + '"', ln)
+                  ln = re.sub(r'integrity=".+?"', 'integrity="' + r['sri'][m.group(2)] + '"', ln)
+                  print(fn + ' - updated ' + sys.argv[1] + '/' + m.group(2) + ' to ' + sys.argv[2])
+
+                else:
+                  print(fn + ' - skipping ' + sys.argv[1] + '/' + m.group(2) + ' - already at ' + sys.argv[2])
 
               else:
-                print(fn + ' - skipping ' + sys.argv[1] + '/' + m.group(2) + ' - already at ' + sys.argv[2])
+                print('warning: can\'t find resource "' + m.group(2) + '" on cdnjs', file=sys.stderr)
 
-            else:
-              print('warning: can\'t find resource "' + m.group(2) + '" on cdnjs', file=sys.stderr)
+            html.append(ln)
 
-          html.append(ln)
-
-      if len(html) > 0:
-        with open(www + '/' + fn, 'wt') as fh:
-          fh.writelines(html)
+        if len(html) > 0:
+          with open(www + '/' + fn, 'wt') as fh:
+            fh.writelines(html)
 
   elif 'error' in r:
     print('error: ' + r['message'], file=sys.stderr)

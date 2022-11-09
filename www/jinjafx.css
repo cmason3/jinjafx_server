@@ -56,6 +56,7 @@ a:hover {
   text-decoration: underline;
 }
 
+/*
 :root {
   --bs-info: #17a2b8;
   --bs-info-rgb: 23, 162, 184;
@@ -71,3 +72,4 @@ a:hover {
 .btn-bd-primary:focus {
   box-shadow: 0 0 0 0.25rem rgba(121, 82, 179, 0.5);
 }
+*/
