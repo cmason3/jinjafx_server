@@ -110,6 +110,9 @@ textarea {
   line-height: 0.8rem;
   overflow-y: hidden;
 }
+.bg-template {
+  background: #17a2b8;
+}
 .fade-out {
   visibility: hidden;
   opacity: 0;
