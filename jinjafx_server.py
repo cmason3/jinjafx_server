@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji, func_timeout
 
-__version__ = '22.11.0'
+__version__ = '22.11.1'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -144,7 +144,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       if re.search(r'^/dt/[A-Za-z0-9_-]{1,24}$', fpath):
         fpath = '/index.html'
 
-      if re.search(r'^/[0-9.]+/', fpath):
+      if re.search(r'^/[a-f0-9]{8}/', fpath):
         fpath = fpath[fpath[1:].index('/') + 1:]
         versioned = True
 

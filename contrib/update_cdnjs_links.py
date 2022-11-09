@@ -13,7 +13,7 @@ if len(sys.argv) == 3:
     for fn in ('index.html', 'output.html'):
       html = []
 
-      with open(www + '/' + fn, 'r') as fh:
+      with open(www + '/' + fn, 'rt') as fh:
         for ln in fh.readlines():
           m = cdnjs.search(ln)
           if m:
@@ -32,7 +32,7 @@ if len(sys.argv) == 3:
           html.append(ln)
 
       if len(html) > 0:
-        with open(www + '/' + fn, 'w') as fh:
+        with open(www + '/' + fn, 'wt') as fh:
           fh.writelines(html)
 
   elif 'error' in r:
