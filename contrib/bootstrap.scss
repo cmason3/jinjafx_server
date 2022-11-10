@@ -1,5 +1,4 @@
-$button: "primary";
-$color: #0057b8;
+$primary_color: #0057b8;
 
 @function shade-color($color, $weight) {
   @return mix(black, $color, $weight);
@@ -13,21 +12,24 @@ $color: #0057b8;
   @return red($value), green($value), blue($value);
 }
 
-.btn-#{$button} {
+.btn-primary {
   --bs-btn-color: #fff;
   --bs-btn-disabled-color: #fff;
   --bs-btn-hover-color: #fff;
   --bs-btn-active-color: #fff;
 
-  --bs-btn-bg: #{$color};
-  --bs-btn-disabled-bg: #{$color};
-  --bs-btn-hover-bg: #{shade-color($color, 15%)};
-  --bs-btn-active-bg: #{shade-color($color, 20%)};
+  --bs-btn-bg: #{$primary_color};
+  --bs-btn-disabled-bg: #{$primary_color};
+  --bs-btn-hover-bg: #{shade-color($primary_color, 15%)};
+  --bs-btn-active-bg: #{shade-color($primary_color, 20%)};
 
-  --bs-btn-border-color: #{$color};
-  --bs-btn-disabled-border-color: #{$color};
-  --bs-btn-hover-border-color: #{shade-color($color, 20%)};
-  --bs-btn-active-border-color: #{shade-color($color, 25%)};
+  --bs-btn-border-color: #{$primary_color};
+  --bs-btn-disabled-border-color: #{$primary_color};
+  --bs-btn-hover-border-color: #{shade-color($primary_color, 20%)};
+  --bs-btn-active-border-color: #{shade-color($primary_color, 25%)};
 
-  --bs-btn-focus-shadow-rgb: #{to-rgb(tint-color($color, 15%))};
+  --bs-btn-focus-shadow-rgb: #{to-rgb(tint-color($primary_color, 15%))};
+}
+.nav-pills {
+  --bs-nav-pills-link-active-bg: #{$primary_color};
 }

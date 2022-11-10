@@ -2,11 +2,22 @@
 
 import sys, os, re, requests
 
-if len(sys.argv) == 3:
-  www = os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + '/../www')
-  cdnjs = re.compile(r'https://cdnjs.cloudflare.com/ajax/libs/' + re.escape(sys.argv[1]) + '/(.+?)/(.+?)"')
+libraries = {
+  'bootstrap': '5.2.2',
+  'codemirror': '5.65.9',
+  'crypto-js': '4.1.1',
+  'split.js': '1.6.5',
+  'js-yaml': '4.1.0',
+  'utf8': '3.0.0',
+  'dayjs': '1.11.6',
+  'pako': '2.1.0'
+}
 
-  api_url = 'https://api.cdnjs.com/libraries/' + sys.argv[1] + '/' + sys.argv[2]
+for lib in libraries:
+  www = os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + '/../www')
+  cdnjs = re.compile(r'https://cdnjs.cloudflare.com/ajax/libs/' + re.escape(lib) + '/(.+?)/(.+?)"')
+
+  api_url = 'https://api.cdnjs.com/libraries/' + lib + '/' + libraries[lib]
   r = requests.get(api_url + '?fields=sri').json()
 
   if 'sri' in r:
@@ -19,13 +30,13 @@ if len(sys.argv) == 3:
             m = cdnjs.search(ln)
             if m:
               if m.group(2) in r['sri']:
-                if m.group(1) != sys.argv[2]:
-                  ln = cdnjs.sub('https://cdnjs.cloudflare.com/ajax/libs/' + sys.argv[1] + '/' + sys.argv[2] + '/' + m.group(2) + '"', ln)
+                if m.group(1) != libraries[lib]:
+                  ln = cdnjs.sub('https://cdnjs.cloudflare.com/ajax/libs/' + lib + '/' + libraries[lib] + '/' + m.group(2) + '"', ln)
                   ln = re.sub(r'integrity=".+?"', 'integrity="' + r['sri'][m.group(2)] + '"', ln)
-                  print(fn + ' - updated ' + sys.argv[1] + '/' + m.group(2) + ' to ' + sys.argv[2])
+                  print(fn + ' - updated ' + lib + '/' + m.group(2) + ' to ' + libraries[lib])
 
                 else:
-                  print(fn + ' - skipping ' + sys.argv[1] + '/' + m.group(2) + ' - already at ' + sys.argv[2])
+                  print(fn + ' - skipping ' + lib + '/' + m.group(2) + ' - already at ' + libraries[lib])
 
               else:
                 print('warning: can\'t find resource "' + m.group(2) + '" on cdnjs', file=sys.stderr)
@@ -38,7 +49,4 @@ if len(sys.argv) == 3:
 
   elif 'error' in r:
     print('error: ' + r['message'], file=sys.stderr)
-
-else:
-  print('usage: ' + os.path.basename(sys.argv[0]) + ' <library> <version>', file=sys.stderr)
 
