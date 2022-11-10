@@ -109,8 +109,15 @@ textarea {
   width: 20px;
   line-height: 0.8rem;
   overflow-y: hidden;
+  color: white;
 }
-.bg-template {
+.lb-data {
+  background: #17a2b8;
+}
+.lb-template {
+  background: #17a2b8;
+}
+.lb-vars {
   background: #17a2b8;
 }
 .fade-out {
