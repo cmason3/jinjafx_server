@@ -42,10 +42,6 @@ h5#title {
 #push, #footer {
   height: 15px;
 }
-.btn:focus, .btn:active:focus {
-  outline: none !important;
-  box-shadow: none !important;
-}
 .wait, .wait * {
   cursor: wait !important;
 }
@@ -70,4 +66,11 @@ a:hover {
   --bs-btn-hover-border-color: #004693;
   --bs-btn-active-border-color: #00418a;
   --bs-btn-focus-shadow-rgb: 38, 112, 195;
+}
+.nav-pills {
+  --bs-nav-pills-link-active-bg: #0057b8;
+}
+.btn:focus, .btn:active:focus {
+  outline: none !important;
+  box-shadow: none !important;
 }
