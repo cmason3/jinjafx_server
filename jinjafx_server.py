@@ -802,7 +802,7 @@ def log(t):
     if logfile is not None:
       try:
         with open(logfile, 'at') as f:
-          f.write('[' + timestamp + '] ' + re.sub(r'\033.*?m', '', t) + '\n')
+          f.write('[' + timestamp + '] ' + re.sub(r'\033[(?:1;[0-9][0-9]|0)m', '', t) + '\n')
 
       except Exception as e:
         print('[' + timestamp + '] ' + str(e))
