@@ -40,4 +40,8 @@ systemctl daemon-reload
 systemctl enable --now jinjafx_server
 ```
 
-Once the two containers are running you should be able to point your browser at port 443 and it will be passed through to JinjaFx Server.
+Once the two containers are running you should be able to point your browser at port 443 and it will be passed through to the JinjaFx Server. I have also included a the `jinjafx-run.sh` helper script, which automates the running and updating of the JinjaFx container - if you want to run or update the running container to the container image tagged as "latest" then you can run the following command (it assumes Podman):
+
+```
+sudo sh jinjafx-run.sh latest
+```
