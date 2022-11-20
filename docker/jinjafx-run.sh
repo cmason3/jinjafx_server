@@ -29,9 +29,9 @@ else
 
   echo 'Creating JinjaFx Container...'
   if [ -n "$AWS_S3_URL" ]; then
-    podman create --name jinjafx_server --pull=never --tz=local -v /var/log/jinjafx.log:/var/log/jinjafx.log:Z -e AWS_ACCESS_KEY=${AWS_ACCESS_KEY} -e AWS_SECRET_KEY=${AWS_SECRET_KEY} -p 127.0.0.1:8080:8080 docker.io/cmason3/jinjafx_server:$1 -s3 ${AWS_S3_URL} ${ARGS}
+    podman create --name jinjafx --pull=never --tz=local -v /var/log/jinjafx.log:/var/log/jinjafx.log:Z -e AWS_ACCESS_KEY=${AWS_ACCESS_KEY} -e AWS_SECRET_KEY=${AWS_SECRET_KEY} -p 127.0.0.1:8080:8080 docker.io/cmason3/jinjafx_server:$1 -s3 ${AWS_S3_URL} ${ARGS}
   else
-    podman create --name jinjafx_server --pull=never --tz=local -v /var/log/jinjafx.log:/var/log/jinjafx.log:Z -p 127.0.0.1:8080:8080 docker.io/cmason3/jinjafx_server:$1 ${ARGS}
+    podman create --name jinjafx --pull=never --tz=local -v /var/log/jinjafx.log:/var/log/jinjafx.log:Z -p 127.0.0.1:8080:8080 docker.io/cmason3/jinjafx_server:$1 ${ARGS}
   fi
   echo
 
