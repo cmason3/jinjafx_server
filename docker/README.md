@@ -4,7 +4,7 @@ JinjaFx Server will always be available in Docker Hub at [https://hub.docker.com
 
 The following commands (using sudo) will launch a container for JinjaFx Server which listens on localhost on port 8080.
 
-The first step is to create a local user which maps to the UID/GID of the non-root user inside the container - we will also create a persistent logfile outside of the container and we will need to give the local user access to it (as we are using a persistent logfile we have also disabled logging inside the container using `--log-driver=none`).
+The first step is to create a local user which maps to the UID/GID of the non-root user inside the container - we will also create a persistent logfile outside of the container and we will need to give the local user access to it (as we are using a persistent logfile we will also disable logging inside the container using `--log-driver=none`).
 
 ```
 groupadd -g 99 -r jinjafx
