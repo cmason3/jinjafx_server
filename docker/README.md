@@ -18,7 +18,7 @@ chmod 664 /var/log/jinjafx.log
 ### JinjaFx Server
 
 ```
-podman create --name jinjafx --tz=local --log-driver=none -v /var/log/jinjafx.log:/var/log/jinjafx.log:Z -p 127.0.0.1:8080:8080 docker.io/cmason3/jinjafx_server:latest
+podman create --name jinjafx --tz=local --log-driver=none -v /var/log/jinjafx.log:/var/log/jinjafx.log:Z -p 127.0.0.1:8080:8080 docker.io/cmason3/jinjafx_server:latest -logfile /var/log/jinjafx.log
 
 podman generate systemd -n --restart-policy=always jinjafx | tee /etc/systemd/system/jinjafx.service 1>/dev/null
 
