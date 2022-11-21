@@ -128,8 +128,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     self.critical = False
     self.hide = False
 
-    print("DEBUG: GOT " + self.path)
-
     fpath = self.path.split('?', 1)[0]
 
     r = [ 'text/plain', 500, '500 Internal Server Error\r\n', sys._getframe().f_lineno ]
