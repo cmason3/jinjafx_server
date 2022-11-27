@@ -153,7 +153,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
         self.critical = True
 
-        if aws_s3_url or repository:
+        if aws_s3_url or github_url or repository:
           if aws_s3_url:
             try:
               rr = aws_s3_get(aws_s3_url, 'jfx_' + fpath[8:] + '.yml')
@@ -172,7 +172,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             except Exception as e:
               traceback.print_exc()
   
-          elif repository:
+          elif github_url:
+            pass
+
+          else:
             fpath = os.path.normpath(repository + '/jfx_' + fpath[8:] + '.yml')
   
             if os.path.isfile(fpath):
@@ -613,6 +616,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                       except Exception as e:
                         traceback.print_exc()
 
+                    elif github_url:
+                      pass
+
                     else:
                       try:
                         dt_filename = os.path.normpath(repository + '/' + dt_filename)
@@ -700,6 +706,8 @@ def main(rflag=[0]):
   global aws_s3_url
   global aws_access_key
   global aws_secret_key
+  global github_url
+  global github_access_token
   global repository
   global rl_rate
   global rl_limit
@@ -870,6 +878,27 @@ def aws_s3_get(s3_url, fname):
   }
   headers = aws_s3_authorization('GET', fname, s3_url.split('.')[2], headers)
   return requests.get('https://' + s3_url + '/' + fname, headers=headers)
+
+
+def github_put(github_url, fname, content):
+  data = {
+    'message': 'Update ' + fname,
+    'content': base64.b64encode(content)
+  }
+  headers = {
+    'Authorization': 'Token ' + github_access_token,
+    'Content-Type': 'application/json'
+  }
+  return requests.put('https://api.github.com/repos/' + github_url + '/contents/' + fname, headers=headers, data=json.dumps(data))
+}
+
+
+def github_get(github_url, fname):
+  headers = {
+    'Authorization': 'Token ' + github_access_token
+  }
+  return requests.get('https://api.github.com/repos/' + github_url + '/contents/' + fname, headers=headers)
+}
 
 
 if __name__ == '__main__':
