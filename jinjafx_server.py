@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji, func_timeout
 
-__version__ = '22.11.2'
+__version__ = '22.12.0'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -718,6 +718,7 @@ def main(rflag=[0]):
     group_ex = parser.add_mutually_exclusive_group()
     group_ex.add_argument('-r', metavar='<repository>', type=w_directory)
     group_ex.add_argument('-s3', metavar='<aws s3 url>', type=str)
+    group_ex.add_argument('-github', metavar='<github repository>/<branch>', type=str)
     parser.add_argument('-rl', metavar='<rate/limit>', type=rlimit)
     parser.add_argument('-tl', metavar='<time limit>', type=int, default=0)
     parser.add_argument('-ml', metavar='<memory limit>', type=int, default=0)
@@ -733,6 +734,13 @@ def main(rflag=[0]):
 
       if aws_access_key == None or aws_secret_key == None:
         parser.error("argument -s3: environment variables 'AWS_ACCESS_KEY' and 'AWS_SECRET_KEY' are mandatory")
+
+    if args.github is not None:
+      github_url = args.github
+      github_access_token = os.getenv('GITHUB_ACCESS_TOKEN')
+
+      if github_access_token == None:
+        parser.error("argument -github: environment variable 'GITHUB_ACCESS_TOKENA' is mandatory")
 
     if args.logfile is not None:
       logfile = args.logfile
