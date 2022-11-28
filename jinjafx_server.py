@@ -638,11 +638,14 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                         traceback.print_exc()
 
                     elif github_url:
+                      sha = None
+
                       try:
                         rr = github_get(github_url, dt_filename)
                         if rr.status_code == 200:
                           jobj = rr.json()
                           content = jobj['content']
+                          sha = jobj['sha']
 
                           if jobj.get('encoding') and jobj.get('encoding') == 'base64':
                             content = base64.b64decode(content).decode('utf-8')
@@ -657,13 +660,16 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
                         if r[1] == 500 or r[1] == 200:
                           dt_yml = add_client_fields(dt_yml, remote_addr)
-                          rr = github_put(github_url, dt_filename, dt_yml)
+                          rr = github_put(github_url, dt_filename, dt_yml, sha)
 
-                          if rr.status_code == 200:
+                          if str(rr.status_code).startswith('2'):
                             r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
 
-                          elif rr.status_code == 403:
+                          elif rr.status_code == 401:
                             r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+
+                          else:
+                            print(rr.text)
 
                       except Exception as e:
                         traceback.print_exc()
@@ -773,9 +779,9 @@ def main(rflag=[0]):
     parser.add_argument('-l', metavar='<address>', default='127.0.0.1', type=str)
     parser.add_argument('-p', metavar='<port>', default=8080, type=int)
     group_ex = parser.add_mutually_exclusive_group()
-    group_ex.add_argument('-r', metavar='<repository>', type=w_directory)
+    group_ex.add_argument('-r', metavar='<directory>', type=w_directory)
     group_ex.add_argument('-s3', metavar='<aws s3 url>', type=str)
-    group_ex.add_argument('-github', metavar='<github repository>/<branch>', type=str)
+    group_ex.add_argument('-github', metavar='<owner>/<repo>[:<branch>]', type=str)
     parser.add_argument('-rl', metavar='<rate/limit>', type=rlimit)
     parser.add_argument('-tl', metavar='<time limit>', type=int, default=0)
     parser.add_argument('-ml', metavar='<memory limit>', type=int, default=0)
@@ -929,16 +935,23 @@ def aws_s3_get(s3_url, fname):
   return requests.get('https://' + s3_url + '/' + fname, headers=headers)
 
 
-def github_put(github_url, fname, content):
-  data = {
-    'message': 'Update ' + fname,
-    'content': base64.b64encode(content.encode('utf-8')).decode('utf-8')
-  }
+def github_put(github_url, fname, content, sha=None):
   headers = {
     'Authorization': 'Token ' + github_token,
     'Content-Type': 'application/json'
   }
-  print("url is " + 'https://api.github.com/repos/' + github_url + '/contents/' + fname)
+
+  data = {
+    'message': 'Update ' + fname,
+    'content': base64.b64encode(content.encode('utf-8')).decode('utf-8')
+  }
+
+  if ':' in github_url:
+    github_url, data['branch'] = github_url.split(':', 1)
+
+  if sha is not None:
+    data['sha'] = sha
+
   return requests.put('https://api.github.com/repos/' + github_url + '/contents/' + fname, headers=headers, data=json.dumps(data))
 
 
@@ -946,7 +959,13 @@ def github_get(github_url, fname):
   headers = {
     'Authorization': 'Token ' + github_token
   }
-  return requests.get('https://api.github.com/repos/' + github_url + '/contents/' + fname, headers=headers)
+
+  if ':' in github_url:
+    github_url, branch = github_url.split(':', 1)
+    return requests.get('https://api.github.com/repos/' + github_url + '/contents/' + fname + '?ref=' + branch, headers=headers)
+
+  else:
+    return requests.get('https://api.github.com/repos/' + github_url + '/contents/' + fname, headers=headers)
 
 
 if __name__ == '__main__':
