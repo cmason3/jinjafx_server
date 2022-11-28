@@ -189,7 +189,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   
                 dt = content
   
-              elif rr.status_code == 403:
+              elif rr.status_code == 401:
                 r = [ 'text/plain', 403, '403 Forbidden\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
   
               elif rr.status_code == 404:
