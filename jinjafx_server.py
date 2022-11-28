@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji, func_timeout
 
-__version__ = '22.11.2'
+__version__ = '22.12.0'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -29,6 +29,8 @@ base = os.path.abspath(os.path.dirname(__file__))
 aws_s3_url = None
 aws_access_key = None
 aws_secret_key = None
+github_url = None
+github_token = None
 repository = None
 verbose = False
 
@@ -153,7 +155,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
         self.critical = True
 
-        if aws_s3_url or repository:
+        if aws_s3_url or github_url or repository:
           if aws_s3_url:
             try:
               rr = aws_s3_get(aws_s3_url, 'jfx_' + fpath[8:] + '.yml')
@@ -172,7 +174,31 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             except Exception as e:
               traceback.print_exc()
   
-          elif repository:
+          elif github_url:
+            try:
+              rr = github_get(github_url, 'jfx_' + fpath[8:] + '.yml')
+  
+              if rr.status_code == 200:
+                jobj = rr.json()
+                content = jobj['content']
+
+                if jobj.get('encoding') and jobj.get('encoding') == 'base64':
+                  content = base64.b64decode(content).decode('utf-8')
+
+                r = [ 'application/yaml', 200, content.encode('utf-8'), sys._getframe().f_lineno ]
+  
+                dt = content
+  
+              elif rr.status_code == 403:
+                r = [ 'text/plain', 403, '403 Forbidden\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+  
+              elif rr.status_code == 404:
+                r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+  
+            except Exception as e:
+              traceback.print_exc()
+
+          else:
             fpath = os.path.normpath(repository + '/jfx_' + fpath[8:] + '.yml')
   
             if os.path.isfile(fpath):
@@ -229,7 +255,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               r = [ ctype, 200, f.read(), sys._getframe().f_lineno ]
 
               if fpath == '/index.html':
-                if repository or aws_s3_url:
+                if repository or aws_s3_url or github_url:
                   get_link = 'true'
                 else:
                   get_link = 'false'
@@ -450,7 +476,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
 
           elif fpath == '/get_link':
-            if aws_s3_url or repository:
+            if aws_s3_url or github_url or repository:
               if self.headers['Content-Type'] == 'application/json':
                 try:
                   remote_addr = str(self.client_address[0])
@@ -613,6 +639,43 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                       except Exception as e:
                         traceback.print_exc()
 
+                    elif github_url:
+                      sha = None
+
+                      try:
+                        rr = github_get(github_url, dt_filename)
+                        if rr.status_code == 200:
+                          jobj = rr.json()
+                          content = jobj['content']
+                          sha = jobj['sha']
+
+                          if jobj.get('encoding') and jobj.get('encoding') == 'base64':
+                            content = base64.b64decode(content).decode('utf-8')
+
+                          m = re.search(r'revision: (\d+)', content)
+                          if m != None:
+                            if dt_revision <= int(m.group(1)):
+                              r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
+
+                          if r[1] != 409:
+                            dt_yml, r = update_dt(content, dt_yml, r)
+
+                        if r[1] == 500 or r[1] == 200:
+                          dt_yml = add_client_fields(dt_yml, remote_addr)
+                          rr = github_put(github_url, dt_filename, dt_yml, sha)
+
+                          if str(rr.status_code).startswith('2'):
+                            r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
+
+                          elif rr.status_code == 401:
+                            r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+
+                          else:
+                            print(rr.text)
+
+                      except Exception as e:
+                        traceback.print_exc()
+
                     else:
                       try:
                         dt_filename = os.path.normpath(repository + '/' + dt_filename)
@@ -700,6 +763,8 @@ def main(rflag=[0]):
   global aws_s3_url
   global aws_access_key
   global aws_secret_key
+  global github_url
+  global github_token
   global repository
   global rl_rate
   global rl_limit
@@ -716,8 +781,9 @@ def main(rflag=[0]):
     parser.add_argument('-l', metavar='<address>', default='127.0.0.1', type=str)
     parser.add_argument('-p', metavar='<port>', default=8080, type=int)
     group_ex = parser.add_mutually_exclusive_group()
-    group_ex.add_argument('-r', metavar='<repository>', type=w_directory)
+    group_ex.add_argument('-r', metavar='<directory>', type=w_directory)
     group_ex.add_argument('-s3', metavar='<aws s3 url>', type=str)
+    group_ex.add_argument('-github', metavar='<owner>/<repo>[:<branch>]', type=str)
     parser.add_argument('-rl', metavar='<rate/limit>', type=rlimit)
     parser.add_argument('-tl', metavar='<time limit>', type=int, default=0)
     parser.add_argument('-ml', metavar='<memory limit>', type=int, default=0)
@@ -733,6 +799,13 @@ def main(rflag=[0]):
 
       if aws_access_key == None or aws_secret_key == None:
         parser.error("argument -s3: environment variables 'AWS_ACCESS_KEY' and 'AWS_SECRET_KEY' are mandatory")
+
+    if args.github is not None:
+      github_url = args.github
+      github_token = os.getenv('GITHUB_TOKEN')
+
+      if github_token == None:
+        parser.error("argument -github: environment variable 'GITHUB_TOKEN' is mandatory")
 
     if args.logfile is not None:
       logfile = args.logfile
@@ -862,6 +935,39 @@ def aws_s3_get(s3_url, fname):
   }
   headers = aws_s3_authorization('GET', fname, s3_url.split('.')[2], headers)
   return requests.get('https://' + s3_url + '/' + fname, headers=headers)
+
+
+def github_put(github_url, fname, content, sha=None):
+  headers = {
+    'Authorization': 'Token ' + github_token,
+    'Content-Type': 'application/json'
+  }
+
+  data = {
+    'message': 'Update ' + fname,
+    'content': base64.b64encode(content.encode('utf-8')).decode('utf-8')
+  }
+
+  if ':' in github_url:
+    github_url, data['branch'] = github_url.split(':', 1)
+
+  if sha is not None:
+    data['sha'] = sha
+
+  return requests.put('https://api.github.com/repos/' + github_url + '/contents/' + fname, headers=headers, data=json.dumps(data))
+
+
+def github_get(github_url, fname):
+  headers = {
+    'Authorization': 'Token ' + github_token
+  }
+
+  if ':' in github_url:
+    github_url, branch = github_url.split(':', 1)
+    return requests.get('https://api.github.com/repos/' + github_url + '/contents/' + fname + '?ref=' + branch, headers=headers)
+
+  else:
+    return requests.get('https://api.github.com/repos/' + github_url + '/contents/' + fname, headers=headers)
 
 
 if __name__ == '__main__':

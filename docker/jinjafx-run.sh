@@ -4,6 +4,9 @@
 # AWS_ACCESS_KEY="<aws_access_key>"
 # AWS_SECRET_KEY="<aws_secret_key>"
 
+# GITHUB_URL=<owner>/<repo>[:<branch>]
+# GITHUB_TOKEN="<github_token>"
+
 ARGS="-rl 5/20s -logfile /var/log/jinjafx.log"
 
 if [ "$(id -u)" != "0" ]; then
@@ -30,6 +33,8 @@ else
   echo 'Creating JinjaFx Container...'
   if [ -n "$AWS_S3_URL" ]; then
     podman create --name jinjafx --pull=never --tz=local --log-driver=none -v /var/log/jinjafx.log:/var/log/jinjafx.log:Z -e AWS_ACCESS_KEY=${AWS_ACCESS_KEY} -e AWS_SECRET_KEY=${AWS_SECRET_KEY} -p 127.0.0.1:8080:8080 docker.io/cmason3/jinjafx_server:$1 -s3 ${AWS_S3_URL} ${ARGS}
+  elif [ -n "$GITHUB_URL" ]; then
+    podman create --name jinjafx --pull=never --tz=local --log-driver=none -v /var/log/jinjafx.log:/var/log/jinjafx.log:Z -e GITHUB_TOKEN=${GITHUB_TOKEN} -p 127.0.0.1:8080:8080 docker.io/cmason3/jinjafx_server:$1 -github ${GITHUB_URL} ${ARGS}
   else
     podman create --name jinjafx --pull=never --tz=local --log-driver=none -v /var/log/jinjafx.log:/var/log/jinjafx.log:Z -p 127.0.0.1:8080:8080 docker.io/cmason3/jinjafx_server:$1 ${ARGS}
   fi
