@@ -29,6 +29,8 @@ base = os.path.abspath(os.path.dirname(__file__))
 aws_s3_url = None
 aws_access_key = None
 aws_secret_key = None
+github_url = None
+github_token = None
 repository = None
 verbose = False
 
