@@ -17,7 +17,10 @@ python3 -m pip install --upgrade --user jinjafx-server
 Once JinjaFx Server has been started with the `-s` argument then point your web browser at http://localhost:8080 and you will be presented with a web page that allows you to specify `data.csv`, `template.j2` and `vars.yml` and then generate outputs. If you click on "Export" then it will present you with an output that can be pasted back into any pane of JinjaFx to restore the values.
 
 ```
- jinjafx_server -s [-l <address>] [-p <port>] [-r <repository> | -s3 <aws s3 url> | -github <owner>/<repo>[:<branch>]] [-rl <rate/limit>] [-tl <time limit>] [-ml <memory limit>]
+ jinjafx_server -s [-l <address>] [-p <port>]
+                [-r <repository> | -s3 <aws s3 url> | -github <owner>/<repo>[:<branch>]]
+                [-rl <rate/limit>] [-tl <time limit>] [-ml <memory limit>]
+
    -s                                 - start the JinjaFx Server
    -l <address>                       - specify a listen address (default is '127.0.0.1')
    -p <port>                          - specify a listen port (default is 8080)
