@@ -18,13 +18,13 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
 
 ```
  jinjafx_server -s [-l <address>] [-p <port>]
-                [-r <repository> | -s3 <aws s3 url> | -github <owner>/<repo>[:<branch>]]
+                [-r <directory> | -s3 <aws s3 url> | -github <owner>/<repo>[:<branch>]]
                 [-rl <rate/limit>] [-tl <time limit>] [-ml <memory limit>]
 
    -s                                 - start the JinjaFx Server
    -l <address>                       - specify a listen address (default is '127.0.0.1')
    -p <port>                          - specify a listen port (default is 8080)
-   -r <repository>                    - specify a local repository directory (allows 'Get Link')
+   -r <directory>                     - specify a local repository directory (allows 'Get Link')
    -s3 <aws s3 url>                   - specify a repository using aws s3 buckets (allows 'Get Link')
    -github <owner>/<repo>[:<branch>]  - specify a repository using github (allows 'Get Link')
    -rl <rate/limit>                   - specify a rate limit (i.e. '5/30s' for 5 requests in 30 seconds)
