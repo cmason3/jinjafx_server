@@ -153,6 +153,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       if re.search(r'^/get_dt/[A-Za-z0-9_-]{1,24}$', fpath):
         dt = ''
 
+        log("DEBUG: we are in here with a get_dt request")
+        
         self.critical = True
 
         if aws_s3_url or github_url or repository:
