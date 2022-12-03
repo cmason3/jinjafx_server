@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji, func_timeout
 
-__version__ = '22.11.4'
+__version__ = '22.12.0'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -127,181 +127,169 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
 
   def do_GET(self, head=False, cache=True, versioned=False):
-    self.critical = False
-    self.hide = False
+    try:
+      self.critical = False
+      self.hide = False
 
-    fpath = self.path.split('?', 1)[0]
-
-    r = [ 'text/plain', 500, '500 Internal Server Error\r\n', sys._getframe().f_lineno ]
-
-    if fpath == '/ping':
-      cache = False
-      r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-
-    else:
-      if fpath == '/':
-        fpath = '/index.html'
-        self.hide = not verbose
-
-      if re.search(r'^/dt/[A-Za-z0-9_-]{1,24}$', fpath):
-        fpath = '/index.html'
-
-      if re.search(r'^/[a-f0-9]{8}/', fpath):
-        fpath = fpath[fpath[1:].index('/') + 1:]
-        versioned = True
-
-      if re.search(r'^/get_dt/[A-Za-z0-9_-]{1,24}$', fpath):
-        dt = ''
-        self.critical = True
-
-        if aws_s3_url or github_url or repository:
-          if aws_s3_url:
-            try:
-              rr = aws_s3_get(aws_s3_url, 'jfx_' + fpath[8:] + '.yml')
+      fpath = self.path.split('?', 1)[0]
   
+      r = [ 'text/plain', 500, '500 Internal Server Error\r\n', sys._getframe().f_lineno ]
+  
+      if fpath == '/ping':
+        cache = False
+        r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+  
+      else:
+        if fpath == '/':
+          fpath = '/index.html'
+          self.hide = not verbose
+  
+        if re.search(r'^/dt/[A-Za-z0-9_-]{1,24}$', fpath):
+          fpath = '/index.html'
+  
+        if re.search(r'^/[a-f0-9]{8}/', fpath):
+          fpath = fpath[fpath[1:].index('/') + 1:]
+          versioned = True
+  
+        if re.search(r'^/get_dt/[A-Za-z0-9_-]{1,24}$', fpath):
+          dt = ''
+          self.critical = True
+  
+          if aws_s3_url or github_url or repository:
+            if aws_s3_url:
+              rr = aws_s3_get(aws_s3_url, 'jfx_' + fpath[8:] + '.yml')
+    
               if rr.status_code == 200:
                 r = [ 'application/yaml', 200, rr.text.encode('utf-8'), sys._getframe().f_lineno ]
-  
+    
                 dt = rr.text
-  
+    
               elif rr.status_code == 403:
                 r = [ 'text/plain', 403, '403 Forbidden\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
+    
               elif rr.status_code == 404:
                 r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
-            except Exception as e:
-              traceback.print_exc()
-  
-          elif github_url:
-            try:
+    
+            elif github_url:
               rr = github_get(github_url, 'jfx_' + fpath[8:] + '.yml')
-  
+    
               if rr.status_code == 200:
                 jobj = rr.json()
                 content = jobj['content']
-
+  
                 if jobj.get('encoding') and jobj.get('encoding') == 'base64':
                   content = base64.b64decode(content).decode('utf-8')
-
+  
                 r = [ 'application/yaml', 200, content.encode('utf-8'), sys._getframe().f_lineno ]
-  
+    
                 dt = content
-  
+    
               elif rr.status_code == 401:
                 r = [ 'text/plain', 403, '403 Forbidden\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
+    
               elif rr.status_code == 404:
                 r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
-            except Exception as e:
-              traceback.print_exc()
-
-          else:
-            fpath = os.path.normpath(repository + '/jfx_' + fpath[8:] + '.yml')
-  
-            if os.path.isfile(fpath):
-              try:
+    
+            else:
+              fpath = os.path.normpath(repository + '/jfx_' + fpath[8:] + '.yml')
+    
+              if os.path.isfile(fpath):
                 with open(fpath, 'rb') as f:
                   rr = f.read()
                   dt = rr.decode('utf-8')
-  
+    
                   r = [ 'application/yaml', 200, rr, sys._getframe().f_lineno ]
-
+  
                 os.utime(fpath, None)
-  
-              except Exception:
-                traceback.print_exc()
-  
-            else:
-              r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-
-          if r[1] == 200:
-            mo = re.search(r'dt_password: "(\S+)"', dt)
-            if mo != None:
-              if 'X-Dt-Password' in self.headers:
-                t = binascii.unhexlify(mo.group(1).encode('utf-8'))
-                if t != self.derive_key(self.headers['X-Dt-Password'], t[2:int(t[1]) + 2], t[0]):
-                  mm = re.search(r'dt_mpassword: "(\S+)"', dt)
-                  if mm != None:
-                    t = binascii.unhexlify(mm.group(1).encode('utf-8'))
-                    if t != self.derive_key(self.headers['X-Dt-Password'], t[2:int(t[1]) + 2], t[0]):
-                      r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-
-                  else:
-                    r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-
+    
               else:
-                r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-
-      elif re.search(r'^/[A-Z0-9_-]+\.[A-Z0-9]+$', fpath, re.IGNORECASE) and (os.path.isfile(base + '/www' + fpath) or fpath == '/jinjafx.html'):
-        if fpath.endswith('.js'):
-          ctype = 'text/javascript'
-        elif fpath.endswith('.css'):
-          ctype = 'text/css'
-        elif fpath.endswith('.png'):
-          ctype = 'image/png'
-        else:
-          ctype = 'text/html'
-
-        if fpath == '/jinjafx.html':
-          r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-          self.hide = verbose
-
-        else:
-          try:
+                r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+  
+            if r[1] == 200:
+              mo = re.search(r'dt_password: "(\S+)"', dt)
+              if mo != None:
+                if 'X-Dt-Password' in self.headers:
+                  t = binascii.unhexlify(mo.group(1).encode('utf-8'))
+                  if t != self.derive_key(self.headers['X-Dt-Password'], t[2:int(t[1]) + 2], t[0]):
+                    mm = re.search(r'dt_mpassword: "(\S+)"', dt)
+                    if mm != None:
+                      t = binascii.unhexlify(mm.group(1).encode('utf-8'))
+                      if t != self.derive_key(self.headers['X-Dt-Password'], t[2:int(t[1]) + 2], t[0]):
+                        r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+  
+                    else:
+                      r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+  
+                else:
+                  r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+  
+        elif re.search(r'^/[A-Z0-9_-]+\.[A-Z0-9]+$', fpath, re.IGNORECASE) and (os.path.isfile(base + '/www' + fpath) or fpath == '/jinjafx.html'):
+          if fpath.endswith('.js'):
+            ctype = 'text/javascript'
+          elif fpath.endswith('.css'):
+            ctype = 'text/css'
+          elif fpath.endswith('.png'):
+            ctype = 'image/png'
+          else:
+            ctype = 'text/html'
+  
+          if fpath == '/jinjafx.html':
+            r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+            self.hide = verbose
+  
+          else:
             with open(base + '/www' + fpath, 'rb') as f:
               r = [ ctype, 200, f.read(), sys._getframe().f_lineno ]
-
+  
               if fpath == '/index.html':
                 if repository or aws_s3_url or github_url:
                   get_link = 'true'
                 else:
                   get_link = 'false'
-
+  
                 r[2] = r[2].decode('utf-8').replace('{{ jinjafx.version }}', jinjafx.__version__ + ' / Jinja2 v' + jinja2_version).replace('{{ get_link }}', get_link).encode('utf-8')
+  
+        else:
+          r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+  
+      etag = '"' + hashlib.sha256(r[2]).hexdigest() + '"'
+      if 'If-None-Match' in self.headers:
+        if self.headers['If-None-Match'] == etag:
+          head = True
+          r = [ None, 304, None, sys._getframe().f_lineno ]
+  
+      self.send_response(r[1])
+  
+      if r[1] != 304:
+        if len(r[2]) > 1024 and 'Accept-Encoding' in self.headers and r[0] != 'image/png':
+          if 'gzip' in self.headers['Accept-Encoding']:
+            self.send_header('Content-Encoding', 'gzip')
+            r[2] = gzip.compress(r[2])
+  
+        self.send_header('Content-Type', r[0])
+        self.send_header('Content-Length', str(len(r[2])))
+        self.send_header('X-Content-Type-Options', 'nosniff')
+  
+      if versioned:
+        self.send_header('Cache-Control', 'public, max-age=31536000')
+  
+      elif not cache:
+        self.send_header('Cache-Control', 'no-store, max-age=0')
+  
+      elif r[1] == 200 or r[1] == 304:
+        if r[1] == 200:
+          self.send_header('Content-Security-Policy', "frame-ancestors 'none'")
+          self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
+  
+        self.send_header('Cache-Control', 'max-age=0, must-revalidate')
+        self.send_header('ETag', etag)
+  
+      self.end_headers()
+      if not head:
+        self.wfile.write(r[2])
 
-          except Exception:
-            traceback.print_exc()
-
-      else:
-        r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-
-    etag = '"' + hashlib.sha256(r[2]).hexdigest() + '"'
-    if 'If-None-Match' in self.headers:
-      if self.headers['If-None-Match'] == etag:
-        head = True
-        r = [ None, 304, None, sys._getframe().f_lineno ]
-
-    self.send_response(r[1])
-
-    if r[1] != 304:
-      if len(r[2]) > 1024 and 'Accept-Encoding' in self.headers and r[0] != 'image/png':
-        if 'gzip' in self.headers['Accept-Encoding']:
-          self.send_header('Content-Encoding', 'gzip')
-          r[2] = gzip.compress(r[2])
-
-      self.send_header('Content-Type', r[0])
-      self.send_header('Content-Length', str(len(r[2])))
-      self.send_header('X-Content-Type-Options', 'nosniff')
-
-    if versioned:
-      self.send_header('Cache-Control', 'public, max-age=31536000')
-
-    elif not cache:
-      self.send_header('Cache-Control', 'no-store, max-age=0')
-
-    elif r[1] == 200 or r[1] == 304:
-      if r[1] == 200:
-        self.send_header('Content-Security-Policy', "frame-ancestors 'none'")
-        self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
-
-      self.send_header('Cache-Control', 'max-age=0, must-revalidate')
-      self.send_header('ETag', etag)
-
-    self.end_headers()
-    if not head:
-      self.wfile.write(r[2])
+    except Exception as e:
+      log('Exception: ' + str(e))
 
 
   def do_OPTIONS(self):
@@ -468,7 +456,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 return
 
               except Exception as e:
-                traceback.print_exc()
+                log('Exception: ' + str(e))
                 r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
 
             else:
@@ -614,98 +602,86 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                       return dt_yml
 
                     if aws_s3_url:
-                      try:
-                        rr = aws_s3_get(aws_s3_url, dt_filename)
+                      rr = aws_s3_get(aws_s3_url, dt_filename)
+                      if rr.status_code == 200:
+                        m = re.search(r'revision: (\d+)', rr.text)
+                        if m != None:
+                          if dt_revision <= int(m.group(1)):
+                            r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
+
+                        if r[1] != 409:
+                          dt_yml, r = update_dt(rr.text, dt_yml, r)
+
+                      if r[1] == 500 or r[1] == 200:
+                        dt_yml = add_client_fields(dt_yml, remote_addr)
+                        rr = aws_s3_put(aws_s3_url, dt_filename, dt_yml, 'application/yaml')
+
                         if rr.status_code == 200:
-                          m = re.search(r'revision: (\d+)', rr.text)
-                          if m != None:
-                            if dt_revision <= int(m.group(1)):
-                              r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
+                          r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
 
-                          if r[1] != 409:
-                            dt_yml, r = update_dt(rr.text, dt_yml, r)
-
-                        if r[1] == 500 or r[1] == 200:
-                          dt_yml = add_client_fields(dt_yml, remote_addr)
-                          rr = aws_s3_put(aws_s3_url, dt_filename, dt_yml, 'application/yaml')
-
-                          if rr.status_code == 200:
-                            r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
-
-                          elif rr.status_code == 403:
-                            r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
-
-                      except Exception as e:
-                        traceback.print_exc()
+                        elif rr.status_code == 403:
+                          r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
 
                     elif github_url:
                       sha = None
 
-                      try:
-                        rr = github_get(github_url, dt_filename)
-                        if rr.status_code == 200:
-                          jobj = rr.json()
-                          content = jobj['content']
-                          sha = jobj['sha']
+                      rr = github_get(github_url, dt_filename)
+                      if rr.status_code == 200:
+                        jobj = rr.json()
+                        content = jobj['content']
+                        sha = jobj['sha']
 
-                          if jobj.get('encoding') and jobj.get('encoding') == 'base64':
-                            content = base64.b64decode(content).decode('utf-8')
+                        if jobj.get('encoding') and jobj.get('encoding') == 'base64':
+                          content = base64.b64decode(content).decode('utf-8')
 
-                          m = re.search(r'revision: (\d+)', content)
-                          if m != None:
-                            if dt_revision <= int(m.group(1)):
-                              r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
+                        m = re.search(r'revision: (\d+)', content)
+                        if m != None:
+                          if dt_revision <= int(m.group(1)):
+                            r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
 
-                          if r[1] != 409:
-                            dt_yml, r = update_dt(content, dt_yml, r)
+                        if r[1] != 409:
+                          dt_yml, r = update_dt(content, dt_yml, r)
 
-                        if r[1] == 500 or r[1] == 200:
-                          dt_yml = add_client_fields(dt_yml, remote_addr)
-                          rr = github_put(github_url, dt_filename, dt_yml, sha)
+                      if r[1] == 500 or r[1] == 200:
+                        dt_yml = add_client_fields(dt_yml, remote_addr)
+                        rr = github_put(github_url, dt_filename, dt_yml, sha)
 
-                          if str(rr.status_code).startswith('2'):
-                            r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
+                        if str(rr.status_code).startswith('2'):
+                          r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
 
-                          elif rr.status_code == 401:
-                            r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+                        elif rr.status_code == 401:
+                          r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
 
-                          else:
-                            print(rr.text)
-
-                      except Exception as e:
-                        traceback.print_exc()
+                        else:
+                          print(rr.text)
 
                     else:
-                      try:
-                        dt_filename = os.path.normpath(repository + '/' + dt_filename)
+                      dt_filename = os.path.normpath(repository + '/' + dt_filename)
 
-                        if os.path.isfile(dt_filename):
-                          with open(dt_filename, 'rb') as f:
-                            rr = f.read()
+                      if os.path.isfile(dt_filename):
+                        with open(dt_filename, 'rb') as f:
+                          rr = f.read()
 
-                          m = re.search(r'revision: (\d+)', rr.decode('utf-8'))
-                          if m != None:
-                            if dt_revision <= int(m.group(1)):
-                              r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
+                        m = re.search(r'revision: (\d+)', rr.decode('utf-8'))
+                        if m != None:
+                          if dt_revision <= int(m.group(1)):
+                            r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
 
-                          if r[1] != 409:
-                            dt_yml, r = update_dt(rr.decode('utf-8'), dt_yml, r)
+                        if r[1] != 409:
+                          dt_yml, r = update_dt(rr.decode('utf-8'), dt_yml, r)
 
-                        if r[1] == 500 or r[1] == 200:
-                          dt_yml = add_client_fields(dt_yml, remote_addr)
-                          with open(dt_filename, 'w') as f:
-                            f.write(dt_yml)
+                      if r[1] == 500 or r[1] == 200:
+                        dt_yml = add_client_fields(dt_yml, remote_addr)
+                        with open(dt_filename, 'w') as f:
+                          f.write(dt_yml)
 
-                            r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
-
-                      except Exception as e:
-                        traceback.print_exc()
+                          r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
 
                   else:
                     r = [ 'text/plain', 429, '429 Too Many Requests\r\n', sys._getframe().f_lineno ]
 
                 except Exception as e:
-                  traceback.print_exc()
+                  log('Exception: ' + str(e))
                   r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
 
               else:
