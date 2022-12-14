@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # JinjaFx Server - Jinja2 Templating Tool
-# Copyright (c) 2020-2022 Chris Mason <chris@netnix.org>
+# Copyright (c) 2020-2023 Chris Mason <chris@netnix.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
 import cmarkgfm, emoji, func_timeout
 
-__version__ = '22.12.1'
+__version__ = '22.12.2'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -749,7 +749,7 @@ def main(rflag=[0]):
 
   try:
     print('JinjaFx Server v' + __version__ + ' - Jinja2 Templating Tool')
-    print('Copyright (c) 2020-2022 Chris Mason <chris@netnix.org>\n')
+    print('Copyright (c) 2020-2023 Chris Mason <chris@netnix.org>\n')
 
     parser = ArgumentParser(add_help=False)
     parser.add_argument('-s', action='store_true', required=True)
