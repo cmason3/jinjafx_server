@@ -503,6 +503,15 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     dt_yml += 'dt:\n'
 
                     if 'datasets' in dt:
+                      if 'global' in dt:
+                        vdt['global'] = base64.b64decode(dt['global']).decode('utf-8') if 'global' in dt and len(dt['global'].strip()) > 0 else ''
+
+                        if vdt['global'] == '':
+                          dt_yml += '  global: ""\n\n'
+                        else:
+                          dt_yml += '  global: |2\n'
+                          dt_yml += re.sub('^', ' ' * 4, vdt['global'].rstrip(), flags=re.MULTILINE) + '\n\n'
+
                       dt_yml += '  datasets:\n'
 
                       for ds in dt['datasets']:

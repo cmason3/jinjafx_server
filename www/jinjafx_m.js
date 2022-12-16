@@ -117,6 +117,7 @@ function getStatusText(code) {
           onDragEnd: refresh_cm,
           onDragStart: reset_icons
         });
+        window.cmgVars.refresh();
       }
       document.getElementById('select_ds').disabled = false;
       document.getElementById('delete_ds').disabled = false;
@@ -126,7 +127,11 @@ function getStatusText(code) {
       document.getElementById('delete_ds').disabled = true;
       document.getElementById('xgvars').classList.add('d-none');
       document.getElementById('xlvars').classList.add('h-100');
-      xsplit.destroy();
+      
+      if (xsplit != null) {
+        xsplit.destroy();
+        xsplit = null;
+      }
     }
     document.getElementById('selected_ds').innerHTML = current_ds;
   }
@@ -242,6 +247,17 @@ function getStatusText(code) {
       set_status("darkred", "ERROR", "Non ASCII Character(s) in 'data.csv'");
       return false;
     }
+
+    if (document.getElementById('select_ds').disabled == false) {
+      var cgVars = window.cmgVars.getSearchCursor(nonASCIIRegex);
+      if (cgVars.findNext()) {
+        window.cmgVars.focus();
+        window.cmgVars.setSelection(cgVars.from(), cgVars.to());
+        set_status("darkred", "ERROR", "Non ASCII Character(s) in 'global.yml'");
+        return false;
+      }
+    }
+
     var cVars = window.cmVars.getSearchCursor(nonASCIIRegex);
     if (cVars.findNext()) {
       window.cmVars.focus();
@@ -266,6 +282,20 @@ function getStatusText(code) {
 
         dt.data = window.btoa(dt.data.join("\n"));
         dt.vars = window.cmVars.getValue().replace(/\t/g, "  ");
+
+        if (document.getElementById('select_ds').disabled == false) {
+          var global = window.cmgVars.getValue().replace(/\t/g, "  ");
+
+          try {
+            jsyaml.load(global, jsyaml_schema);
+            dt.vars = global + "\n\n" + dt.vars;
+          }
+          catch (e) {
+            console.log(e);
+            set_status("darkred", "ERROR", '[global.yml] ' + e);
+            return false;
+          }
+        }
 
         if (dt.vars.match(/\S/)) {
           try {
@@ -419,6 +449,11 @@ function getStatusText(code) {
         }
         else {
           dt.datasets = {};
+
+          if (Object.keys(datasets).length > 1) {
+            dt.global = window.btoa(window.cmgVars.getValue().replace(/\t/g, "  "));
+          }
+
           switch_dataset(current_ds, true);
           Object.keys(datasets).forEach(function(ds) {
             dt.datasets[ds] = {};
@@ -1695,6 +1730,8 @@ function getStatusText(code) {
       }
   
       current_ds = 'Default';
+
+      window.cmgVars.setValue("");
   
       if (_dt.hasOwnProperty("datasets")) {
         datasets = {};
@@ -1708,6 +1745,10 @@ function getStatusText(code) {
         current_ds = Object.keys(datasets)[0];
         window.cmData.swapDoc(datasets[current_ds][0]);
         window.cmVars.swapDoc(datasets[current_ds][1]);
+
+        if (_dt.hasOwnProperty("global")) {
+          window.cmgVars.setValue(_dt.global);
+        }
       }
       else {
         datasets = {
@@ -1732,6 +1773,7 @@ function getStatusText(code) {
   
       window.cmData.getDoc().clearHistory();
       window.cmVars.getDoc().clearHistory();
+      window.cmgVars.getDoc().clearHistory();
       window.cmTemplate.getDoc().clearHistory();
   
       rebuild_datasets();

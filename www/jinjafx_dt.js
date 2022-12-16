@@ -19,6 +19,18 @@
       dtx += 'dt:\n';
 
       if (dt.hasOwnProperty('datasets')) {
+        if (dt.hasOwnProperty('global')) {
+          var global = dt.global.match(/\S/) ? window.atob(dt.global).replace(/\s+$/g, '') : "";
+
+          if (global == '') {
+            dtx += '  global: ""\n\n';
+          }
+          else {
+            dtx += '  global: |2\n';
+            dtx += window.opener.quote(global.replace(/^/gm, '    ')) + '\n\n';
+          }
+        }
+
         dtx += '  datasets:\n';
 
         Object.keys(dt.datasets).forEach(function(ds) {
