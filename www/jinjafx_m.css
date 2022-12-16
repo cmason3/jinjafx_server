@@ -120,6 +120,9 @@ textarea {
 .lb-vars {
   background: #00a9d8;
 }
+.lb-gvars {
+  background: #008bd9;
+}
 .fade-out {
   visibility: hidden;
   opacity: 0;

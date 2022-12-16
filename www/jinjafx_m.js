@@ -57,6 +57,8 @@ function getStatusText(code) {
   var csv_on = false;
   var dicon = "ldata";
   var cDataPos = null;
+  var xsize = [50, 50];
+  var xsplit = null;
 
   var jsyaml_schema = {
     schema: jsyaml.DEFAULT_SCHEMA.extend(['scalar', 'sequence', 'mapping'].map(function(kind) {
@@ -102,12 +104,29 @@ function getStatusText(code) {
     });
   
     if (Object.keys(datasets).length > 1) {
+      if (document.getElementById('select_ds').disabled == true) {
+        document.getElementById('xgvars').classList.remove('d-none');
+        document.getElementById('xlvars').classList.remove('h-100');
+
+        xsplit = Split(["#xgvars", "#xlvars"], {
+          direction: "vertical",
+          cursor: "row-resize",
+          sizes: xsize,
+          snapOffset: 0,
+          minSize: 30,
+          onDragEnd: refresh_cm,
+          onDragStart: reset_icons
+        });
+      }
       document.getElementById('select_ds').disabled = false;
       document.getElementById('delete_ds').disabled = false;
     }
     else {
       document.getElementById('select_ds').disabled = true;
       document.getElementById('delete_ds').disabled = true;
+      document.getElementById('xgvars').classList.add('d-none');
+      document.getElementById('xlvars').classList.add('h-100');
+      xsplit.destroy();
     }
     document.getElementById('selected_ds').innerHTML = current_ds;
   }
@@ -770,6 +789,17 @@ function getStatusText(code) {
       mode: "data",
       viewportMargin: 80,
       smartIndent: false
+    });
+
+    window.cmgVars = CodeMirror.fromTextArea(t_gvars, {
+      tabSize: 2,
+      scrollbarStyle: "null",
+      styleSelectedText: false,
+      extraKeys: gExtraKeys,
+      mode: "yaml",
+      viewportMargin: 80,
+      smartIndent: false,
+      showTrailingSpace: true
     });
 
     window.cmVars = CodeMirror.fromTextArea(vars, {
