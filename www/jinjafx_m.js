@@ -132,6 +132,9 @@ function getStatusText(code) {
       if (xsplit != null) {
         xsplit.destroy();
         xsplit = null;
+
+        window.cmgVars.setValue("");
+        window.cmgVars.getDoc().clearHistory();
       }
     }
     document.getElementById('selected_ds').innerHTML = current_ds;
@@ -203,7 +206,7 @@ function getStatusText(code) {
     fe.focus();
 
     if (method == "delete_dataset") {
-      if ((window.cmData.getValue().match(/\S/) || window.cmVars.getValue().match(/\S/)) || ()) {
+      if ((window.cmData.getValue().match(/\S/) || window.cmVars.getValue().match(/\S/)) || ((Object.keys(datasets).length == 2) && window.cmgVars.getValue().match(/\S/))) {
         if (confirm("Are You Sure?") === true) {
           delete_dataset(current_ds);
         }
@@ -991,6 +994,7 @@ function getStatusText(code) {
     fe = window.cmTemplate;
     window.cmData.on("focus", function() { fe = window.cmData });
     window.cmVars.on("focus", function() { fe = window.cmVars; onDataBlur() });
+    window.cmgVars.on("focus", function() { fe = window.cmgVars; onDataBlur() });
     window.cmTemplate.on("focus", function() { fe = window.cmTemplate; onDataBlur() });
 
     document.getElementById('header').onclick = onDataBlur;
@@ -1015,9 +1019,11 @@ function getStatusText(code) {
     window.cmData.on("beforeChange", onPaste);
     window.cmTemplate.on("beforeChange", onPaste);
     window.cmVars.on("beforeChange", onPaste);
+    window.cmgVars.on("beforeChange", onPaste);
 
     window.cmData.on("change", onChange);
     window.cmVars.on("change", onChange);
+    window.cmgVars.on("change", onChange);
     window.cmTemplate.on("change", onChange);
 
     // var hsize = [60, 40];
@@ -1608,12 +1614,14 @@ function getStatusText(code) {
     window.cmData.getWrapperElement().style.background = '#eee';
     window.cmTemplate.getWrapperElement().style.background = '#eee';
     window.cmVars.getWrapperElement().style.background = '#eee';
+    window.cmgVars.getWrapperElement().style.background = '#eee';
     document.getElementById('overlay').style.display = 'block';
   }
   
   function clear_wait() {
     document.getElementById('overlay').style.display = 'none';
     window.cmVars.getWrapperElement().style.background = '';
+    window.cmgVars.getWrapperElement().style.background = '';
     window.cmTemplate.getWrapperElement().style.background = '';
     window.cmData.getWrapperElement().style.background = '';
     document.getElementById("csv").style.background = '#fff';
