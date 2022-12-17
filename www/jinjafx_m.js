@@ -51,13 +51,13 @@ function getStatusText(code) {
   var r_input_form = null;
   var jinput = null;
   var protect_action = 0;
-  var cflag = false;
+  // var cflag = false;
   var revision = 0;
   var protect_ok = false;
   var csv_on = false;
-  var dicon = "ldata";
+  // var dicon = "ldata";
   var cDataPos = null;
-  var xsize = [50, 50];
+  // var xsize = [50, 50];
   var xsplit = null;
 
   var jsyaml_schema = {
@@ -66,7 +66,8 @@ function getStatusText(code) {
         kind: kind,
         multi: true
       });
-    }))
+    })),
+    json: true
   };
   
   function select_dataset(e) {
@@ -111,11 +112,11 @@ function getStatusText(code) {
         xsplit = Split(["#xgvars", "#xlvars"], {
           direction: "vertical",
           cursor: "row-resize",
-          sizes: xsize,
+          sizes: [50, 50],
           snapOffset: 0,
           minSize: 30,
-          onDragEnd: refresh_cm,
-          onDragStart: reset_icons
+          // onDragEnd: refresh_cm,
+          onDragStart: remove_info
         });
         window.cmgVars.refresh();
       }
@@ -202,7 +203,7 @@ function getStatusText(code) {
     fe.focus();
 
     if (method == "delete_dataset") {
-      if (window.cmData.getValue().match(/\S/) || window.cmVars.getValue().match(/\S/)) {
+      if ((window.cmData.getValue().match(/\S/) || window.cmVars.getValue().match(/\S/)) || ()) {
         if (confirm("Are You Sure?") === true) {
           delete_dataset(current_ds);
         }
@@ -280,19 +281,32 @@ function getStatusText(code) {
           return false;
         }
 
-        dt.data = window.btoa(dt.data.join("\n"));
-        dt.vars = window.cmVars.getValue().replace(/\t/g, "  ");
-
         if (document.getElementById('select_ds').disabled == false) {
           var global = window.cmgVars.getValue().replace(/\t/g, "  ");
 
+          if (global.match(/\S/)) {
+            try {
+              jsyaml.load(global, jsyaml_schema);
+              dt.vars = global + "\n\n";
+            }
+            catch (e) {
+              console.log(e);
+              set_status("darkred", "ERROR", '[global.yml] ' + e);
+              return false;
+            }
+          }
+        }
+
+        var vars = window.cmVars.getValue().replace(/\t/g, "  ");
+
+        if (vars.match(/\S/)) {
           try {
-            jsyaml.load(global, jsyaml_schema);
-            dt.vars = global + "\n\n" + dt.vars;
+            jsyaml.load(vars, jsyaml_schema);
+            dt.vars += vars;
           }
           catch (e) {
             console.log(e);
-            set_status("darkred", "ERROR", '[global.yml] ' + e);
+            set_status("darkred", "ERROR", '[vars.yml] ' + e);
             return false;
           }
         }
@@ -429,10 +443,11 @@ function getStatusText(code) {
           }
           catch (e) {
             console.log(e);
-            set_status("darkred", "ERROR", '[vars.yml] ' + e);
+            set_status("darkred", "ERROR", '[all.yml] ' + e);
             return false;
           }
         }
+        dt.data = window.btoa(dt.data.join("\n"));
         jinjafx_generate();
       }
       else if ((method === "export") || (method === "get_link") || (method === "update_link")) {
@@ -985,7 +1000,7 @@ function getStatusText(code) {
     document.getElementById("csv").onclick = function() {
       window.cmData.getWrapperElement().style.display = 'block';
       document.getElementById("csv").style.display = 'none';
-      document.getElementById(dicon).classList.remove('d-none');
+      // document.getElementById(dicon).classList.remove('d-none');
       window.cmData.refresh();
       window.cmData.focus();
 
@@ -1005,29 +1020,30 @@ function getStatusText(code) {
     window.cmVars.on("change", onChange);
     window.cmTemplate.on("change", onChange);
 
-    var hsize = [60, 40];
-    var vsize = [30, 70];
+    // var hsize = [60, 40];
+    // var vsize = [30, 70];
 
     var hsplit = Split(["#cdata", "#cvars"], {
       direction: "horizontal",
       cursor: "col-resize",
-      sizes: hsize,
+      sizes: [60, 40],
       snapOffset: 0,
       minSize: 45,
-      onDragEnd: refresh_cm,
-      onDragStart: reset_icons
+      // onDragEnd: refresh_cm,
+      onDragStart: remove_info
     });
 
     var vsplit = Split(["#top", "#ctemplate"], {
       direction: "vertical",
       cursor: "row-resize",
-      sizes: vsize,
+      sizes: [30, 70],
       snapOffset: 0,
       minSize: 30,
-      onDragEnd: refresh_cm,
-      onDragStart: reset_icons
+      // onDragEnd: refresh_cm,
+      onDragStart: remove_info
     });
 
+    /*
     document.getElementById('ldata').onclick = function() {
       if (cflag == false) {
         hsize = hsplit.getSizes();
@@ -1092,6 +1108,7 @@ function getStatusText(code) {
       document.getElementById('ltemplate').classList.remove('d-none');
       window.cmTemplate.focus();
     };
+    */
 
     document.getElementById('jinjafx_input').addEventListener('shown.bs.modal', function (e) {
       var focusable = document.getElementById('jinjafx_input_form').querySelectorAll('input,select');
@@ -1548,13 +1565,16 @@ function getStatusText(code) {
     }
   };
   
+  /*
   function refresh_cm() {
     window.cmData.refresh();
     window.cmVars.refresh();
     window.cmTemplate.refresh();
-    cflag = false;
+    // cflag = false;
   }
+  */
   
+  /*
   function reset_icons() {
     if (!csv_on) {
       document.getElementById('ldata2').classList.add('d-none');
@@ -1568,11 +1588,17 @@ function getStatusText(code) {
     document.getElementById('template_info').style.zIndex = -1000;
     dicon = 'ldata';
   }
+  */
+
+  function remove_info() {
+    document.getElementById('template_info').classList.add('fade-out');
+    document.getElementById('template_info').style.zIndex = -1000;
+  }
   
   function set_wait() {
-    document.querySelectorAll('.expand').forEach(function(e, i) {
-      e.style.background = '#eee';
-    });
+    //document.querySelectorAll('.expand').forEach(function(e, i) {
+    //  e.style.background = '#eee';
+    //});
     fe.setOption('readOnly', 'nocursor');
     var e = document.getElementById("csv").getElementsByTagName("th");
     for (var i = 0; i < e.length; i++) {
@@ -1596,9 +1622,9 @@ function getStatusText(code) {
       e[i].style.background = 'none';
     }
     fe.setOption('readOnly', false);
-    document.querySelectorAll('.expand').forEach(function(e, i) {
-      e.style.background = '#fff';
-    });
+    //document.querySelectorAll('.expand').forEach(function(e, i) {
+    //  e.style.background = '#fff';
+    //});
     fe.focus();
   }
   
@@ -1645,8 +1671,8 @@ function getStatusText(code) {
     });
     if (datarows.length > 1) {
       document.getElementById("csv").innerHTML = get_csv_astable(datarows);
-      document.getElementById('ldata').classList.add('d-none');
-      document.getElementById('ldata2').classList.add('d-none');
+      // document.getElementById('ldata').classList.add('d-none');
+      // document.getElementById('ldata2').classList.add('d-none');
       document.getElementById("csv").style.display = 'block';
       window.cmData.getWrapperElement().style.display = 'none';
       csv_on = true;
@@ -1654,7 +1680,7 @@ function getStatusText(code) {
     else {
       window.cmData.getWrapperElement().style.display = 'block';
       document.getElementById("csv").style.display = 'none';
-      document.getElementById(dicon).classList.remove('d-none');
+      // document.getElementById(dicon).classList.remove('d-none');
       window.cmData.refresh();
       csv_on = false;
     }

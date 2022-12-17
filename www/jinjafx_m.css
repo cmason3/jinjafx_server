@@ -65,6 +65,7 @@ textarea {
   border-top-left-radius: 0.3rem !important;
   border-bottom-left-radius: 0.3rem !important;
 }
+/*
 .expand {
   position: absolute;
   background: #fff;
@@ -80,6 +81,7 @@ textarea {
 .expand:hover {
   stroke: black;
 }
+*/
 .code-block {
   border: 1px dashed gray;
   background-color: lightgray;
