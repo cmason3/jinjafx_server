@@ -134,7 +134,7 @@ function getStatusText(code) {
 
         if (window.cmgVars.getValue().match(/\S/)) {
           var ds = Object.keys(datasets)[0];
-          datasets[ds][1].setValue(window.cmgVars.getValue() + "\n\n" + datasets[ds][1].getValue());
+          datasets[ds][1].setValue(window.cmgVars.getValue().trimEnd() + "\n\n" + datasets[ds][1].getValue());
         }
 
         window.cmgVars.setValue("");
@@ -294,7 +294,7 @@ function getStatusText(code) {
           if (global.match(/\S/)) {
             try {
               jsyaml.load(global, jsyaml_schema);
-              dt.vars = global + "\n\n";
+              dt.vars = global.trimEnd() + "\n\n";
             }
             catch (e) {
               console.log(e);
