@@ -115,7 +115,6 @@ function getStatusText(code) {
           sizes: [50, 50],
           snapOffset: 0,
           minSize: 30,
-          // onDragEnd: refresh_cm,
           onDragStart: remove_info
         });
         window.cmgVars.refresh();
