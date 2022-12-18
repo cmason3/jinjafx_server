@@ -820,6 +820,8 @@ def main(rflag=[0]):
       soft, hard = resource.getrlimit(resource.RLIMIT_AS)
       resource.setrlimit(resource.RLIMIT_AS, (args.ml * 1024 * 1024, hard))
 
+    update_versioned_links(base + '/www')
+
     log('Starting JinjaFx Server (PID is ' + str(os.getpid()) + ') on http://' + args.l + ':' + str(args.p) + '...')
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -864,6 +866,31 @@ def log(t):
       except Exception as e:
         traceback.print_exc()
         print('[' + timestamp + '] ' + str(e))
+
+
+def update_versioned_links(d):
+  for fn in os.listdir(d):
+    if fn.endswith('.html'):
+      changed = False
+      html = []
+ 
+      with open(d + '/' + fn, 'rt') as fh:
+        for ln in fh:
+          m = re.search(r'(?:href|src)="/([a-f0-9]{8})/(.+?)"', ln)
+          if m:
+            with open(d + '/' + m.group(2), 'rb') as fh2:
+              h = hashlib.sha256(fh2.read()).hexdigest()[:8]
+ 
+              if h != m.group(1):
+                ln = re.sub(m.group(1), h, ln)
+                # log('[' + fn + '] Updated ' + m.group(2) + ' to ' + h)
+                changed = True
+ 
+          html.append(ln)
+ 
+      if changed:
+        with open(d + '/' + fn, 'wt') as fh:
+          fh.writelines(html)
 
 
 def w_directory(d):

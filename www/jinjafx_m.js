@@ -1008,7 +1008,6 @@ function getStatusText(code) {
     document.getElementById("csv").onclick = function() {
       window.cmData.getWrapperElement().style.display = 'block';
       document.getElementById("csv").style.display = 'none';
-      // document.getElementById(dicon).classList.remove('d-none');
       window.cmData.refresh();
       window.cmData.focus();
 
@@ -1029,9 +1028,6 @@ function getStatusText(code) {
     window.cmVars.on("change", onChange);
     window.cmgVars.on("change", onChange);
     window.cmTemplate.on("change", onChange);
-
-    // var hsize = [60, 40];
-    // var vsize = [30, 70];
 
     var hsplit = Split(["#cdata", "#cvars"], {
       direction: "horizontal",
