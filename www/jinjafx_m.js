@@ -133,6 +133,11 @@ function getStatusText(code) {
         xsplit.destroy();
         xsplit = null;
 
+        if (window.cmgVars.getValue().match(/\S/)) {
+          var ds = Object.keys(datasets)[0];
+          datasets[ds][1].setValue(window.cmgVars.getValue() + "\n\n" + datasets[ds][1].getValue());
+        }
+
         window.cmgVars.setValue("");
         window.cmgVars.getDoc().clearHistory();
       }
