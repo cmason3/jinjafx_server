@@ -40,6 +40,7 @@ rl_limit = 0
 logfile = None
 timelimit = 0
 
+
 class JinjaFxServer(HTTPServer):
   def handle_error(self, request, client_address):
     pass
@@ -350,25 +351,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 if y != None:
                   gvars.update(y)
 
-
-              class StoppableJinjaFx(threading.Thread):
-                def __init__(self, jinjafx, template, data, gvars, ret):
-                  threading.Thread.__init__(self)
-                  self.jinjafx = jinjafx
-                  self.template = template
-                  self.data = data
-                  self.gvars = gvars
-                  self.ret = ret
-                  self.start()
-
-                def run(self):
-                  self.ret[1] = self.jinjafx(self.template, self.data, self.gvars, 'Output', [], True)
-                  self.ret[0] = True
-
-                def stop(self):
-                  ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.ident), ctypes.py_object(SystemExit))
-
-
               st = round(time.time() * 1000)
               ocount = 0
               ret = [False, None]
@@ -376,7 +358,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               t = StoppableJinjaFx(jinjafx.JinjaFx().jinjafx, template.decode('utf-8'), data.decode('utf-8'), gvars, ret)
 
               if timelimit > 0:
-                while t.is_alive() and  # timeleft
+                while t.is_alive() and ((time.time() * 1000) - st) <= (timelimit * 1000):
                   time.sleep(0.1)
 
                 if t.is_alive():
@@ -389,22 +371,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
               else:
                 raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
-
-              
-                  
-
-              #  if timelimit > 0:
-              #    outputs = func_timeout.func_timeout(timelimit, jinjafx.JinjaFx().jinjafx, args=(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True))
-              #  else:
-              #    outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True)
-              #              
-              #except func_timeout.FunctionTimedOut:
-              #  raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
-
-
-
-
-
 
               jsr = {
                 'status': 'ok',
@@ -779,12 +745,29 @@ class JinjaFxThread(threading.Thread):
     self.daemon = True
     self.start()
 
-
   def run(self):
     httpd = JinjaFxServer(self.addr, JinjaFxRequest, False)
     httpd.socket = self.s
     httpd.server_bind = self.server_close = lambda self: None
     httpd.serve_forever()
+
+
+class StoppableJinjaFx(threading.Thread):
+  def __init__(self, jinjafx, template, data, gvars, ret):
+    threading.Thread.__init__(self)
+    self.jinjafx = jinjafx
+    self.template = template
+    self.data = data
+    self.gvars = gvars
+    self.ret = ret
+    self.start()
+
+  def run(self):
+    self.ret[1] = self.jinjafx(self.template, self.data, self.gvars, 'Output', [], True)
+    self.ret[0] = True
+
+  def stop(self):
+    ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.ident), ctypes.py_object(SystemExit))
 
 
 def main(rflag=[0]):
