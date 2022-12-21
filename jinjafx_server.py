@@ -18,8 +18,8 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime, resource
-import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
-import cmarkgfm, emoji, func_timeout
+import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes
+import cmarkgfm, emoji # , func_timeout
 
 __version__ = '23.1.0'
 
@@ -350,17 +350,61 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 if y != None:
                   gvars.update(y)
 
-              try:
-                st = round(time.time() * 1000)
-                ocount = 0
 
-                if timelimit > 0:
-                  outputs = func_timeout.func_timeout(timelimit, jinjafx.JinjaFx().jinjafx, args=(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True))
-                else:
-                  outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True)
-                            
-              except func_timeout.FunctionTimedOut:
+              class StoppableJinjaFx(threading.Thread):
+                def __init__(self, jinjafx, template, data, gvars, ret):
+                  threading.Thread.__init__(self)
+                  self.jinjafx = jinjafx
+                  self.template = template
+                  self.data = data
+                  self.gvars = gvars
+                  self.ret = ret
+                  self.start()
+
+                def run(self):
+                  self.ret[1] = self.jinjafx(self.template, self.data, self.gvars, 'Output', [], True)
+                  self.ret[0] = True
+
+                def stop(self):
+                  ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.ident), ctypes.py_object(SystemExit))
+
+
+              st = round(time.time() * 1000)
+              ocount = 0
+              ret = [False, None]
+              
+              t = StoppableJinjaFx(jinjafx.JinjaFx().jinjafx, template.decode('utf-8'), data.decode('utf-8'), gvars, ret)
+
+              if timelimit > 0:
+                while t.is_alive() and  # timeleft
+                  time.sleep(0.1)
+
+                if t.is_alive():
+                  t.stop()
+
+              t.join()
+
+              if ret[0]:
+                outputs = ret[1]
+
+              else:
                 raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
+
+              
+                  
+
+              #  if timelimit > 0:
+              #    outputs = func_timeout.func_timeout(timelimit, jinjafx.JinjaFx().jinjafx, args=(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True))
+              #  else:
+              #    outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True)
+              #              
+              #except func_timeout.FunctionTimedOut:
+              #  raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
+
+
+
+
+
 
               jsr = {
                 'status': 'ok',
