@@ -65,23 +65,6 @@ textarea {
   border-top-left-radius: 0.3rem !important;
   border-bottom-left-radius: 0.3rem !important;
 }
-/*
-.expand {
-  position: absolute;
-  background: #fff;
-  z-index: 2;
-  right: 2px;
-  top: 2px;
-  padding-top: 2px;
-  padding-right: 2px;
-  padding-left: 2px;
-  cursor: pointer;
-  stroke: gray;
-}
-.expand:hover {
-  stroke: black;
-}
-*/
 .code-block {
   border: 1px dashed gray;
   background-color: lightgray;
