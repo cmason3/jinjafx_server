@@ -854,13 +854,13 @@ def main(rflag=[0]):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((args.l, args.p))
-    s.listen(16)
+    s.listen(8)
 
     rflag[0] = 1
     threads = []
     repository = args.r
 
-    for i in range(16):
+    for i in range(8):
       threads.append(JinjaFxThread(s, (args.l, args.p)))
 
     while rflag[0] < 2:
