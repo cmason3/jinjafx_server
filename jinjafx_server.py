@@ -39,6 +39,7 @@ rl_rate = 0
 rl_limit = 0
 logfile = None
 timelimit = 0
+n_threads = 4
 
 
 class JinjaFxServer(HTTPServer):
@@ -854,13 +855,13 @@ def main(rflag=[0]):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((args.l, args.p))
-    s.listen(8)
+    s.listen()
 
     rflag[0] = 1
     threads = []
     repository = args.r
 
-    for i in range(8):
+    for i in range(n_threads):
       threads.append(JinjaFxThread(s, (args.l, args.p)))
 
     while rflag[0] < 2:
