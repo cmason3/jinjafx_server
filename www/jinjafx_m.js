@@ -1031,7 +1031,7 @@ function getStatusText(code) {
     var hsplit = Split(["#cdata", "#cvars"], {
       direction: "horizontal",
       cursor: "col-resize",
-      sizes: [60, 40],
+      sizes: [50, 50],
       snapOffset: 0,
       minSize: 45,
       onDragStart: remove_info
