@@ -354,34 +354,27 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
               st = round(time.time() * 1000)
               ocount = 0
-              ret = [False, None]
+              #ret = [False, None]
               
-              log(f"about to start st is {st}")
 
-              t = StoppableJinjaFx(jinjafx.JinjaFx().jinjafx, template.decode('utf-8'), data.decode('utf-8'), gvars, ret)
+              outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True)
 
-              if timelimit > 0:
-                log(f"about to loop")
-                while t.is_alive() and ((time.time() * 1000) - st) <= (timelimit * 1000):
-                  time.sleep(0.1)
+              #t = StoppableJinjaFx(jinjafx.JinjaFx().jinjafx, template.decode('utf-8'), data.decode('utf-8'), gvars, ret)
 
-                log(f"time taken is {(time.time() * 1000) - st}")
+              #if timelimit > 0:
+              #  while t.is_alive() and ((time.time() * 1000) - st) <= (timelimit * 1000):
+              #    time.sleep(0.1)
+#
+            #    if t.is_alive():
+            #      t.stop()
 
-                if t.is_alive():
-                  log(f"dropped out of loop - need to stop")
-                  t.stop()
+           #   t.join()
 
-              log(f"about to join")
+            #  if ret[0]:
+             #   outputs = ret[1]
 
-              t.join()
-
-              log(f"checking outputs")
-
-              if ret[0]:
-                outputs = ret[1]
-
-              else:
-                raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
+         #     else:
+         #       raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
 
               jsr = {
                 'status': 'ok',
