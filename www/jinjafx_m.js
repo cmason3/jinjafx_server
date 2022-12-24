@@ -1031,7 +1031,7 @@ function getStatusText(code) {
     var hsplit = Split(["#cdata", "#cvars"], {
       direction: "horizontal",
       cursor: "col-resize",
-      sizes: [50, 50],
+      sizes: [60, 40],
       snapOffset: 0,
       minSize: 45,
       onDragStart: remove_info
@@ -1040,7 +1040,7 @@ function getStatusText(code) {
     var vsplit = Split(["#top", "#ctemplate"], {
       direction: "vertical",
       cursor: "row-resize",
-      sizes: [30, 70],
+      sizes: [40, 60],
       snapOffset: 0,
       minSize: 30,
       onDragStart: remove_info
