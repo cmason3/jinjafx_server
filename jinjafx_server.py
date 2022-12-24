@@ -354,27 +354,27 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
               st = round(time.time() * 1000)
               ocount = 0
-              #ret = [False, None]
+              ret = [0, None]
               
+              t = StoppableJinjaFx(jinjafx.JinjaFx().jinjafx, template.decode('utf-8'), data.decode('utf-8'), gvars, ret)
 
-              outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True)
+              if timelimit > 0:
+                while t.is_alive() and ((time.time() * 1000) - st) <= (timelimit * 1000):
+                  time.sleep(0.1)
 
-              #t = StoppableJinjaFx(jinjafx.JinjaFx().jinjafx, template.decode('utf-8'), data.decode('utf-8'), gvars, ret)
+                if t.is_alive():
+                  t.stop()
 
-              #if timelimit > 0:
-              #  while t.is_alive() and ((time.time() * 1000) - st) <= (timelimit * 1000):
-              #    time.sleep(0.1)
-#
-            #    if t.is_alive():
-            #      t.stop()
+              t.join()
 
-           #   t.join()
+              if ret[0] == 1:
+                outputs = ret[1]
 
-            #  if ret[0]:
-             #   outputs = ret[1]
+              elif ret[0] == -1:
+                raise ret[1]
 
-         #     else:
-         #       raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
+              else:
+                raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
 
               jsr = {
                 'status': 'ok',
@@ -767,8 +767,13 @@ class StoppableJinjaFx(threading.Thread):
     self.start()
 
   def run(self):
-    self.ret[1] = self.jinjafx(self.template, self.data, self.gvars, 'Output', [], True)
-    self.ret[0] = True
+    try:
+      self.ret[1] = self.jinjafx(self.template, self.data, self.gvars, 'Output', [], True)
+      self.ret[0] = 1
+
+    except Exception as e:
+      self.ret[1] = e
+      self.ret[0] = -1
 
   def stop(self):
     ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.ident), ctypes.py_object(SystemExit))
