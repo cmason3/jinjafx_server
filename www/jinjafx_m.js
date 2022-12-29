@@ -286,11 +286,21 @@ function getStatusText(code) {
         }
 
         dt.vars = '';
+        var vars = window.cmVars.getValue().replace(/\t/g, "  ");
 
         if (document.getElementById('select_ds').disabled == false) {
           var global = window.cmgVars.getValue().replace(/\t/g, "  ");
 
           if (global.match(/\S/)) {
+            if (global.trimStart().startsWith('$ANSIBLE_VAULT;') && vars.match(/\S/)) {
+              set_status("darkred", "ERROR", "Ansible Vault not supported in 'global.yml' with 'vars.yml'");
+              return false;
+            }
+            if (vars.trimStart().startsWith('$ANSIBLE_VAULT;')) {
+              set_status("darkred", "ERROR", "Ansible Vault not supported in 'vars.yml' with 'global.yml'");
+              return false;
+            }
+
             try {
               jsyaml.load(global, jsyaml_schema);
               dt.vars += global.trimEnd() + "\n\n";
@@ -302,8 +312,6 @@ function getStatusText(code) {
             }
           }
         }
-
-        var vars = window.cmVars.getValue().replace(/\t/g, "  ");
 
         if (vars.match(/\S/)) {
           try {
