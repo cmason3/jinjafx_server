@@ -182,6 +182,8 @@ function getStatusText(code) {
     dt.id = dt_id;
     dt.dataset = current_ds;
 
+    console.log("DEBUG: jinjafx_generate()");
+
     if (JSON.stringify(dt).length > 2048 * 1024) {
       set_status("darkred", "ERROR", 'Content Too Large');
     }
@@ -286,6 +288,8 @@ function getStatusText(code) {
         }
 
         dt.vars = '';
+        dt.data = window.btoa(dt.data.join("\n"));
+
         var vars = window.cmVars.getValue().replace(/\t/g, "  ");
 
         if (document.getElementById('select_ds').disabled == false) {
@@ -461,7 +465,6 @@ function getStatusText(code) {
             return false;
           }
         }
-        dt.data = window.btoa(dt.data.join("\n"));
         jinjafx_generate();
       }
       else if ((method === "export") || (method === "get_link") || (method === "update_link")) {
