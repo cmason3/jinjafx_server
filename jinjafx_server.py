@@ -18,10 +18,10 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime, resource
-import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests
-import cmarkgfm, emoji, func_timeout
+import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes
+import cmarkgfm, emoji
 
-__version__ = '22.12.2'
+__version__ = '23.1.0'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -39,6 +39,8 @@ rl_rate = 0
 rl_limit = 0
 logfile = None
 timelimit = 0
+n_threads = 4
+
 
 class JinjaFxServer(HTTPServer):
   def handle_error(self, request, client_address):
@@ -350,16 +352,28 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 if y != None:
                   gvars.update(y)
 
-              try:
-                st = round(time.time() * 1000)
-                ocount = 0
+              st = round(time.time() * 1000)
+              ocount = 0
+              ret = [0, None]
+              
+              t = StoppableJinjaFx(jinjafx.JinjaFx().jinjafx, template.decode('utf-8'), data.decode('utf-8'), gvars, ret)
 
-                if timelimit > 0:
-                  outputs = func_timeout.func_timeout(timelimit, jinjafx.JinjaFx().jinjafx, args=(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True))
-                else:
-                  outputs = jinjafx.JinjaFx().jinjafx(template.decode('utf-8'), data.decode('utf-8'), gvars, 'Output', [], True)
-                            
-              except func_timeout.FunctionTimedOut:
+              if timelimit > 0:
+                while t.is_alive() and ((time.time() * 1000) - st) <= (timelimit * 1000):
+                  time.sleep(0.1)
+
+                if t.is_alive():
+                  t.stop()
+
+              t.join()
+
+              if ret[0] == 1:
+                outputs = ret[1]
+
+              elif ret[0] == -1:
+                raise ret[1]
+
+              else:
                 raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
 
               jsr = {
@@ -503,6 +517,15 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     dt_yml += 'dt:\n'
 
                     if 'datasets' in dt:
+                      if 'global' in dt:
+                        vdt['global'] = base64.b64decode(dt['global']).decode('utf-8') if 'global' in dt and len(dt['global'].strip()) > 0 else ''
+
+                        if vdt['global'] == '':
+                          dt_yml += '  global: ""\n\n'
+                        else:
+                          dt_yml += '  global: |2\n'
+                          dt_yml += re.sub('^', ' ' * 4, vdt['global'].rstrip(), flags=re.MULTILINE) + '\n\n'
+
                       dt_yml += '  datasets:\n'
 
                       for ds in dt['datasets']:
@@ -726,12 +749,34 @@ class JinjaFxThread(threading.Thread):
     self.daemon = True
     self.start()
 
-
   def run(self):
     httpd = JinjaFxServer(self.addr, JinjaFxRequest, False)
     httpd.socket = self.s
     httpd.server_bind = self.server_close = lambda self: None
     httpd.serve_forever()
+
+
+class StoppableJinjaFx(threading.Thread):
+  def __init__(self, jinjafx, template, data, gvars, ret):
+    threading.Thread.__init__(self)
+    self.jinjafx = jinjafx
+    self.template = template
+    self.data = data
+    self.gvars = gvars
+    self.ret = ret
+    self.start()
+
+  def run(self):
+    try:
+      self.ret[1] = self.jinjafx(self.template, self.data, self.gvars, 'Output', [], True)
+      self.ret[0] = 1
+
+    except Exception as e:
+      self.ret[1] = e
+      self.ret[0] = -1
+
+  def stop(self):
+    ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.ident), ctypes.py_object(SystemExit))
 
 
 def main(rflag=[0]):
@@ -811,18 +856,20 @@ def main(rflag=[0]):
       soft, hard = resource.getrlimit(resource.RLIMIT_AS)
       resource.setrlimit(resource.RLIMIT_AS, (args.ml * 1024 * 1024, hard))
 
+    update_versioned_links(base + '/www')
+
     log('Starting JinjaFx Server (PID is ' + str(os.getpid()) + ') on http://' + args.l + ':' + str(args.p) + '...')
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((args.l, args.p))
-    s.listen(16)
+    s.listen()
 
     rflag[0] = 1
     threads = []
     repository = args.r
 
-    for i in range(16):
+    for i in range(n_threads):
       threads.append(JinjaFxThread(s, (args.l, args.p)))
 
     while rflag[0] < 2:
@@ -855,6 +902,31 @@ def log(t):
       except Exception as e:
         traceback.print_exc()
         print('[' + timestamp + '] ' + str(e))
+
+
+def update_versioned_links(d):
+  for fn in os.listdir(d):
+    if fn.endswith('.html'):
+      changed = False
+      html = []
+ 
+      with open(d + '/' + fn, 'rt') as fh:
+        for ln in fh:
+          m = re.search(r'(?:href|src)="/([a-f0-9]{8})/(.+?)"', ln)
+          if m:
+            with open(d + '/' + m.group(2), 'rb') as fh2:
+              h = hashlib.sha256(fh2.read()).hexdigest()[:8]
+ 
+              if h != m.group(1):
+                ln = re.sub(m.group(1), h, ln)
+                # log('[' + fn + '] Updated ' + m.group(2) + ' to ' + h)
+                changed = True
+ 
+          html.append(ln)
+ 
+      if changed:
+        with open(d + '/' + fn, 'wt') as fh:
+          fh.writelines(html)
 
 
 def w_directory(d):

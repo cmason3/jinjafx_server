@@ -1,5 +1,5 @@
 [![PyPI](https://img.shields.io/pypi/v/jinjafx-server.svg)](https://pypi.python.org/pypi/jinjafx-server/)
-![Python](https://img.shields.io/badge/python-≥&nbsp;3.6-brightgreen)
+![Python](https://img.shields.io/badge/python-≥&nbsp;3.7-brightgreen)
 [<img src="https://img.shields.io/badge/url-https%3A%2F%2Fjinjafx.io-blue" align="right">](https://jinjafx.io)
 &nbsp;
 <h1 align="center">JinjaFx Server - Jinja2 Templating Tool</h1>
@@ -47,7 +47,7 @@ The "-rl" argument is used to provide an optional rate limit of the source IP - 
 
 ### Shortcut Keys
 
-As well as supporting the standard CodeMirror shortcut keys for the "data.csv", "vars.yml" and "template.j2" panes, it also supports the following custom shortcut keys:
+As well as supporting the standard CodeMirror shortcut keys for the "data.csv", "global.yml", "vars.yml" and "template.j2" panes, it also supports the following custom shortcut keys:
 
 - F11 / Cmd-Enter - Toggle Fullscreen
 
@@ -59,7 +59,7 @@ As well as supporting the standard CodeMirror shortcut keys for the "data.csv", 
 
 ### DataSets
 
-The DataSet feature allows you to include multiple different "data.csv" and "vars.yml" contents while maintaining the same "template.j2". This is to support scenarios where you have different DataSets for your Live vs your Test environments, but the template should be the same. There are no limits on the number of different DataSets that can be added to a single DataTemplate (the name must start with a letter and only contain alphanumerical, "-", " " or "_" characters). When you click "Generate" it will use the currently active DataSet to generate the output - clicking on the name of the current DataSet (by default there is a single "Default" DataSet) allows you to switch between the different DataSets.
+The DataSet feature allows you to include multiple different "data.csv" and "vars.yml" contents while maintaining the same "template.j2". When enabled it also enables a "global.yml" pane for specifying global variables which are common across all DataSets (any variables which are redefined in "vars.yml" will overwrite variables in "global.yml"). This is to support scenarios where you have different DataSets for your Live vs your Test environments, but the template should be the same. There are no limits on the number of different DataSets that can be added to a single DataTemplate (the name must start with a letter and only contain alphanumerical, "-", " " or "_" characters). When you click "Generate" it will use the currently active DataSet to generate the output - clicking on the name of the current DataSet (by default there is a single "Default" DataSet) allows you to switch between the different DataSets.
 
 ### Output Formats
 

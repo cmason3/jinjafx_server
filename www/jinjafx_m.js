@@ -51,12 +51,11 @@ function getStatusText(code) {
   var r_input_form = null;
   var jinput = null;
   var protect_action = 0;
-  var cflag = false;
   var revision = 0;
   var protect_ok = false;
   var csv_on = false;
-  var dicon = "ldata";
   var cDataPos = null;
+  var xsplit = null;
 
   var jsyaml_schema = {
     schema: jsyaml.DEFAULT_SCHEMA.extend(['scalar', 'sequence', 'mapping'].map(function(kind) {
@@ -64,7 +63,8 @@ function getStatusText(code) {
         kind: kind,
         multi: true
       });
-    }))
+    })),
+    json: true
   };
   
   function select_dataset(e) {
@@ -102,12 +102,41 @@ function getStatusText(code) {
     });
   
     if (Object.keys(datasets).length > 1) {
+      if (document.getElementById('select_ds').disabled == true) {
+        document.getElementById('xgvars').classList.remove('d-none');
+        document.getElementById('xlvars').classList.remove('h-100');
+
+        xsplit = Split(["#xgvars", "#xlvars"], {
+          direction: "vertical",
+          cursor: "row-resize",
+          sizes: [50, 50],
+          snapOffset: 0,
+          minSize: 30,
+          onDragStart: remove_info
+        });
+        window.cmgVars.refresh();
+      }
       document.getElementById('select_ds').disabled = false;
       document.getElementById('delete_ds').disabled = false;
     }
     else {
       document.getElementById('select_ds').disabled = true;
       document.getElementById('delete_ds').disabled = true;
+      document.getElementById('xgvars').classList.add('d-none');
+      document.getElementById('xlvars').classList.add('h-100');
+      
+      if (xsplit != null) {
+        xsplit.destroy();
+        xsplit = null;
+
+        if (window.cmgVars.getValue().match(/\S/)) {
+          var ds = Object.keys(datasets)[0];
+          datasets[ds][1].setValue(window.cmgVars.getValue().trimEnd() + "\n\n" + datasets[ds][1].getValue());
+        }
+
+        window.cmgVars.setValue("");
+        window.cmgVars.getDoc().clearHistory();
+      }
     }
     document.getElementById('selected_ds').innerHTML = current_ds;
   }
@@ -178,7 +207,7 @@ function getStatusText(code) {
     fe.focus();
 
     if (method == "delete_dataset") {
-      if (window.cmData.getValue().match(/\S/) || window.cmVars.getValue().match(/\S/)) {
+      if ((window.cmData.getValue().match(/\S/) || window.cmVars.getValue().match(/\S/)) || ((Object.keys(datasets).length == 2) && window.cmgVars.getValue().match(/\S/))) {
         if (confirm("Are You Sure?") === true) {
           delete_dataset(current_ds);
         }
@@ -223,6 +252,17 @@ function getStatusText(code) {
       set_status("darkred", "ERROR", "Non ASCII Character(s) in 'data.csv'");
       return false;
     }
+
+    if (document.getElementById('select_ds').disabled == false) {
+      var cgVars = window.cmgVars.getSearchCursor(nonASCIIRegex);
+      if (cgVars.findNext()) {
+        window.cmgVars.focus();
+        window.cmgVars.setSelection(cgVars.from(), cgVars.to());
+        set_status("darkred", "ERROR", "Non ASCII Character(s) in 'global.yml'");
+        return false;
+      }
+    }
+
     var cVars = window.cmVars.getSearchCursor(nonASCIIRegex);
     if (cVars.findNext()) {
       window.cmVars.focus();
@@ -245,8 +285,45 @@ function getStatusText(code) {
           return false;
         }
 
-        dt.data = window.btoa(dt.data.join("\n"));
-        dt.vars = window.cmVars.getValue().replace(/\t/g, "  ");
+        dt.vars = '';
+        var vars = window.cmVars.getValue().replace(/\t/g, "  ");
+
+        if (document.getElementById('select_ds').disabled == false) {
+          var global = window.cmgVars.getValue().replace(/\t/g, "  ");
+
+          if (global.match(/\S/)) {
+            if (global.trimStart().startsWith('$ANSIBLE_VAULT;') && vars.match(/\S/)) {
+              set_status("darkred", "ERROR", "Ansible Vault not supported in 'global.yml' with 'vars.yml'");
+              return false;
+            }
+            if (vars.trimStart().startsWith('$ANSIBLE_VAULT;')) {
+              set_status("darkred", "ERROR", "Ansible Vault not supported in 'vars.yml' with 'global.yml'");
+              return false;
+            }
+
+            try {
+              jsyaml.load(global, jsyaml_schema);
+              dt.vars += global.trimEnd() + "\n\n";
+            }
+            catch (e) {
+              console.log(e);
+              set_status("darkred", "ERROR", '[global.yml] ' + e);
+              return false;
+            }
+          }
+        }
+
+        if (vars.match(/\S/)) {
+          try {
+            jsyaml.load(vars, jsyaml_schema);
+            dt.vars += vars;
+          }
+          catch (e) {
+            console.log(e);
+            set_status("darkred", "ERROR", '[vars.yml] ' + e);
+            return false;
+          }
+        }
 
         if (dt.vars.match(/\S/)) {
           try {
@@ -380,10 +457,11 @@ function getStatusText(code) {
           }
           catch (e) {
             console.log(e);
-            set_status("darkred", "ERROR", '[vars.yml] ' + e);
+            set_status("darkred", "ERROR", '[all.yml] ' + e);
             return false;
           }
         }
+        dt.data = window.btoa(dt.data.join("\n"));
         jinjafx_generate();
       }
       else if ((method === "export") || (method === "get_link") || (method === "update_link")) {
@@ -400,6 +478,11 @@ function getStatusText(code) {
         }
         else {
           dt.datasets = {};
+
+          if (Object.keys(datasets).length > 1) {
+            dt.global = window.btoa(window.cmgVars.getValue().replace(/\t/g, "  "));
+          }
+
           switch_dataset(current_ds, true);
           Object.keys(datasets).forEach(function(ds) {
             dt.datasets[ds] = {};
@@ -772,6 +855,17 @@ function getStatusText(code) {
       smartIndent: false
     });
 
+    window.cmgVars = CodeMirror.fromTextArea(t_gvars, {
+      tabSize: 2,
+      scrollbarStyle: "null",
+      styleSelectedText: false,
+      extraKeys: gExtraKeys,
+      mode: "yaml",
+      viewportMargin: 80,
+      smartIndent: false,
+      showTrailingSpace: true
+    });
+
     window.cmVars = CodeMirror.fromTextArea(vars, {
       tabSize: 2,
       scrollbarStyle: "null",
@@ -911,6 +1005,7 @@ function getStatusText(code) {
     fe = window.cmTemplate;
     window.cmData.on("focus", function() { fe = window.cmData });
     window.cmVars.on("focus", function() { fe = window.cmVars; onDataBlur() });
+    window.cmgVars.on("focus", function() { fe = window.cmgVars; onDataBlur() });
     window.cmTemplate.on("focus", function() { fe = window.cmTemplate; onDataBlur() });
 
     document.getElementById('header').onclick = onDataBlur;
@@ -920,7 +1015,6 @@ function getStatusText(code) {
     document.getElementById("csv").onclick = function() {
       window.cmData.getWrapperElement().style.display = 'block';
       document.getElementById("csv").style.display = 'none';
-      document.getElementById(dicon).classList.remove('d-none');
       window.cmData.refresh();
       window.cmData.focus();
 
@@ -935,98 +1029,30 @@ function getStatusText(code) {
     window.cmData.on("beforeChange", onPaste);
     window.cmTemplate.on("beforeChange", onPaste);
     window.cmVars.on("beforeChange", onPaste);
+    window.cmgVars.on("beforeChange", onPaste);
 
     window.cmData.on("change", onChange);
     window.cmVars.on("change", onChange);
+    window.cmgVars.on("change", onChange);
     window.cmTemplate.on("change", onChange);
-
-    var hsize = [60, 40];
-    var vsize = [30, 70];
 
     var hsplit = Split(["#cdata", "#cvars"], {
       direction: "horizontal",
       cursor: "col-resize",
-      sizes: hsize,
+      sizes: [60, 40],
       snapOffset: 0,
       minSize: 45,
-      onDragEnd: refresh_cm,
-      onDragStart: reset_icons
+      onDragStart: remove_info
     });
 
     var vsplit = Split(["#top", "#ctemplate"], {
       direction: "vertical",
       cursor: "row-resize",
-      sizes: vsize,
+      sizes: [40, 60],
       snapOffset: 0,
       minSize: 30,
-      onDragEnd: refresh_cm,
-      onDragStart: reset_icons
+      onDragStart: remove_info
     });
-
-    document.getElementById('ldata').onclick = function() {
-      if (cflag == false) {
-        hsize = hsplit.getSizes();
-        vsize = vsplit.getSizes();
-      }
-      cflag = true;
-      reset_icons();
-      hsplit.setSizes([100, 0]);
-      vsplit.setSizes([100, 0]);
-
-      document.getElementById('ldata').classList.add('d-none');
-      document.getElementById('ldata2').classList.remove('d-none');
-      window.cmData.focus();
-      dicon = 'ldata2';
-    };
-    document.getElementById('ldata2').onclick = function() {
-      hsplit.setSizes(hsize);
-      vsplit.setSizes(vsize);
-      document.getElementById('ldata2').classList.add('d-none');
-      document.getElementById('ldata').classList.remove('d-none');
-      window.cmData.focus();
-      dicon = 'ldata';
-    };
-
-    document.getElementById('lvars').onclick = function() {
-      if (cflag == false) {
-        hsize = hsplit.getSizes();
-        vsize = vsplit.getSizes();
-      }
-      cflag = true;
-      reset_icons();
-      hsplit.setSizes([0, 100]);
-      vsplit.setSizes([100, 0]);
-      document.getElementById('lvars').classList.add('d-none');
-      document.getElementById('lvars2').classList.remove('d-none');
-      window.cmVars.focus();
-    };
-    document.getElementById('lvars2').onclick = function() {
-      hsplit.setSizes(hsize);
-      vsplit.setSizes(vsize);
-      document.getElementById('lvars2').classList.add('d-none');
-      document.getElementById('lvars').classList.remove('d-none');
-      window.cmVars.focus();
-    };
-
-    document.getElementById('ltemplate').onclick = function() {
-      if (cflag == false) {
-        hsize = hsplit.getSizes();
-        vsize = vsplit.getSizes();
-      }
-      cflag = true;
-      reset_icons();
-      vsplit.setSizes([0, 100]);
-      document.getElementById('ltemplate').classList.add('d-none');
-      document.getElementById('ltemplate2').classList.remove('d-none');
-      window.cmTemplate.focus();
-    };
-    document.getElementById('ltemplate2').onclick = function() {
-      hsplit.setSizes(hsize);
-      vsplit.setSizes(vsize);
-      document.getElementById('ltemplate2').classList.add('d-none');
-      document.getElementById('ltemplate').classList.remove('d-none');
-      window.cmTemplate.focus();
-    };
 
     document.getElementById('jinjafx_input').addEventListener('shown.bs.modal', function (e) {
       var focusable = document.getElementById('jinjafx_input_form').querySelectorAll('input,select');
@@ -1483,31 +1509,12 @@ function getStatusText(code) {
     }
   };
   
-  function refresh_cm() {
-    window.cmData.refresh();
-    window.cmVars.refresh();
-    window.cmTemplate.refresh();
-    cflag = false;
-  }
-  
-  function reset_icons() {
-    if (!csv_on) {
-      document.getElementById('ldata2').classList.add('d-none');
-      document.getElementById('ldata').classList.remove('d-none');
-    }
-    document.getElementById('lvars2').classList.add('d-none');
-    document.getElementById('lvars').classList.remove('d-none');
-    document.getElementById('ltemplate2').classList.add('d-none');
-    document.getElementById('ltemplate').classList.remove('d-none');
+  function remove_info() {
     document.getElementById('template_info').classList.add('fade-out');
     document.getElementById('template_info').style.zIndex = -1000;
-    dicon = 'ldata';
   }
   
   function set_wait() {
-    document.querySelectorAll('.expand').forEach(function(e, i) {
-      e.style.background = '#eee';
-    });
     fe.setOption('readOnly', 'nocursor');
     var e = document.getElementById("csv").getElementsByTagName("th");
     for (var i = 0; i < e.length; i++) {
@@ -1517,12 +1524,14 @@ function getStatusText(code) {
     window.cmData.getWrapperElement().style.background = '#eee';
     window.cmTemplate.getWrapperElement().style.background = '#eee';
     window.cmVars.getWrapperElement().style.background = '#eee';
+    window.cmgVars.getWrapperElement().style.background = '#eee';
     document.getElementById('overlay').style.display = 'block';
   }
   
   function clear_wait() {
     document.getElementById('overlay').style.display = 'none';
     window.cmVars.getWrapperElement().style.background = '';
+    window.cmgVars.getWrapperElement().style.background = '';
     window.cmTemplate.getWrapperElement().style.background = '';
     window.cmData.getWrapperElement().style.background = '';
     document.getElementById("csv").style.background = '#fff';
@@ -1531,9 +1540,6 @@ function getStatusText(code) {
       e[i].style.background = 'none';
     }
     fe.setOption('readOnly', false);
-    document.querySelectorAll('.expand').forEach(function(e, i) {
-      e.style.background = '#fff';
-    });
     fe.focus();
   }
   
@@ -1580,8 +1586,6 @@ function getStatusText(code) {
     });
     if (datarows.length > 1) {
       document.getElementById("csv").innerHTML = get_csv_astable(datarows);
-      document.getElementById('ldata').classList.add('d-none');
-      document.getElementById('ldata2').classList.add('d-none');
       document.getElementById("csv").style.display = 'block';
       window.cmData.getWrapperElement().style.display = 'none';
       csv_on = true;
@@ -1589,7 +1593,6 @@ function getStatusText(code) {
     else {
       window.cmData.getWrapperElement().style.display = 'block';
       document.getElementById("csv").style.display = 'none';
-      document.getElementById(dicon).classList.remove('d-none');
       window.cmData.refresh();
       csv_on = false;
     }
@@ -1665,6 +1668,8 @@ function getStatusText(code) {
       }
   
       current_ds = 'Default';
+
+      window.cmgVars.setValue("");
   
       if (_dt.hasOwnProperty("datasets")) {
         datasets = {};
@@ -1678,6 +1683,10 @@ function getStatusText(code) {
         current_ds = Object.keys(datasets)[0];
         window.cmData.swapDoc(datasets[current_ds][0]);
         window.cmVars.swapDoc(datasets[current_ds][1]);
+
+        if (_dt.hasOwnProperty("global")) {
+          window.cmgVars.setValue(_dt.global);
+        }
       }
       else {
         datasets = {
@@ -1702,6 +1711,7 @@ function getStatusText(code) {
   
       window.cmData.getDoc().clearHistory();
       window.cmVars.getDoc().clearHistory();
+      window.cmgVars.getDoc().clearHistory();
       window.cmTemplate.getDoc().clearHistory();
   
       rebuild_datasets();
@@ -1754,35 +1764,6 @@ function getStatusText(code) {
           stream.skipToEnd();
           return "jfx-header";
         }
-        /*
-        else {
-          var pc = '';
-          var m = null;
-
-          if (stream.column()) {
-            stream.backUp(1);
-            pc = stream.next();
-          }
-
-          if (pc != '\\') {
-            if (m = stream.match(/\((.+?)(?<!\\)\)/)) {
-              // CHECK IF not escaped | exists or there is \1 in the line
-              return "jfx-tag";
-            }
-            else if (stream.match(/\{[ \t]*[0-9]+(?:-[0-9]+)?:[0-9]+[ \t]*(?<!\\)\}/)) {
-              return "jfx-tag";
-            }
-            else if (m = stream.match(/\[([A-Z0-9\-]+)(?<!\\)\]/i)) {
-              if (!m[1].match(/(?:[A-Z]-[^A-Z]|[a-z]-[^a-z]|[0-9]-[^0-9]|[^A-Za-z0-9]-)/)) {
-                return "jfx-tag";
-              }
-            }
-            else if (stream.match(/%[0-9]+/)) {
-              return "jfx-header";
-            }
-          }
-        }
-        */
         stream.next();
       }
     };

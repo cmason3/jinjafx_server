@@ -14,7 +14,7 @@ README = re.sub(r'<p.+?</p>', '', README, flags=re.DOTALL)
 setup(
   name="jinjafx_server",
   version=__version__,
-  python_requires=">=3.6",
+  python_requires=">=3.7",
   description="JinjaFx Server - Jinja2 Templating Tool",
   long_description=README,
   long_description_content_type="text/markdown",
@@ -30,7 +30,7 @@ setup(
   packages=["jinjafx_server"],
   include_package_data=True,
   package_data={'': ['www/*']},
-  install_requires=["jinjafx>=1.13.0", "requests", "cmarkgfm>=0.5.0", "emoji", "func_timeout"],
+  install_requires=["jinjafx>=1.13.0", "requests", "cmarkgfm>=0.5.0", "emoji"],
   entry_points={
     "console_scripts": [
       "jinjafx_server=jinjafx_server:main",
