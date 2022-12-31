@@ -182,8 +182,6 @@ function getStatusText(code) {
     dt.id = dt_id;
     dt.dataset = current_ds;
 
-    console.log("DEBUG: jinjafx_generate()");
-
     if (JSON.stringify(dt).length > 2048 * 1024) {
       set_status("darkred", "ERROR", 'Content Too Large');
     }
