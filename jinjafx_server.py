@@ -291,7 +291,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         self.wfile.write(r[2])
 
     except Exception as e:
-      log('Exception: ' + str(e))
+      log(traceback.format_exc())
 
 
   def do_OPTIONS(self):
@@ -470,7 +470,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 return
 
               except Exception as e:
-                log('Exception: ' + str(e))
+                log(traceback.format_exc())
                 r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
 
             else:
@@ -704,7 +704,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     r = [ 'text/plain', 429, '429 Too Many Requests\r\n', sys._getframe().f_lineno ]
 
                 except Exception as e:
-                  log('Exception: ' + str(e))
+                  log(traceback.format_exc())
                   r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
 
               else:
@@ -919,7 +919,6 @@ def update_versioned_links(d):
  
               if h != m.group(1):
                 ln = re.sub(m.group(1), h, ln)
-                # log('[' + fn + '] Updated ' + m.group(2) + ' to ' + h)
                 changed = True
  
           html.append(ln)
