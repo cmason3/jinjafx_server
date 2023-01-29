@@ -96,7 +96,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
           if self.command == 'POST':
             if self.error is not None:
-              ae = '[' + src + '] [\033[1;' + ansi + 'm>>>\033[0m] \033[1;' + ansi + 'm' + str(self.error) + '\033[0m'
+              ae = '[' + src + ']        \033[1;33m->\033[1;' + ansi + 'm ' + str(self.error) + '\033[0m'
             else:
               ae = None
 
