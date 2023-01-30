@@ -96,9 +96,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
           if self.command == 'POST':
             if self.error is not None:
-              ae = '[' + src + ']        \033[1;33m->\033[1;' + ansi + 'm ' + str(self.error) + '\033[0m'
+              ae = ' ->\033[1;' + ansi + 'm ' + str(self.error)[5:] + '\033[0m'
             else:
-              ae = None
+              ae = ''
 
             if self.elapsed is not None:
               log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + '] in ' + str(self.elapsed) + 'ms', ae)
@@ -429,7 +429,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               elif 'yaml.SafeLoader' in tb:
                 error = 'error[vars.yml]: ' + type(e).__name__ + ': ' + str(e)
               else:
-                error = 'error[' + str(sys.exc_info()[2].tb_lineno) + ']: ' + type(e).__name__ + ': ' + str(e)
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                error = 'error[' + fname + ':' + str(exc_tb.tb_lineno) + ']: ' + type(e).__name__ + ': ' + str(e)
 
               jsr = {
                 'status': 'error',
@@ -888,7 +890,8 @@ def main(rflag=[0]):
 
   except Exception as e:
     exc_type, exc_obj, exc_tb = sys.exc_info()
-    print('error[' + str(exc_tb.tb_lineno) + ']: ' + str(e), file=sys.stderr)
+    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+    print('error[' + fname + ':' + str(exc_tb.tb_lineno) + ']: ' + str(e), file=sys.stderr)
     sys.exit(-2)
 
   finally:
@@ -897,20 +900,15 @@ def main(rflag=[0]):
       s.close()
 
 
-def log(t, ae=None):
+def log(t, ae=''):
   with lock:
     timestamp = datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19]
-    print('[' + timestamp + '] ' + t)
-
-    if ae is not None:
-      print('[' + timestamp + '] ' + ae)
+    print('[' + timestamp + '] ' + t + ae)
 
     if logfile is not None:
       try:
         with open(logfile, 'at') as f:
-          f.write('[' + timestamp + '] ' + re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t) + '\n')
-          if ae is not None:
-            f.write('[' + timestamp + '] ' + re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', ae) + '\n')
+          f.write('[' + timestamp + '] ' + re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t + ae) + '\n')
 
       except Exception as e:
         traceback.print_exc()
