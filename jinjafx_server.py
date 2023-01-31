@@ -431,7 +431,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               else:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                error = 'error[jinja_server.py:' + str(exc_tb.tb_lineno) + ']: ' + type(e).__name__ + ': ' + str(e)
+                error = 'error[jinjafx_server.py:' + str(exc_tb.tb_lineno) + ']: ' + type(e).__name__ + ': ' + str(e)
 
               jsr = {
                 'status': 'error',
@@ -891,7 +891,7 @@ def main(rflag=[0]):
   except Exception as e:
     exc_type, exc_obj, exc_tb = sys.exc_info()
     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-    print('error[jinja_server.py:' + str(exc_tb.tb_lineno) + ']: ' + str(e), file=sys.stderr)
+    print('error[jinjafx_server.py:' + str(exc_tb.tb_lineno) + ']: ' + str(e), file=sys.stderr)
     sys.exit(-2)
 
   finally:
