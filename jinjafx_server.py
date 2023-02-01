@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes
 import cmarkgfm, emoji
 
-__version__ = '23.1.0'
+__version__ = '23.2.0'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -71,7 +71,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
     if not self.hide or verbose:
       if not isinstance(args[0], int) and path != '/ping':
-        if args[1] == '200' or args[1] == '204':
+        if self.error is not None:
+          ansi = '31'
+        elif args[1] == '200' or args[1] == '204':
           ansi = '32'
         elif args[1] == '304':
           ansi = '33'
@@ -92,14 +94,16 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               else:
                 ctype = ' (' + self.headers['Content-Type'] + ')'
 
-          if str(args[1]) == 'ERR':
-            log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;' + ansi + 'm' + str(args[2]) + '\033[0m')
-        
-          elif self.command == 'POST':
-            if self.elapsed is not None:
-              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + '] in ' + str(self.elapsed) + 'ms')
+          if self.command == 'POST':
+            if self.error is not None:
+              ae = ' ->\033[1;' + ansi + 'm ' + str(self.error)[5:] + '\033[0m'
             else:
-              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + ']')
+              ae = ''
+
+            if self.elapsed is not None:
+              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + '] in ' + str(self.elapsed) + 'ms', ae)
+            else:
+              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + ' [' + self.format_bytes(self.length) + ']', ae)
 
           elif self.command != None:
             if (args[1] != '200' and args[1] != '304') or (not path.endswith('.js') and not path.endswith('.css') and not path.endswith('.png')) or verbose:
@@ -132,6 +136,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     try:
       self.critical = False
       self.hide = False
+      self.error = None
 
       fpath = self.path.split('?', 1)[0]
   
@@ -297,12 +302,14 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   def do_OPTIONS(self):
     self.critical = False
     self.hide = False
+    self.error = None
     self.send_response(204)
     self.send_header('Allow', 'OPTIONS, HEAD, GET, POST')
     self.end_headers()
 
 
   def do_HEAD(self):
+    self.error = None
     self.do_GET(True)
 
 
@@ -310,6 +317,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     self.critical = False
     self.hide = False
     self.elapsed = None
+    self.error = None
 
     uc = self.path.split('?', 1)
     params = { x[0]: x[1] for x in [x.split('=') for x in uc[1].split('&') ] } if len(uc) > 1 else { }
@@ -421,13 +429,15 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               elif 'yaml.SafeLoader' in tb:
                 error = 'error[vars.yml]: ' + type(e).__name__ + ': ' + str(e)
               else:
-                error = 'error[' + str(sys.exc_info()[2].tb_lineno) + ']: ' + type(e).__name__ + ': ' + str(e)
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                error = 'error[jinjafx_server.py:' + str(exc_tb.tb_lineno) + ']: ' + type(e).__name__ + ': ' + str(e)
 
               jsr = {
                 'status': 'error',
                 'error': error
               }
-              self.log_request('ERR', error);
+              self.error = error
   
             r = [ 'application/json', 200, json.dumps(jsr), sys._getframe().f_lineno ]
   
@@ -880,7 +890,8 @@ def main(rflag=[0]):
 
   except Exception as e:
     exc_type, exc_obj, exc_tb = sys.exc_info()
-    print('error[' + str(exc_tb.tb_lineno) + ']: ' + str(e), file=sys.stderr)
+    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+    print('error[jinjafx_server.py:' + str(exc_tb.tb_lineno) + ']: ' + str(e), file=sys.stderr)
     sys.exit(-2)
 
   finally:
@@ -889,15 +900,15 @@ def main(rflag=[0]):
       s.close()
 
 
-def log(t):
+def log(t, ae=''):
   with lock:
     timestamp = datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19]
-    print('[' + timestamp + '] ' + t)
+    print('[' + timestamp + '] ' + t + ae)
 
     if logfile is not None:
       try:
         with open(logfile, 'at') as f:
-          f.write('[' + timestamp + '] ' + re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t) + '\n')
+          f.write('[' + timestamp + '] ' + re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t + ae) + '\n')
 
       except Exception as e:
         traceback.print_exc()
