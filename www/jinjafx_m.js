@@ -640,7 +640,7 @@ function getStatusText(code) {
           }
           else if (this.status === 200) {
             try {
-              var dt = jsyaml.load(this.responseText, jsyaml_schema);
+              var dt = jsyaml.load(window.atob(JSON.parse(this.responseText)['dt']), jsyaml_schema);
   
               load_datatemplate(dt['dt'], qs);
               dt_id = qs.dt;
