@@ -167,7 +167,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               rr = aws_s3_get(aws_s3_url, 'jfx_' + fpath[8:] + '.yml')
     
               if rr.status_code == 200:
-                r = [ 'application/json', 200, json.dumps({ 'dt': base64.b64encode(rr.text).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
+                r = [ 'application/json', 200, json.dumps({ 'dt': base64.b64encode(rr.text.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
     
                 dt = rr.text
     
@@ -187,7 +187,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 if jobj.get('encoding') and jobj.get('encoding') == 'base64':
                   content = base64.b64decode(content).decode('utf-8')
   
-                r = [ 'application/json', 200, json.dumps({ 'dt': base64.b64encode(content).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
+                r = [ 'application/json', 200, json.dumps({ 'dt': base64.b64encode(content.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
     
                 dt = content
     
