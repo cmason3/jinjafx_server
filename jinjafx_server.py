@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes
 import cmarkgfm, emoji
 
-__version__ = '23.2.0'
+__version__ = '23.2.1'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -167,7 +167,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               rr = aws_s3_get(aws_s3_url, 'jfx_' + fpath[8:] + '.yml')
     
               if rr.status_code == 200:
-                r = [ 'application/yaml', 200, rr.text.encode('utf-8'), sys._getframe().f_lineno ]
+                r = [ 'application/json', 200, json.dumps({ 'dt': base64.b64encode(rr.text).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
     
                 dt = rr.text
     
@@ -187,7 +187,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 if jobj.get('encoding') and jobj.get('encoding') == 'base64':
                   content = base64.b64decode(content).decode('utf-8')
   
-                r = [ 'application/yaml', 200, content.encode('utf-8'), sys._getframe().f_lineno ]
+                r = [ 'application/json', 200, json.dumps({ 'dt': base64.b64encode(content).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
     
                 dt = content
     
@@ -204,8 +204,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 with open(fpath, 'rb') as f:
                   rr = f.read()
                   dt = rr.decode('utf-8')
-    
-                  r = [ 'application/yaml', 200, rr, sys._getframe().f_lineno ]
+
+                  r = [ 'application/json', 200, json.dumps({ 'dt': base64.b64encode(rr).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
   
                 os.utime(fpath, None)
     
@@ -326,7 +326,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     r = [ 'text/plain', 500, '500 Internal Server Error\r\n', sys._getframe().f_lineno ]
 
     if 'Content-Length' in self.headers:
-      if int(self.headers['Content-Length']) < (2048 * 1024):
+      if int(self.headers['Content-Length']) < (25 * 1024 * 1024):
         postdata = self.rfile.read(int(self.headers['Content-Length']))
         self.length = len(postdata)
 
