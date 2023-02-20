@@ -353,8 +353,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               if 'vars' in dt and len(dt['vars'].strip()) > 0:
                 gyaml = self.d(dt['vars']).decode('utf-8')
 
-                if 'vault_password' in dt:
-                  vpw = self.d(dt['vault_password']).decode('utf-8')
+                if 'vpw' in dt:
+                  vpw = self.d(dt['vpw']).decode('utf-8')
 
                   if gyaml.lstrip().startswith('$ANSIBLE_VAULT;'):
                     gyaml = jinjafx.Vault().decrypt(gyaml.encode('utf-8'), vpw).decode('utf-8')

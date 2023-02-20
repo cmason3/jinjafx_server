@@ -103,6 +103,9 @@
           _qs.push('ds=' + dt.dataset);
         }
         qs = (_qs.length > 0) ? '?' + _qs.join('&') : '';
+
+        delete dt.id;
+        delete dt.dataset;
   
         var xHR = new XMLHttpRequest();
         xHR.open("POST", '/jinjafx' + qs, true);
@@ -115,7 +118,7 @@
                 var stderr = null;
 
                 if (obj.outputs.hasOwnProperty('_stderr_')) {
-                  stderr = window.atob(obj.outputs['_stderr_']);
+                  stderr = window.opener.d(obj.outputs['_stderr_']);
                   delete (obj.outputs['_stderr_']);
                 }
 
@@ -144,7 +147,7 @@
                   tabs += '<div id="o' + oid + '" class="h-100 tab-pane fade' + ((oid == 1) ? ' show active' : '') + '">';
                   tabs += '<h4 class="fw-bold">' + g + '</h4>';
   
-                  var tc = utf8.decode(window.atob(obj.outputs[output]));
+                  var tc = utf8.decode(window.opener.d(obj.outputs[output]));
                   if (oformat == 'html') {
                     tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + tc.replace(/&/g, '&amp;').replace(/"/g, "&quot;") + '"></iframe>';
                   }

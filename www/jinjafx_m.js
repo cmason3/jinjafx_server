@@ -4,6 +4,14 @@ function reset_dt() {
   dt = {};
 }
 
+function e(data) {
+  return window.btoa(data);
+}
+
+function d(data) {
+  return window.atob(data);
+}
+
 function quote(str) {
   str = str.replace(/&/g, "&amp;");
   str = str.replace(/>/g, "&gt;");
@@ -177,8 +185,8 @@ function getStatusText(code) {
 
   function jinjafx_generate() {
     var vaulted_vars = dt.vars.indexOf('$ANSIBLE_VAULT;') > -1;
-    dt.vars = window.btoa(dt.vars);
-    dt.template = window.btoa(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
+    dt.vars = e(dt.vars);
+    dt.template = e(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
     dt.id = dt_id;
     dt.dataset = current_ds;
 
@@ -286,7 +294,7 @@ function getStatusText(code) {
         }
 
         dt.vars = '';
-        dt.data = window.btoa(dt.data.join("\n"));
+        dt.data = e(dt.data.join("\n"));
 
         var vars = window.cmVars.getValue().replace(/\t/g, "  ");
 
@@ -349,7 +357,7 @@ function getStatusText(code) {
                         try {
                           obj = JSON.parse(xHR.responseText);
                           if (obj.status === "ok") {
-                            r_input_form = window.atob(obj.outputs['Output']);
+                            r_input_form = d(obj.outputs['Output']);
                             document.getElementById('jinjafx_input_form').innerHTML = r_input_form;
                             input_form = vars['jinjafx_input']['body'];
                             jinput = new bootstrap.Modal(document.getElementById('jinjafx_input'), {
@@ -390,7 +398,7 @@ function getStatusText(code) {
                     xHR.timeout = 10000;
                     xHR.setRequestHeader("Content-Type", "application/json");
 
-                    var rd = JSON.stringify({ "template": window.btoa(utf8.encode(rbody)) });
+                    var rd = JSON.stringify({ "template": e(utf8.encode(rbody)) });
                     if (rd.length > 1024) {
                       xHR.setRequestHeader("Content-Encoding", "gzip");
                       xHR.send(pako.gzip(rd));
@@ -471,24 +479,24 @@ function getStatusText(code) {
           return false;
         }
   
-        dt.template = window.btoa(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
+        dt.template = e(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
   
         if ((current_ds === 'Default') && (Object.keys(datasets).length === 1)) {
-          dt.vars = window.btoa(window.cmVars.getValue().replace(/\t/g, "  "));
-          dt.data = window.btoa(window.cmData.getValue());
+          dt.vars = e(window.cmVars.getValue().replace(/\t/g, "  "));
+          dt.data = e(window.cmData.getValue());
         }
         else {
           dt.datasets = {};
 
           if (Object.keys(datasets).length > 1) {
-            dt.global = window.btoa(window.cmgVars.getValue().replace(/\t/g, "  "));
+            dt.global = e(window.cmgVars.getValue().replace(/\t/g, "  "));
           }
 
           switch_dataset(current_ds, true);
           Object.keys(datasets).forEach(function(ds) {
             dt.datasets[ds] = {};
-            dt.datasets[ds].data = window.btoa(datasets[ds][0].getValue());
-            dt.datasets[ds].vars = window.btoa(datasets[ds][1].getValue().replace(/\t/g, "  "));
+            dt.datasets[ds].data = e(datasets[ds][0].getValue());
+            dt.datasets[ds].vars = e(datasets[ds][1].getValue().replace(/\t/g, "  "));
           });
         }
   
@@ -640,7 +648,7 @@ function getStatusText(code) {
           }
           else if (this.status === 200) {
             try {
-              var dt = jsyaml.load(window.atob(JSON.parse(this.responseText)['dt']), jsyaml_schema);
+              var dt = jsyaml.load(d(JSON.parse(this.responseText)['dt']), jsyaml_schema);
   
               load_datatemplate(dt['dt'], qs);
               dt_id = qs.dt;
@@ -1144,7 +1152,7 @@ function getStatusText(code) {
     });
 
     document.getElementById('ml-vault-ok').onclick = function() {
-      dt.vault_password = window.btoa(document.getElementById("vault").value);
+      dt.vpw = e(document.getElementById("vault").value);
       if (dt_id != '') {
         window.open("/output.html?dt=" + dt_id, "_blank");
       }
@@ -1662,11 +1670,13 @@ function getStatusText(code) {
   
   function load_datatemplate(_dt, _qs) {
     try {
+      /*
       if (_qs != null) {
         if (_qs.hasOwnProperty("template")) {
-          _dt.template = window.atob(_qs.template);
+          _dt.template = d(_qs.template);
         }
       }
+      */
   
       current_ds = 'Default';
 
@@ -1694,6 +1704,7 @@ function getStatusText(code) {
           'Default': [CodeMirror.Doc('', 'data'), CodeMirror.Doc('', 'yaml')]
         };
   
+        /*
         if (_qs != null) {
           if (_qs.hasOwnProperty("data")) {
             _dt.data = window.atob(_qs.data);
@@ -1702,6 +1713,7 @@ function getStatusText(code) {
             _dt.vars = window.atob(_qs.vars);
           }
         }
+        */
   
         datasets['Default'][0].setValue(_dt.hasOwnProperty("data") ? _dt.data : "");
         window.cmData.swapDoc(datasets['Default'][0]);
