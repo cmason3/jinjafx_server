@@ -814,6 +814,8 @@ def main(rflag=[0]):
     print('JinjaFx Server v' + __version__ + ' - Jinja2 Templating Tool')
     print('Copyright (c) 2020-2023 Chris Mason <chris@netnix.org>\n')
 
+    update_versioned_links(base + '/www')
+
     parser = ArgumentParser(add_help=False)
     parser.add_argument('-s', action='store_true', required=True)
     parser.add_argument('-l', metavar='<address>', default='127.0.0.1', type=str)
@@ -873,8 +875,6 @@ def main(rflag=[0]):
     if args.ml:
       soft, hard = resource.getrlimit(resource.RLIMIT_AS)
       resource.setrlimit(resource.RLIMIT_AS, (args.ml * 1024 * 1024, hard))
-
-    update_versioned_links(base + '/www')
 
     log('Starting JinjaFx Server (PID is ' + str(os.getpid()) + ') on http://' + args.l + ':' + str(args.p) + '...')
 
