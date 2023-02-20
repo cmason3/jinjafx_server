@@ -96,11 +96,14 @@
 
       if (Object.keys(dt).length !== 0) {
         var _qs = [];
+        var dataset = null;
+
         if (dt.id != '') {
           _qs.push('dt=' + dt.id);
         }
         if (dt.dataset != '') {
           _qs.push('ds=' + dt.dataset);
+          dataset = dt.dataset;
         }
         qs = (_qs.length > 0) ? '?' + _qs.join('&') : '';
 
@@ -172,7 +175,7 @@
                 document.getElementById('wrap').classList.remove('d-none');
                 document.getElementById('footer').classList.remove('d-none');
 
-                document.title = 'Outputs' + ((dt.dataset != 'Default') ? ' (' + dt.dataset + ')' : '');
+                document.title = 'Outputs' + ((dataset != 'Default') ? ' (' + dataset + ')' : '');
 
                 if (oc > 1) {
                   document.getElementById('pills').classList.remove('d-none');
