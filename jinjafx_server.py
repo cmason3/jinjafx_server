@@ -53,7 +53,7 @@ class ArgumentParser(argparse.ArgumentParser):
     print('Usage:\n  ' + self.format_usage()[7:], file=sys.stderr)
     raise Exception(message)
 
-    
+
 class JinjaFxRequest(BaseHTTPRequestHandler):
   server_version = 'JinjaFx/' + __version__
   protocol_version = 'HTTP/1.1'
@@ -132,12 +132,17 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     return struct.pack('B', version) + struct.pack('B', len(salt)) + salt + hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, pbkdf2_iterations)
 
 
+  def rot13(self, data):
+    t_rot13 = bytes.maketrans(b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", b"nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM")
+    return data.translate(t_rot13)
+
+
   def e(self, data):
-    return base64.b64encode(data)
-    
+    return self.rot13(base64.b64encode(data))
+
 
   def d(self, data):
-    return base64.b64decode(data)
+    return base64.b64decode(self.rot13(data))
 
 
   def do_GET(self, head=False, cache=True, versioned=False):
@@ -147,79 +152,79 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       self.error = None
 
       fpath = self.path.split('?', 1)[0]
-  
+
       r = [ 'text/plain', 500, '500 Internal Server Error\r\n', sys._getframe().f_lineno ]
-  
+
       if fpath == '/ping':
         cache = False
         r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
+
       else:
         if fpath == '/':
           fpath = '/index.html'
           self.hide = not verbose
-  
+
         if re.search(r'^/dt/[A-Za-z0-9_-]{1,24}$', fpath):
           fpath = '/index.html'
-  
+
         if re.search(r'^/[a-f0-9]{8}/', fpath):
           fpath = fpath[fpath[1:].index('/') + 1:]
           versioned = True
-  
+
         if re.search(r'^/get_dt/[A-Za-z0-9_-]{1,24}$', fpath):
           dt = ''
           self.critical = True
-  
+
           if aws_s3_url or github_url or repository:
             if aws_s3_url:
               rr = aws_s3_get(aws_s3_url, 'jfx_' + fpath[8:] + '.yml')
-    
+
               if rr.status_code == 200:
                 r = [ 'application/json', 200, json.dumps({ 'dt': self.e(rr.text.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
-    
+
                 dt = rr.text
-    
+
               elif rr.status_code == 403:
                 r = [ 'text/plain', 403, '403 Forbidden\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-    
+
               elif rr.status_code == 404:
                 r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-    
+
             elif github_url:
               rr = github_get(github_url, 'jfx_' + fpath[8:] + '.yml')
-    
+
               if rr.status_code == 200:
                 jobj = rr.json()
                 content = jobj['content']
-  
+
                 if jobj.get('encoding') and jobj.get('encoding') == 'base64':
                   content = base64.b64decode(content).decode('utf-8')
-  
+
                 r = [ 'application/json', 200, json.dumps({ 'dt': self.e(content.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
-    
+
                 dt = content
-    
+
               elif rr.status_code == 401:
                 r = [ 'text/plain', 403, '403 Forbidden\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-    
+
               elif rr.status_code == 404:
                 r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-    
+
             else:
               fpath = os.path.normpath(repository + '/jfx_' + fpath[8:] + '.yml')
-    
+
               if os.path.isfile(fpath):
                 with open(fpath, 'rb') as f:
                   rr = f.read()
                   dt = rr.decode('utf-8')
 
                   r = [ 'application/json', 200, json.dumps({ 'dt': self.e(rr).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
-  
+
                 os.utime(fpath, None)
-    
+
               else:
                 r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
+
             if r[1] == 200:
               mo = re.search(r'dt_password: "(\S+)"', dt)
               if mo != None:
@@ -231,13 +236,13 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                       t = binascii.unhexlify(mm.group(1).encode('utf-8'))
                       if t != self.derive_key(self.headers['X-Dt-Password'], t[2:int(t[1]) + 2], t[0]):
                         r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
+
                     else:
                       r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
+
                 else:
                   r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
+
         elif re.search(r'^/[A-Z0-9_-]+\.[A-Z0-9]+$', fpath, re.IGNORECASE) and (os.path.isfile(base + '/www' + fpath) or fpath == '/jinjafx.html'):
           if fpath.endswith('.js'):
             ctype = 'text/javascript'
@@ -247,58 +252,58 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             ctype = 'image/png'
           else:
             ctype = 'text/html'
-  
+
           if fpath == '/jinjafx.html':
             r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
             self.hide = verbose
-  
+
           else:
             with open(base + '/www' + fpath, 'rb') as f:
               r = [ ctype, 200, f.read(), sys._getframe().f_lineno ]
-  
+
               if fpath == '/index.html':
                 if repository or aws_s3_url or github_url:
                   get_link = 'true'
                 else:
                   get_link = 'false'
-  
+
                 r[2] = r[2].decode('utf-8').replace('{{ jinjafx.version }}', jinjafx.__version__ + ' / Jinja2 v' + jinja2_version).replace('{{ get_link }}', get_link).encode('utf-8')
-  
+
         else:
           r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
+
       etag = '"' + hashlib.sha256(r[2]).hexdigest() + '"'
       if 'If-None-Match' in self.headers:
         if self.headers['If-None-Match'] == etag:
           head = True
           r = [ None, 304, None, sys._getframe().f_lineno ]
-  
+
       self.send_response(r[1])
-  
+
       if r[1] != 304:
         if len(r[2]) > 1024 and 'Accept-Encoding' in self.headers and r[0] != 'image/png':
           if 'gzip' in self.headers['Accept-Encoding']:
             self.send_header('Content-Encoding', 'gzip')
             r[2] = gzip.compress(r[2])
-  
+
         self.send_header('Content-Type', r[0])
         self.send_header('Content-Length', str(len(r[2])))
         self.send_header('X-Content-Type-Options', 'nosniff')
-  
+
       if versioned:
         self.send_header('Cache-Control', 'public, max-age=31536000')
-  
+
       elif not cache:
         self.send_header('Cache-Control', 'no-store, max-age=0')
-  
+
       elif r[1] == 200 or r[1] == 304:
         if r[1] == 200:
           self.send_header('Content-Security-Policy', "frame-ancestors 'none'")
           self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
-  
+
         self.send_header('Cache-Control', 'max-age=0, must-revalidate')
         self.send_header('ETag', etag)
-  
+
       self.end_headers()
       if not head:
         self.wfile.write(r[2])
@@ -349,7 +354,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               dt = json.loads(postdata.decode('utf-8'))
               template = self.d(dt['template']) if 'template' in dt and len(dt['template'].strip()) > 0 else b''
               data = self.d(dt['data']) if 'data' in dt and len(dt['data'].strip()) > 0 else b''
-  
+
               if 'vars' in dt and len(dt['vars'].strip()) > 0:
                 gyaml = self.d(dt['vars']).decode('utf-8')
 
@@ -371,7 +376,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               st = round(time.time() * 1000)
               ocount = 0
               ret = [0, None]
-              
+
               t = StoppableJinjaFx(jinjafx.JinjaFx().jinjafx, template.decode('utf-8'), data.decode('utf-8'), gvars, ret)
 
               if timelimit > 0:
@@ -425,10 +430,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   jsr['outputs'].update({ o: self.e(output.encode('utf-8')).decode('utf-8') })
                   if o != '_stderr_':
                     ocount += 1
-  
+
               if ocount == 0:
                 raise Exception('nothing to output')
-  
+
             except Exception as e:
               tb = traceback.format_exc()
               match = re.search(r'[\s\S]*File "<(?:template|unknown)>", line ([0-9]+), in.*template', tb, re.IGNORECASE)
@@ -446,12 +451,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 'error': error
               }
               self.error = error
-  
+
             r = [ 'application/json', 200, json.dumps(jsr), sys._getframe().f_lineno ]
-  
+
           else:
             r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
-  
+
         else:
           if fpath == '/download':
             if self.headers['Content-Type'] == 'application/json':
@@ -831,7 +836,7 @@ def main(rflag=[0]):
     parser.add_argument('-v', action='store_true', default=False)
     args = parser.parse_args()
     verbose = args.v
-    
+
     if args.s3 is not None:
       aws_s3_url = args.s3
       aws_access_key = os.getenv('AWS_ACCESS_KEY')
@@ -928,20 +933,20 @@ def update_versioned_links(d):
     if fn.endswith('.html'):
       changed = False
       html = []
- 
+
       with open(d + '/' + fn, 'rt') as fh:
         for ln in fh:
           m = re.search(r'(?:href|src)="/([a-f0-9]{8})/(.+?)"', ln)
           if m:
             with open(d + '/' + m.group(2), 'rb') as fh2:
               h = hashlib.sha256(fh2.read()).hexdigest()[:8]
- 
+
               if h != m.group(1):
                 ln = re.sub(m.group(1), h, ln)
                 changed = True
- 
+
           html.append(ln)
- 
+
       if changed:
         with open(d + '/' + fn, 'wt') as fh:
           fh.writelines(html)
@@ -958,7 +963,7 @@ def w_directory(d):
 def rlimit(rl):
   if not re.match(r'(?i)^\d+/\d+[smh]$', rl):
     raise argparse.ArgumentTypeError("value must be rate/limit, e.g. 5/30s or 30/1h")
-  return rl 
+  return rl
 
 
 def aws_s3_authorization(method, fname, region, headers):
