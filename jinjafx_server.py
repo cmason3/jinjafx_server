@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes
 import cmarkgfm, emoji
 
-__version__ = '23.2.1'
+__version__ = '23.2.2'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -132,6 +132,14 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     return struct.pack('B', version) + struct.pack('B', len(salt)) + salt + hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, pbkdf2_iterations)
 
 
+  def e(self, data):
+    return base64.b64encode(data)
+    
+
+  def d(self, data):
+    return base64.b64decode(data)
+
+
   def do_GET(self, head=False, cache=True, versioned=False):
     try:
       self.critical = False
@@ -167,7 +175,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               rr = aws_s3_get(aws_s3_url, 'jfx_' + fpath[8:] + '.yml')
     
               if rr.status_code == 200:
-                r = [ 'application/json', 200, json.dumps({ 'dt': base64.b64encode(rr.text.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
+                r = [ 'application/json', 200, json.dumps({ 'dt': self.e(rr.text.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
     
                 dt = rr.text
     
@@ -187,7 +195,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 if jobj.get('encoding') and jobj.get('encoding') == 'base64':
                   content = base64.b64decode(content).decode('utf-8')
   
-                r = [ 'application/json', 200, json.dumps({ 'dt': base64.b64encode(content.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
+                r = [ 'application/json', 200, json.dumps({ 'dt': self.e(content.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
     
                 dt = content
     
@@ -205,7 +213,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   rr = f.read()
                   dt = rr.decode('utf-8')
 
-                  r = [ 'application/json', 200, json.dumps({ 'dt': base64.b64encode(rr).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
+                  r = [ 'application/json', 200, json.dumps({ 'dt': self.e(rr).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
   
                 os.utime(fpath, None)
     
@@ -339,14 +347,14 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               gvars = {}
 
               dt = json.loads(postdata.decode('utf-8'))
-              template = base64.b64decode(dt['template']) if 'template' in dt and len(dt['template'].strip()) > 0 else b''
-              data = base64.b64decode(dt['data']) if 'data' in dt and len(dt['data'].strip()) > 0 else b''
+              template = self.d(dt['template']) if 'template' in dt and len(dt['template'].strip()) > 0 else b''
+              data = self.d(dt['data']) if 'data' in dt and len(dt['data'].strip()) > 0 else b''
   
               if 'vars' in dt and len(dt['vars'].strip()) > 0:
-                gyaml = base64.b64decode(dt['vars']).decode('utf-8')
+                gyaml = self.d(dt['vars']).decode('utf-8')
 
                 if 'vault_password' in dt:
-                  vpw = base64.b64decode(dt['vault_password']).decode('utf-8')
+                  vpw = self.d(dt['vault_password']).decode('utf-8')
 
                   if gyaml.lstrip().startswith('$ANSIBLE_VAULT;'):
                     gyaml = jinjafx.Vault().decrypt(gyaml.encode('utf-8'), vpw).decode('utf-8')
@@ -414,7 +422,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   elif oformat == 'html':
                     output = output.encode('ascii', 'xmlcharrefreplace').decode('utf-8')
 
-                  jsr['outputs'].update({ o: base64.b64encode(output.encode('utf-8')).decode('utf-8') })
+                  jsr['outputs'].update({ o: self.e(output.encode('utf-8')).decode('utf-8') })
                   if o != '_stderr_':
                     ocount += 1
   
@@ -458,7 +466,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 for o in outputs:
                   (oname, oformat) = o.rsplit(':', 1) if ':' in o else (o, 'text')
                   ofile = re.sub(r'_+', '_', re.sub(r'[^A-Za-z0-9_. -/]', '_', os.path.normpath(oname)))
-                  outputs[o] = re.sub(r'\r?\n', lterminator, base64.b64decode(outputs[o]).decode('utf-8'))
+                  outputs[o] = re.sub(r'\r?\n', lterminator, self.d(outputs[o]).decode('utf-8'))
 
                   if '.' not in ofile:
                     if oformat == 'html':
@@ -528,7 +536,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
                     if 'datasets' in dt:
                       if 'global' in dt:
-                        vdt['global'] = base64.b64decode(dt['global']).decode('utf-8') if 'global' in dt and len(dt['global'].strip()) > 0 else ''
+                        vdt['global'] = self.d(dt['global']).decode('utf-8') if 'global' in dt and len(dt['global'].strip()) > 0 else ''
 
                         if vdt['global'] == '':
                           dt_yml += '  global: ""\n\n'
@@ -539,8 +547,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                       dt_yml += '  datasets:\n'
 
                       for ds in dt['datasets']:
-                        vdt['data'] = base64.b64decode(dt['datasets'][ds]['data']).decode('utf-8') if 'data' in dt['datasets'][ds] and len(dt['datasets'][ds]['data'].strip()) > 0 else ''
-                        vdt['vars'] = base64.b64decode(dt['datasets'][ds]['vars']).decode('utf-8') if 'vars' in dt['datasets'][ds] and len(dt['datasets'][ds]['vars'].strip()) > 0 else ''
+                        vdt['data'] = self.d(dt['datasets'][ds]['data']).decode('utf-8') if 'data' in dt['datasets'][ds] and len(dt['datasets'][ds]['data'].strip()) > 0 else ''
+                        vdt['vars'] = self.d(dt['datasets'][ds]['vars']).decode('utf-8') if 'vars' in dt['datasets'][ds] and len(dt['datasets'][ds]['vars'].strip()) > 0 else ''
 
                         dt_yml += '    "' + ds + '":\n'
 
@@ -557,8 +565,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                           dt_yml += re.sub('^', ' ' * 8, vdt['vars'].rstrip(), flags=re.MULTILINE) + '\n\n'
 
                     else :
-                      vdt['data'] = base64.b64decode(dt['data']).decode('utf-8') if 'data' in dt and len(dt['data'].strip()) > 0 else ''
-                      vdt['vars'] = base64.b64decode(dt['vars']).decode('utf-8') if 'vars' in dt and len(dt['vars'].strip()) > 0 else ''
+                      vdt['data'] = self.d(dt['data']).decode('utf-8') if 'data' in dt and len(dt['data'].strip()) > 0 else ''
+                      vdt['vars'] = self.d(dt['vars']).decode('utf-8') if 'vars' in dt and len(dt['vars'].strip()) > 0 else ''
 
                       if vdt['data'] == '':
                         dt_yml += '  data: ""\n\n'
@@ -572,7 +580,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                         dt_yml += '  vars: |2\n'
                         dt_yml += re.sub('^', ' ' * 4, vdt['vars'].rstrip(), flags=re.MULTILINE) + '\n\n'
 
-                    vdt['template'] = base64.b64decode(dt['template']).decode('utf-8') if 'template' in dt and len(dt['template'].strip()) > 0 else ''
+                    vdt['template'] = self.d(dt['template']).decode('utf-8') if 'template' in dt and len(dt['template'].strip()) > 0 else ''
 
                     if vdt['template'] == '':
                       dt_yml += '  template: ""\n'
