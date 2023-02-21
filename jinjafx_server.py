@@ -132,17 +132,18 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     return struct.pack('B', version) + struct.pack('B', len(salt)) + salt + hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, pbkdf2_iterations)
 
 
-  def rot13(self, data):
-    t_rot13 = bytes.maketrans(b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", b"nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM")
-    return data.translate(t_rot13)
+  def rot47(self, data):
+    std_rot47chars = b" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}"
+    mod_rot47chars = b"OPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|} !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMN"
+    return data.translate(bytes.maketrans(std_rot47chars, mod_rot47chars))
 
 
   def e(self, data):
-    return self.rot13(base64.b64encode(data))
+    return base64.b64encode(self.rot47(data))
 
 
   def d(self, data):
-    return base64.b64decode(self.rot13(data))
+    return self.rot47(base64.b64decode(data))
 
 
   def do_GET(self, head=False, cache=True, versioned=False):

@@ -4,18 +4,25 @@ function reset_dt() {
   dt = {};
 }
 
-function rot13(data) {
-  return data.replace(/[a-zA-Z]/g, function (c) {
-    return String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26);
+function rot47(data) {
+  return data.replace(/[ -}]/g, function(c) {
+    var n = c.charCodeAt(0) + 47;
+
+    if (n > 125) {
+      n -= 94;
+    }
+
+    return String.fromCharCode(n);
   });
 }
 
 function e(data) {
-  return rot13(window.btoa(data));
+  console.log("data is: " + rot47(data));
+  return window.btoa(rot47(data));
 }
 
 function d(data) {
-  return window.atob(rot13(data));
+  return rot47(window.atob(data));
 }
 
 function quote(str) {
