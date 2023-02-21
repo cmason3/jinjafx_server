@@ -17,7 +17,6 @@ function rot47(data) {
 }
 
 function e(data) {
-  console.log("data is: " + rot47(data));
   return window.btoa(rot47(data));
 }
 
