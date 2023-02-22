@@ -20,7 +20,7 @@
 
       if (dt.hasOwnProperty('datasets')) {
         if (dt.hasOwnProperty('global')) {
-          var global = dt.global.match(/\S/) ? window.atob(dt.global).replace(/\s+$/g, '') : "";
+          var global = dt.global.match(/\S/) ? window.opener.d(dt.global).replace(/\s+$/g, '') : "";
 
           if (global == '') {
             dtx += '  global: ""\n\n';
@@ -34,8 +34,8 @@
         dtx += '  datasets:\n';
 
         Object.keys(dt.datasets).forEach(function(ds) {
-          var data = dt.datasets[ds].data.match(/\S/) ? window.atob(dt.datasets[ds].data).replace(/\s+$/g, '') : "";
-          var vars = dt.datasets[ds].vars.match(/\S/) ? window.atob(dt.datasets[ds].vars).replace(/\s+$/g, '') : "";
+          var data = dt.datasets[ds].data.match(/\S/) ? window.opener.d(dt.datasets[ds].data).replace(/\s+$/g, '') : "";
+          var vars = dt.datasets[ds].vars.match(/\S/) ? window.opener.d(dt.datasets[ds].vars).replace(/\s+$/g, '') : "";
 
           dtx += '    "' + ds + '":\n';
 
@@ -57,8 +57,8 @@
         });
       }
       else {
-        var data = dt.data.match(/\S/) ? window.atob(dt.data).replace(/\s+$/g, '') : "";
-        var vars = dt.vars.match(/\S/) ? window.atob(dt.vars).replace(/\s+$/g, '') : "";
+        var data = dt.data.match(/\S/) ? window.opener.d(dt.data).replace(/\s+$/g, '') : "";
+        var vars = dt.vars.match(/\S/) ? window.opener.d(dt.vars).replace(/\s+$/g, '') : "";
 
         if (data == '') {
           dtx += '  data: ""\n\n';
@@ -77,7 +77,7 @@
         }
       }
 
-      var template = dt.template.match(/\S/) ? window.atob(dt.template).replace(/\s+$/g, '') : "";
+      var template = dt.template.match(/\S/) ? window.opener.d(dt.template).replace(/\s+$/g, '') : "";
 
       if (template == '') {
         dtx += '  template: ""\n';

@@ -2,21 +2,21 @@
   var obj = null;
   var tid = 0;
   var qs = '';
-  
+
   function set_status(color, title, message) {
     clearTimeout(tid);
     tid = setTimeout(function() { sobj.innerHTML = "" }, 5000);
     sobj.style.color = color;
     sobj.innerHTML = "<strong>" + window.opener.quote(title) + "</strong> " + window.opener.quote(message);
   }
-  
+
   window.onload = function() {
     if (window.opener != null) {
       var dt = window.opener.dt;
       window.opener.reset_dt();
 
       dayjs.extend(window.dayjs_plugin_advancedFormat);
-  
+
       sobj = document.getElementById("ostatus");
 
       document.getElementById('copy').onclick = function() {
@@ -96,17 +96,23 @@
 
       if (Object.keys(dt).length !== 0) {
         var _qs = [];
+        var dataset = null;
+
         if (dt.id != '') {
           _qs.push('dt=' + dt.id);
         }
         if (dt.dataset != '') {
           _qs.push('ds=' + dt.dataset);
+          dataset = dt.dataset;
         }
         qs = (_qs.length > 0) ? '?' + _qs.join('&') : '';
-  
+
+        delete dt.id;
+        delete dt.dataset;
+
         var xHR = new XMLHttpRequest();
         xHR.open("POST", '/jinjafx' + qs, true);
-  
+
         xHR.onload = function() {
           if (this.status === 200) {
             try {
@@ -115,16 +121,16 @@
                 var stderr = null;
 
                 if (obj.outputs.hasOwnProperty('_stderr_')) {
-                  stderr = window.atob(obj.outputs['_stderr_']);
+                  stderr = window.opener.d(obj.outputs['_stderr_']);
                   delete (obj.outputs['_stderr_']);
                 }
 
                 var oc = Object.keys(obj.outputs).length;
                 var oid = 1;
-  
+
                 var links = '';
                 var tabs = '';
-  
+
                 Object.keys(obj.outputs).sort(function(a, b) {
                   if (a == 'Output') {
                     return -1;
@@ -140,27 +146,27 @@
                   }
 
                   var g = window.opener.quote(oname)
-  
+
                   tabs += '<div id="o' + oid + '" class="h-100 tab-pane fade' + ((oid == 1) ? ' show active' : '') + '">';
                   tabs += '<h4 class="fw-bold">' + g + '</h4>';
-  
-                  var tc = utf8.decode(window.atob(obj.outputs[output]));
+
+                  var tc = utf8.decode(window.opener.d(obj.outputs[output]));
                   if (oformat == 'html') {
                     tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + tc.replace(/&/g, '&amp;').replace(/"/g, "&quot;") + '"></iframe>';
                   }
                   else {
                     tabs += '<textarea id="t_o' + oid + '" class="output" readonly>' + window.opener.quote(tc) + '</textarea>';
                   }
-  
+
                   tabs += '</div>';
-  
+
                   links += '<li class="nav-item">';
                   links += '<a class="nav-link' + ((oid == 1) ? ' active"' : '"') + ' data-bs-toggle="tab" href="#o' + oid + '">' + g + '</a>';
                   links += '</li>';
-  
+
                   oid += 1;
                 });
-  
+
                 document.body.style.display = 'none';
                 document.getElementById('status').style.display = 'none';
                 document.getElementById('summary').innerHTML = 'Generated at ' + dayjs().format('HH:mm') + ' on ' + dayjs().format('Do MMMM YYYY') + '<br />in ' + Math.ceil(obj.elapsed).toLocaleString() + ' milliseconds';
@@ -168,17 +174,17 @@
                 document.getElementById('nav-links').innerHTML = links;
                 document.getElementById('wrap').classList.remove('d-none');
                 document.getElementById('footer').classList.remove('d-none');
-  
-                document.title = 'Outputs' + ((dt.dataset != 'Default') ? ' (' + dt.dataset + ')' : '');
-  
+
+                document.title = 'Outputs' + ((dataset != 'Default') ? ' (' + dataset + ')' : '');
+
                 if (oc > 1) {
                   document.getElementById('pills').classList.remove('d-none');
                 }
-  
+
                 window.onresize = function() {
                   document.getElementById("row").style.height = (window.innerHeight - 200) + "px";
                 };
-  
+
                 window.onresize();
                 document.body.style.display = 'block';
 
@@ -221,7 +227,7 @@
           document.body.innerHTML = "<div id=\"status\" class=\"alert alert-danger\"><strong><h4>JinjaFx Error</h4></strong>XMLHttpRequest.onError()</div>";
         };
         xHR.setRequestHeader("Content-Type", "application/json");
-        
+
         var rd = JSON.stringify(dt);
         if (rd.length > 1024) {
           xHR.setRequestHeader("Content-Encoding", "gzip");

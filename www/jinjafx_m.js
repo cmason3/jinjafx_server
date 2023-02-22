@@ -4,6 +4,26 @@ function reset_dt() {
   dt = {};
 }
 
+function rot47(data) {
+  return data.replace(/[ -}]/g, function(c) {
+    var n = c.charCodeAt(0) + 47;
+
+    if (n > 125) {
+      n -= 94;
+    }
+
+    return String.fromCharCode(n);
+  });
+}
+
+function e(data) {
+  return window.btoa(rot47(data));
+}
+
+function d(data) {
+  return rot47(window.atob(data));
+}
+
 function quote(str) {
   str = str.replace(/&/g, "&amp;");
   str = str.replace(/>/g, "&gt;");
@@ -66,11 +86,11 @@ function getStatusText(code) {
     })),
     json: true
   };
-  
+
   function select_dataset(e) {
     switch_dataset(e.currentTarget.ds_name, true);
   }
-  
+
   function switch_dataset(ds, sflag) {
     if (sflag) {
       datasets[current_ds][0] = window.cmData.swapDoc(datasets[ds][0]);
@@ -87,10 +107,10 @@ function getStatusText(code) {
     }
     fe.focus();
   }
-  
+
   function rebuild_datasets() {
     document.getElementById('datasets').innerHTML = '';
-  
+
     Object.keys(datasets).forEach(function(ds) {
       var a = document.createElement('a');
       a.classList.add('dropdown-item', 'text-decoration-none');
@@ -100,7 +120,7 @@ function getStatusText(code) {
       a.innerHTML = ds;
       document.getElementById('datasets').appendChild(a);
     });
-  
+
     if (Object.keys(datasets).length > 1) {
       if (document.getElementById('select_ds').disabled == true) {
         document.getElementById('xgvars').classList.remove('d-none');
@@ -124,7 +144,7 @@ function getStatusText(code) {
       document.getElementById('delete_ds').disabled = true;
       document.getElementById('xgvars').classList.add('d-none');
       document.getElementById('xlvars').classList.add('h-100');
-      
+
       if (xsplit != null) {
         xsplit.destroy();
         xsplit = null;
@@ -140,7 +160,7 @@ function getStatusText(code) {
     }
     document.getElementById('selected_ds').innerHTML = current_ds;
   }
-  
+
   function delete_dataset(ds) {
     delete datasets[ds];
     window.addEventListener('beforeunload', onBeforeUnload);
@@ -148,7 +168,7 @@ function getStatusText(code) {
       document.title = 'JinjaFx [unsaved]';
     }
     dirty = true;
-  
+
     rebuild_datasets();
     switch_dataset(Object.keys(datasets)[0], false);
     fe.focus();
@@ -177,8 +197,8 @@ function getStatusText(code) {
 
   function jinjafx_generate() {
     var vaulted_vars = dt.vars.indexOf('$ANSIBLE_VAULT;') > -1;
-    dt.vars = window.btoa(dt.vars);
-    dt.template = window.btoa(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
+    dt.vars = e(dt.vars);
+    dt.template = e(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
     dt.id = dt_id;
     dt.dataset = current_ds;
 
@@ -224,7 +244,7 @@ function getStatusText(code) {
       }).show();
       return false;
     }
-  
+
     if (method == "protect") {
       document.getElementById('password_open2').classList.remove('is-invalid');
       document.getElementById('password_open2').classList.remove('is-valid');
@@ -235,7 +255,7 @@ function getStatusText(code) {
       }).show();
       return false;
     }
-  
+
     if (window.cmTemplate.getValue().length === 0) {
       window.cmTemplate.focus();
       set_status("darkred", "ERROR", "No Template");
@@ -272,13 +292,13 @@ function getStatusText(code) {
     }
 
     dt = {};
-  
+
     try {
       if (method === "generate") {
         dt.data = window.cmData.getValue().split(/\r?\n/).filter(function(e) {
           return !e.match(/^[ \t]*#/) && e.match(/\S/);
         });
-  
+
         if (dt.data.length == 1) {
           window.cmData.focus();
           set_status("darkred", "ERROR", "Not Enough Data Rows");
@@ -286,7 +306,7 @@ function getStatusText(code) {
         }
 
         dt.vars = '';
-        dt.data = window.btoa(dt.data.join("\n"));
+        dt.data = e(dt.data.join("\n"));
 
         var vars = window.cmVars.getValue().replace(/\t/g, "  ");
 
@@ -336,20 +356,20 @@ function getStatusText(code) {
                 if (vars['jinjafx_input'].hasOwnProperty('size')) {
                   document.getElementById('input_modal').className += " modal-" + vars['jinjafx_input']['size'];
                 }
-  
+
                 if (vars['jinjafx_input'].hasOwnProperty('body')) {
                   if (input_form !== vars['jinjafx_input']['body']) {
                     var xHR = new XMLHttpRequest();
                     xHR.open("POST", '/jinjafx?dt=jinjafx_input', true);
-  
+
                     r_input_form = null;
-  
+
                     xHR.onload = function() {
                       if (this.status === 200) {
                         try {
                           obj = JSON.parse(xHR.responseText);
                           if (obj.status === "ok") {
-                            r_input_form = window.atob(obj.outputs['Output']);
+                            r_input_form = d(obj.outputs['Output']);
                             document.getElementById('jinjafx_input_form').innerHTML = r_input_form;
                             input_form = vars['jinjafx_input']['body'];
                             jinput = new bootstrap.Modal(document.getElementById('jinjafx_input'), {
@@ -381,16 +401,16 @@ function getStatusText(code) {
                       set_status("darkred", "ERROR", "XMLHttpRequest.onTimeout()");
                       clear_wait();
                     };
-  
+
                     set_wait();
-  
+
                     var rbody = vars['jinjafx_input']['body'];
                     rbody = rbody.replace(/<(?:output[\t ]+.+?|\/output[\t ]*)>.*?\n/gi, '');
-  
+
                     xHR.timeout = 10000;
                     xHR.setRequestHeader("Content-Type", "application/json");
 
-                    var rd = JSON.stringify({ "template": window.btoa(utf8.encode(rbody)) });
+                    var rd = JSON.stringify({ "template": e(utf8.encode(rbody)) });
                     if (rd.length > 1024) {
                       xHR.setRequestHeader("Content-Encoding", "gzip");
                       xHR.send(pako.gzip(rd));
@@ -470,28 +490,28 @@ function getStatusText(code) {
           set_status("#e64c00", "OK", 'No Changes Detected');
           return false;
         }
-  
-        dt.template = window.btoa(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
-  
+
+        dt.template = e(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
+
         if ((current_ds === 'Default') && (Object.keys(datasets).length === 1)) {
-          dt.vars = window.btoa(window.cmVars.getValue().replace(/\t/g, "  "));
-          dt.data = window.btoa(window.cmData.getValue());
+          dt.vars = e(window.cmVars.getValue().replace(/\t/g, "  "));
+          dt.data = e(window.cmData.getValue());
         }
         else {
           dt.datasets = {};
 
           if (Object.keys(datasets).length > 1) {
-            dt.global = window.btoa(window.cmgVars.getValue().replace(/\t/g, "  "));
+            dt.global = e(window.cmgVars.getValue().replace(/\t/g, "  "));
           }
 
           switch_dataset(current_ds, true);
           Object.keys(datasets).forEach(function(ds) {
             dt.datasets[ds] = {};
-            dt.datasets[ds].data = window.btoa(datasets[ds][0].getValue());
-            dt.datasets[ds].vars = window.btoa(datasets[ds][1].getValue().replace(/\t/g, "  "));
+            dt.datasets[ds].data = e(datasets[ds][0].getValue());
+            dt.datasets[ds].vars = e(datasets[ds][1].getValue().replace(/\t/g, "  "));
           });
         }
-  
+
         if (method === "export") {
           if (dt_id != '') {
             window.open("/dt.html?dt=" + dt_id, "_blank");
@@ -502,7 +522,7 @@ function getStatusText(code) {
         }
         else {
           set_wait();
-  
+
           if (method == "update_link") {
             update_link(dt_id);
           }
@@ -518,10 +538,10 @@ function getStatusText(code) {
       clear_wait();
     }
   }
-  
+
   function update_link(v_dt_id) {
     var xHR = new XMLHttpRequest();
-  
+
     if (v_dt_id !== null) {
       xHR.open("POST", "/get_link?id=" + v_dt_id, true);
       if (dt_password !== null) {
@@ -538,7 +558,7 @@ function getStatusText(code) {
     else {
       xHR.open("POST", "/get_link", true);
     }
-  
+
     xHR.onload = function() {
       if (this.status === 200) {
         if (v_dt_id !== null) {
@@ -577,7 +597,7 @@ function getStatusText(code) {
       }
       clear_wait();
     };
-  
+
     xHR.onerror = function() {
       set_status("darkred", "ERROR", "XMLHttpRequest.onError()");
       clear_wait();
@@ -586,7 +606,7 @@ function getStatusText(code) {
       set_status("darkred", "ERROR", "XMLHttpRequest.onTimeout()");
       clear_wait();
     };
-  
+
     xHR.timeout = 10000;
     xHR.setRequestHeader("Content-Type", "application/json");
 
@@ -622,7 +642,7 @@ function getStatusText(code) {
       window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('?')) + suffix);
     }
   }
-  
+
   function try_to_load() {
     try {
       if (qs.hasOwnProperty('dt')) {
@@ -640,8 +660,8 @@ function getStatusText(code) {
           }
           else if (this.status === 200) {
             try {
-              var dt = jsyaml.load(this.responseText, jsyaml_schema);
-  
+              var dt = jsyaml.load(d(JSON.parse(this.responseText)['dt']), jsyaml_schema);
+
               load_datatemplate(dt['dt'], qs);
               dt_id = qs.dt;
 
@@ -653,7 +673,7 @@ function getStatusText(code) {
               if (dt.hasOwnProperty('dt_password') || dt.hasOwnProperty('dt_mpassword')) {
                 document.getElementById('protect_text').innerHTML = 'Update Protection';
               }
-  
+
               if (dt.hasOwnProperty('updated')) {
                 revision = dt.revision;
                 set_status('green', 'Revision ' + revision, 'Updated ' + dayjs.unix(dt.updated).fromNow(), 30000, true);
@@ -661,7 +681,7 @@ function getStatusText(code) {
               else {
                 revision = 1;
               }
-  
+
               reset_location('/dt/' + dt_id);
             }
             catch (e) {
@@ -679,7 +699,7 @@ function getStatusText(code) {
           loaded = true;
           clear_wait();
         };
-    
+
         xHR.onerror = function() {
           set_status("darkred", "ERROR", "XMLHttpRequest.onError()");
           reset_location('');
@@ -694,7 +714,7 @@ function getStatusText(code) {
           loaded = true;
           clear_wait();
         };
-  
+
         xHR.timeout = 10000;
         if (dt_password != null) {
           xHR.setRequestHeader("X-Dt-Password", dt_password);
@@ -713,7 +733,7 @@ function getStatusText(code) {
       loaded = true; onChange(null, true);
     }
   }
-  
+
   window.onload = function() {
     dayjs.extend(window.dayjs_plugin_relativeTime);
 
@@ -787,7 +807,7 @@ function getStatusText(code) {
 
     document.getElementById('export').onclick = function() { jinjafx('export'); };
     document.getElementById('generate').onclick = function() { jinjafx('generate'); };
-    document.getElementById('encrypt').onclick = function() { 
+    document.getElementById('encrypt').onclick = function() {
       clear_status();
       new bootstrap.Modal(document.getElementById('vault_encrypt'), {
         keyboard: false
@@ -845,7 +865,7 @@ function getStatusText(code) {
       "Cmd-D": false
     };
 
-    CodeMirror.defineMode("data", cmDataMode);    
+    CodeMirror.defineMode("data", cmDataMode);
     window.cmData = CodeMirror.fromTextArea(data, {
       tabSize: 2,
       scrollbarStyle: "null",
@@ -928,7 +948,7 @@ function getStatusText(code) {
       }
       return undefined;
     });
-    
+
     function cmOutputMode() {
       return {
         startState: function() {
@@ -996,7 +1016,7 @@ function getStatusText(code) {
       smartIndent: false,
       showTrailingSpace: true,
       foldGutter: true,
-      foldOptions: { 
+      foldOptions: {
         rangeFinder: CodeMirror.helpers.fold.jinja2,
         widget: ' \u22EF '
       },
@@ -1026,7 +1046,7 @@ function getStatusText(code) {
       }
       csv_on = false;
     };
-    
+
     window.cmData.on("beforeChange", onPaste);
     window.cmTemplate.on("beforeChange", onPaste);
     window.cmVars.on("beforeChange", onPaste);
@@ -1128,8 +1148,8 @@ function getStatusText(code) {
       if (e.which == 13) {
         document.getElementById('ml-vault-encrypt-ok').click();
       }
-    };    
-    
+    };
+
     document.getElementById('vault_encrypt').addEventListener('hidden.bs.modal', function (e) {
       clear_status();
       document.getElementById("vault_string").value = '';
@@ -1144,7 +1164,7 @@ function getStatusText(code) {
     });
 
     document.getElementById('ml-vault-ok').onclick = function() {
-      dt.vault_password = window.btoa(document.getElementById("vault").value);
+      dt.vpw = e(document.getElementById("vault").value);
       if (dt_id != '') {
         window.open("/output.html?dt=" + dt_id, "_blank");
       }
@@ -1440,7 +1460,7 @@ function getStatusText(code) {
           if (focusable.length) {
             var first = focusable[0];
             var last = focusable[focusable.length - 1];
-  
+
             if ((e.target === first) && e.shiftKey) {
               last.focus();
               e.preventDefault();
@@ -1461,7 +1481,7 @@ function getStatusText(code) {
         try_to_load();
 
         document.getElementById('lbuttons').classList.remove('d-none');
-        
+
         if (fe != window.cmData) {
           onDataBlur();
         }
@@ -1474,7 +1494,7 @@ function getStatusText(code) {
     }
     else if (window.location.href.indexOf('?') > -1) {
       var v = window.location.href.substr(window.location.href.indexOf('?') + 1).split('&');
-  
+
       for (var i = 0; i < v.length; i++) {
         var p = v[i].split('=');
         qs[p[0].toLowerCase()] = decodeURIComponent(p.length > 1 ? p[1] : '');
@@ -1485,7 +1505,7 @@ function getStatusText(code) {
           try_to_load();
 
           document.getElementById('lbuttons').classList.remove('d-none');
-        
+
           if (fe != window.cmData) {
             onDataBlur();
           }
@@ -1509,12 +1529,12 @@ function getStatusText(code) {
       loaded = true;
     }
   };
-  
+
   function remove_info() {
     document.getElementById('template_info').classList.add('fade-out');
     document.getElementById('template_info').style.zIndex = -1000;
   }
-  
+
   function set_wait() {
     fe.setOption('readOnly', 'nocursor');
     var e = document.getElementById("csv").getElementsByTagName("th");
@@ -1528,7 +1548,7 @@ function getStatusText(code) {
     window.cmgVars.getWrapperElement().style.background = '#eee';
     document.getElementById('overlay').style.display = 'block';
   }
-  
+
   function clear_wait() {
     document.getElementById('overlay').style.display = 'none';
     window.cmVars.getWrapperElement().style.background = '';
@@ -1543,27 +1563,27 @@ function getStatusText(code) {
     fe.setOption('readOnly', false);
     fe.focus();
   }
-  
+
   function escapeRegExp(s) {
     return s.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
   }
-  
+
   function get_csv_astable(datarows) {
     var tc = (datarows[0].match(/\t/g) || []).length;
     var cc = (datarows[0].match(/,/g) || []).length;
     var delim = new RegExp(cc > tc ? '[ \\t]*,[ \\t]*' : ' *\\t *');
     var hrow = datarows[0].split(delim);
-  
+
     var table = '<table class="table table-responsive table-hover table-sm">';
     table += '<thead><tr>';
     for (var col = 0; col < hrow.length; col++) {
       table += '<th>' + quote(hrow[col]) + '</th>';
     }
     table += '</tr></thead><tbody>';
-  
+
     for (var row = 1; row < datarows.length; row++) {
       var rowdata = datarows[row].split(delim);
-  
+
       if (rowdata.length != hrow.length) {
         table += '<tr class="bg-danger">';
       }
@@ -1580,7 +1600,7 @@ function getStatusText(code) {
     table += '</tbody></table>';
     return table;
   }
-  
+
   function onDataBlur() {
     var datarows = window.cmData.getValue().trim().split(/\r?\n/).filter(function(e) {
       return !e.match(/^[ \t]*#/) && e.match(/\S/);
@@ -1597,8 +1617,8 @@ function getStatusText(code) {
       window.cmData.refresh();
       csv_on = false;
     }
-  } 
-  
+  }
+
   function apply_dt() {
     load_datatemplate(pending_dt, null);
     reset_location('');
@@ -1613,17 +1633,17 @@ function getStatusText(code) {
     document.getElementById('protect').classList.add('disabled');
     document.getElementById('protect').innerHTML = 'Protect Link';
   }
-  
+
   function onPaste(cm, change) {
     if (change.origin === "paste") {
       var t = change.text.join('\n');
-  
+
       if (t.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
         var obj = jsyaml.load(t, jsyaml_schema);
         if (obj != null) {
           change.cancel();
           pending_dt = obj['dt'];
-  
+
           if (dirty) {
             if (confirm("Are You Sure?") === true) {
               apply_dt();
@@ -1636,11 +1656,11 @@ function getStatusText(code) {
       }
     }
   }
-  
+
   function onBeforeUnload(e) {
     e.returnValue = 'Are you sure?';
   }
-  
+
   function onChange(editor, errflag) {
     if (loaded) {
       if (!dirty && (errflag !== true)) {
@@ -1659,28 +1679,30 @@ function getStatusText(code) {
       }
     }
   }
-  
+
   function load_datatemplate(_dt, _qs) {
     try {
+      /*
       if (_qs != null) {
         if (_qs.hasOwnProperty("template")) {
-          _dt.template = window.atob(_qs.template);
+          _dt.template = d(_qs.template);
         }
       }
-  
+      */
+
       current_ds = 'Default';
 
       window.cmgVars.setValue("");
-  
+
       if (_dt.hasOwnProperty("datasets")) {
         datasets = {};
-  
+
         Object.keys(_dt.datasets).forEach(function(ds) {
           var data = _dt.datasets[ds].hasOwnProperty("data") ? _dt.datasets[ds].data : "";
           var vars = _dt.datasets[ds].hasOwnProperty("vars") ? _dt.datasets[ds].vars : "";
           datasets[ds] = [CodeMirror.Doc(data, 'data'), CodeMirror.Doc(vars, 'yaml')];
         });
-  
+
         current_ds = Object.keys(datasets)[0];
         window.cmData.swapDoc(datasets[current_ds][0]);
         window.cmVars.swapDoc(datasets[current_ds][1]);
@@ -1693,7 +1715,8 @@ function getStatusText(code) {
         datasets = {
           'Default': [CodeMirror.Doc('', 'data'), CodeMirror.Doc('', 'yaml')]
         };
-  
+
+        /*
         if (_qs != null) {
           if (_qs.hasOwnProperty("data")) {
             _dt.data = window.atob(_qs.data);
@@ -1702,19 +1725,20 @@ function getStatusText(code) {
             _dt.vars = window.atob(_qs.vars);
           }
         }
-  
+        */
+
         datasets['Default'][0].setValue(_dt.hasOwnProperty("data") ? _dt.data : "");
         window.cmData.swapDoc(datasets['Default'][0]);
         datasets['Default'][1].setValue(_dt.hasOwnProperty("vars") ? _dt.vars : "");
         window.cmVars.swapDoc(datasets['Default'][1]);
       }
       window.cmTemplate.setValue(_dt.hasOwnProperty("template") ? _dt.template : "");
-  
+
       window.cmData.getDoc().clearHistory();
       window.cmVars.getDoc().clearHistory();
       window.cmgVars.getDoc().clearHistory();
       window.cmTemplate.getDoc().clearHistory();
-  
+
       rebuild_datasets();
       loaded = true;
     }
@@ -1727,7 +1751,7 @@ function getStatusText(code) {
       onDataBlur();
     }
   }
-  
+
   function clear_status() {
     clearTimeout(tid);
     sobj.innerHTML = "";
@@ -1744,7 +1768,7 @@ function getStatusText(code) {
     sobj.style.color = color;
     if (typeof mline !== 'undefined') {
       sobj.innerHTML = "<strong>" + quote(title) + "</strong><br /><span class=\"small\">" + quote(message) + "</span>";
-    } 
+    }
     else {
       sobj.innerHTML = "<strong>" + quote(title) + "</strong> " + quote(message);
     }
