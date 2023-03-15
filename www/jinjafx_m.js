@@ -174,29 +174,34 @@ function getStatusText(code) {
     fe.focus();
   }
 
-
-
+  function bufferToHex(buffer) {
+    return [...new Uint8Array(buffer)].map(b => b.toString(16).padStart(2, '0')).join ('');
+  }
 
   function ansible_vault_encrypt(plaintext, password) {
+    return window.crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']).then(function(key) {
+      var salt = window.crypto.getRandomValues(new Uint8Array(32));
 
-
-    var salt2 = window.crypto.getRandomValues(new Uint8Array(32));
+      return window.crypto.subtle.deriveBits({ 'name': 'PBKDF2', 'salt': salt, 'iterations': 10000, 'hash': 'SHA-256' }, key, 640).then(function(db) {
+        return window.crypto.subtle.importKey('raw', db.slice(0, 32), { 'name': 'AES-CTR' }, false, ['encrypt']).then(function(ekey) {
+          return window.crypto.subtle.encrypt({ 'name': 'AES-CTR', 'counter': db.slice(64, 80), 'length': 64 }, ekey, new TextEncoder().encode(plaintext)).then(function(ciphertext) {
+            return window.crypto.subtle.importKey('raw', db.slice(32, 64), { 'name': 'HMAC', 'hash': 'SHA-256' }, false, ['sign']).then(function(hkey) {
+              return window.crypto.subtle.sign({ 'name': 'HMAC' }, hkey, ciphertext).then(function(hmac) {
+                var h = bufferToHex(new TextEncoder().encode(bufferToHex(salt) + '\n' + bufferToHex(hmac) + '\n' + bufferToHex(ciphertext)));
+                var vtext = h.match(/.{1,80}/g).map(x => ' '.repeat(10) + x).join('\n');
+                return '!vault |\n' + ' '.repeat(10) + '$ANSIBLE_VAULT;1.1;AES256\n' + vtext;
+              });
+            });
+          });
+        });
+      });
+    });
 
     /*
-    var keym = await window.crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
-    var key = await window.crypto.subtle.deriveKey({ name: 'PBKDF2', salt: salt, iterations: 10000, hash: 'SHA-256' }, keym, { name: 'AES-CTR', length: 256 }, false, ['encrypt']);
-
-    */
-
-
     var salt = CryptoJS.lib.WordArray.random(32);
 
-    console.log("length of old salt is " + salt.toString(CryptoJS.enc.Hex).length / 2)
-    console.log("length of new salt is " + salt2.length)
-
-
     var key = CryptoJS.PBKDF2(password, salt, { hasher: CryptoJS.algo.SHA256, keySize: 20, iterations: 10000 });
-    var dk = [salt.toString(CryptoJS.enc.Hex), key.toString(CryptoJS.enc.Hex)];
+    var dk = [salt.toString(CryptoJS.enc.Hex), key.toString(CryptoJS.enc.Hex)]; // 160 -> 320
 
     var ciphertext = CryptoJS.AES.encrypt(plaintext, CryptoJS.enc.Hex.parse(dk[1].substring(0, 64)), {
       iv: CryptoJS.enc.Hex.parse(dk[1].substring(128, 160)),
@@ -209,11 +214,8 @@ function getStatusText(code) {
     var h = CryptoJS.enc.Hex.stringify(CryptoJS.enc.Utf8.parse(vtext));
     vtext = h.match(/.{1,80}/g).map(x => ' '.repeat(10) + x).join('\n');
     return '!vault |\n' + ' '.repeat(10) + '$ANSIBLE_VAULT;1.1;AES256\n' + vtext
+    */
   }
-
-
-
-
 
   function jinjafx_generate() {
     var vaulted_vars = dt.vars.indexOf('$ANSIBLE_VAULT;') > -1;
@@ -1222,7 +1224,11 @@ function getStatusText(code) {
         if (document.getElementById('password_vault1').value.match(/\S/)) {
           if (document.getElementById('password_vault1').value == document.getElementById('password_vault2').value) {
             bootstrap.Modal.getOrCreateInstance(document.getElementById('vault_encrypt')).hide()
-            document.getElementById('vault_text').value = ansible_vault_encrypt(document.getElementById('vault_string').value, document.getElementById('password_vault1').value);
+
+            ansible_vault_encrypt(document.getElementById('vault_string').value, document.getElementById('password_vault1').value).then(function(x) {
+              document.getElementById('vault_text').value = x;
+            });
+
             new bootstrap.Modal(document.getElementById('vault_output'), {
               keyboard: false
             }).show();
