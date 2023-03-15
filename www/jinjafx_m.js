@@ -174,14 +174,30 @@ function getStatusText(code) {
     fe.focus();
   }
 
-  function derive_key(password) {
-    var salt = CryptoJS.lib.WordArray.random(32);
-    var key = CryptoJS.PBKDF2(password, salt, { hasher: CryptoJS.algo.SHA256, keySize: 20, iterations: 10000 });
-    return [salt.toString(CryptoJS.enc.Hex), key.toString(CryptoJS.enc.Hex)];
-  }
+
+
 
   function ansible_vault_encrypt(plaintext, password) {
-    var dk = derive_key(password);
+
+
+    var salt2 = window.crypto.getRandomValues(new Uint8Array(32));
+
+    /*
+    var keym = await window.crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+    var key = await window.crypto.subtle.deriveKey({ name: 'PBKDF2', salt: salt, iterations: 10000, hash: 'SHA-256' }, keym, { name: 'AES-CTR', length: 256 }, false, ['encrypt']);
+
+    */
+
+
+    var salt = CryptoJS.lib.WordArray.random(32);
+
+    console.log("length of old salt is " + salt.toString(CryptoJS.enc.Hex).length / 2)
+    console.log("length of new salt is " + salt2.length)
+
+
+    var key = CryptoJS.PBKDF2(password, salt, { hasher: CryptoJS.algo.SHA256, keySize: 20, iterations: 10000 });
+    var dk = [salt.toString(CryptoJS.enc.Hex), key.toString(CryptoJS.enc.Hex)];
+
     var ciphertext = CryptoJS.AES.encrypt(plaintext, CryptoJS.enc.Hex.parse(dk[1].substring(0, 64)), {
       iv: CryptoJS.enc.Hex.parse(dk[1].substring(128, 160)),
       mode: CryptoJS.mode.CTR,
@@ -194,6 +210,10 @@ function getStatusText(code) {
     vtext = h.match(/.{1,80}/g).map(x => ' '.repeat(10) + x).join('\n');
     return '!vault |\n' + ' '.repeat(10) + '$ANSIBLE_VAULT;1.1;AES256\n' + vtext
   }
+
+
+
+
 
   function jinjafx_generate() {
     var vaulted_vars = dt.vars.indexOf('$ANSIBLE_VAULT;') > -1;
@@ -749,6 +769,10 @@ function getStatusText(code) {
     document.getElementById('get2').onclick = function() { jinjafx('get_link'); };
     document.getElementById('update').onclick = function() { jinjafx('update_link'); };
     document.getElementById('protect').onclick = function() { jinjafx('protect'); };
+
+    if (window.crypto.subtle) {
+      document.getElementById('encrypt').classList.remove('d-none');
+    }
 
     if (window.showOpenFilePicker) {
       document.getElementById('import').onclick = async() => {
