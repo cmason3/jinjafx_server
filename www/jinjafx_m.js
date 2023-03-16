@@ -179,15 +179,19 @@ function getStatusText(code) {
   }
 
   function ansible_vault_encrypt(plaintext, password) {
-    return window.crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']).then(function(key) {
+    var t = new TextEncoder();
+
+    return window.crypto.subtle.importKey('raw', t.encode(password), 'PBKDF2', false, ['deriveBits']).then(function(key) {
       var salt = window.crypto.getRandomValues(new Uint8Array(32));
 
       return window.crypto.subtle.deriveBits({ name: 'PBKDF2', salt: salt, iterations: 10000, hash: 'SHA-256' }, key, 640).then(function(db) {
         return window.crypto.subtle.importKey('raw', db.slice(0, 32), 'AES-CTR', false, ['encrypt']).then(function(ekey) {
-          return window.crypto.subtle.encrypt({ name: 'AES-CTR', counter: db.slice(64, 80), length: 64 }, ekey, new TextEncoder().encode(plaintext)).then(function(ciphertext) {
+          var b_plaintext = new t.encode(plaintext);
+
+          return window.crypto.subtle.encrypt({ name: 'AES-CTR', counter: db.slice(64, 80), length: 64 }, ekey, b_plaintext).then(function(ciphertext) {
             return window.crypto.subtle.importKey('raw', db.slice(32, 64), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']).then(function(hkey) {
               return window.crypto.subtle.sign('HMAC', hkey, ciphertext).then(function(hmac) {
-                var h = bufferToHex(new TextEncoder().encode(bufferToHex(salt) + '\n' + bufferToHex(hmac) + '\n' + bufferToHex(ciphertext)));
+                var h = bufferToHex(t.encode(bufferToHex(salt) + '\n' + bufferToHex(hmac) + '\n' + bufferToHex(ciphertext)));
                 var vtext = h.match(/.{1,80}/g).map(x => ' '.repeat(10) + x).join('\n');
                 return '!vault |\n' + ' '.repeat(10) + '$ANSIBLE_VAULT;1.1;AES256\n' + vtext;
               });
