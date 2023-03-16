@@ -8,7 +8,8 @@ libraries = {
   'split.js': '1.6.5',
   'js-yaml': '4.1.0',
   'dayjs': '1.11.7',
-  'pako': '2.1.0'
+  'pako': '2.1.0',
+  'jszip': '3.10.1'
 }
 
 for lib in libraries:

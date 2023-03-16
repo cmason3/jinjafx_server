@@ -64,6 +64,27 @@
       document.getElementById('download').onclick = function() {
         sobj.innerHTML = '';
         if (obj != null) {
+          var zip = new JSZip();
+          Object.keys(obj.outputs).forEach(function(o) {
+            var [ofile, oformat] = o.split(':', 2);
+
+            ofile = ofile.replace(/[^A-Z0-9_. -/]/gi, '_').replace(/_+/g, '_');
+
+            if (!ofile.includes('.')) {
+              ofile += '.' + oformat.replace('text', 'txt');
+            }
+
+            zip.file(ofile, window.opener.d(obj.outputs[o]));
+          });
+
+          zip.generateAsync({ type: 'blob' }).then(function(content) {
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(content);
+            link.download = 'Outputs.' + dayjs().format('YYYYMMDD') + '-' + dayjs().format('HHmmss') + '.zip';
+            link.click();
+          });
+
+          /*
           var xHR = new XMLHttpRequest();
           xHR.open("POST", 'download' + qs, true);
 
@@ -89,6 +110,7 @@
           else {
             xHR.send(rd);
           }
+          */
         }
         var t = document.getElementById('t_' + document.querySelector('.tab-content > .active').getAttribute('id'));
         t.focus();
