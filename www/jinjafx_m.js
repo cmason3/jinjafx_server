@@ -174,31 +174,46 @@ function getStatusText(code) {
     fe.focus();
   }
 
-  function derive_key(password) {
-    var salt = CryptoJS.lib.WordArray.random(32);
-    var key = CryptoJS.PBKDF2(password, salt, { hasher: CryptoJS.algo.SHA256, keySize: 20, iterations: 10000 });
-    return [salt.toString(CryptoJS.enc.Hex), key.toString(CryptoJS.enc.Hex)];
+  function bufferToHex(buffer) {
+    return [...new Uint8Array(buffer)].map(b => b.toString(16).padStart(2, '0')).join ('');
   }
 
   function ansible_vault_encrypt(plaintext, password) {
-    var dk = derive_key(password);
-    var ciphertext = CryptoJS.AES.encrypt(plaintext, CryptoJS.enc.Hex.parse(dk[1].substring(0, 64)), {
-      iv: CryptoJS.enc.Hex.parse(dk[1].substring(128, 160)),
-      mode: CryptoJS.mode.CTR,
-      padding: CryptoJS.pad.Pkcs7
-    }).ciphertext;
+    var t = new TextEncoder();
 
-    var hmac = CryptoJS.HmacSHA256(ciphertext, CryptoJS.enc.Hex.parse(dk[1].substring(64, 128)));
-    var vtext = dk[0] + '\n' + hmac.toString(CryptoJS.format.hex) + '\n' + ciphertext.toString(CryptoJS.format.hex);
-    var h = CryptoJS.enc.Hex.stringify(CryptoJS.enc.Utf8.parse(vtext));
-    vtext = h.match(/.{1,80}/g).map(x => ' '.repeat(10) + x).join('\n');
-    return '!vault |\n' + ' '.repeat(10) + '$ANSIBLE_VAULT;1.1;AES256\n' + vtext
+    return window.crypto.subtle.importKey('raw', t.encode(password), 'PBKDF2', false, ['deriveBits']).then(function(key) {
+      var salt = window.crypto.getRandomValues(new Uint8Array(32));
+
+      return window.crypto.subtle.deriveBits({ name: 'PBKDF2', salt: salt, iterations: 10000, hash: 'SHA-256' }, key, 640).then(function(db) {
+        return window.crypto.subtle.importKey('raw', db.slice(0, 32), 'AES-CTR', false, ['encrypt']).then(function(ekey) {
+          var b_plaintext = t.encode(plaintext);
+          var pkcs7_padding = 16 - (b_plaintext.byteLength % 16);
+          var r = new Uint8Array(b_plaintext.byteLength + pkcs7_padding);
+
+          r.set(b_plaintext);
+          for (var i = b_plaintext.byteLength; i < r.byteLength; i++) {
+            r[i] = pkcs7_padding;
+          }
+
+          return window.crypto.subtle.encrypt({ name: 'AES-CTR', counter: db.slice(64, 80), length: 64 }, ekey, r).then(function(ciphertext) {
+            return window.crypto.subtle.importKey('raw', db.slice(32, 64), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']).then(function(hkey) {
+              return window.crypto.subtle.sign('HMAC', hkey, ciphertext).then(function(hmac) {
+                var h = bufferToHex(t.encode(bufferToHex(salt) + '\n' + bufferToHex(hmac) + '\n' + bufferToHex(ciphertext)));
+                var vtext = h.match(/.{1,80}/g).map(x => ' '.repeat(10) + x).join('\n');
+                return '!vault |\n' + ' '.repeat(10) + '$ANSIBLE_VAULT;1.1;AES256\n' + vtext;
+              });
+            });
+          });
+        });
+      });
+    });
   }
 
   function jinjafx_generate() {
     var vaulted_vars = dt.vars.indexOf('$ANSIBLE_VAULT;') > -1;
     dt.vars = e(dt.vars);
-    dt.template = e(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
+    //dt.template = e(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
+    dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
     dt.id = dt_id;
     dt.dataset = current_ds;
 
@@ -288,6 +303,14 @@ function getStatusText(code) {
       window.cmVars.focus();
       window.cmVars.setSelection(cVars.from(), cVars.to());
       set_status("darkred", "ERROR", "Non ASCII Character(s) in 'vars.yml'");
+      return false;
+    }
+
+    var cTemplate = window.cmTemplate.getSearchCursor(nonASCIIRegex);
+    if (cTemplate.findNext()) {
+      window.cmTemplate.focus();
+      window.cmTemplate.setSelection(cTemplate.from(), cTemplate.to());
+      set_status("darkred", "ERROR", "Non ASCII Character(s) in 'template.j2'");
       return false;
     }
 
@@ -410,7 +433,8 @@ function getStatusText(code) {
                     xHR.timeout = 10000;
                     xHR.setRequestHeader("Content-Type", "application/json");
 
-                    var rd = JSON.stringify({ "template": e(utf8.encode(rbody)) });
+                    //var rd = JSON.stringify({ "template": e(utf8.encode(rbody)) });
+                    var rd = JSON.stringify({ "template": e(rbody) });
                     if (rd.length > 1024) {
                       xHR.setRequestHeader("Content-Encoding", "gzip");
                       xHR.send(pako.gzip(rd));
@@ -491,7 +515,8 @@ function getStatusText(code) {
           return false;
         }
 
-        dt.template = e(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
+        //dt.template = e(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
+        dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
 
         if ((current_ds === 'Default') && (Object.keys(datasets).length === 1)) {
           dt.vars = e(window.cmVars.getValue().replace(/\t/g, "  "));
@@ -749,6 +774,10 @@ function getStatusText(code) {
     document.getElementById('get2').onclick = function() { jinjafx('get_link'); };
     document.getElementById('update').onclick = function() { jinjafx('update_link'); };
     document.getElementById('protect').onclick = function() { jinjafx('protect'); };
+
+    if (window.crypto.subtle) {
+      document.getElementById('encrypt').classList.remove('d-none');
+    }
 
     if (window.showOpenFilePicker) {
       document.getElementById('import').onclick = async() => {
@@ -1198,7 +1227,11 @@ function getStatusText(code) {
         if (document.getElementById('password_vault1').value.match(/\S/)) {
           if (document.getElementById('password_vault1').value == document.getElementById('password_vault2').value) {
             bootstrap.Modal.getOrCreateInstance(document.getElementById('vault_encrypt')).hide()
-            document.getElementById('vault_text').value = ansible_vault_encrypt(document.getElementById('vault_string').value, document.getElementById('password_vault1').value);
+
+            ansible_vault_encrypt(document.getElementById('vault_string').value, document.getElementById('password_vault1').value).then(function(x) {
+              document.getElementById('vault_text').value = x;
+            });
+
             new bootstrap.Modal(document.getElementById('vault_output'), {
               keyboard: false
             }).show();

@@ -18,10 +18,11 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime, resource
-import re, argparse, zipfile, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes
+import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes
 import cmarkgfm, emoji
+#import zipfile
 
-__version__ = '23.2.1'
+__version__ = '23.3.0'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
@@ -459,48 +460,48 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
 
         else:
-          if fpath == '/download':
-            if self.headers['Content-Type'] == 'application/json':
-              lterminator = '\r\n' if 'User-Agent' in self.headers and 'windows' in self.headers['User-Agent'].lower() else '\n'
+          #if fpath == '/download':
+          #  if self.headers['Content-Type'] == 'application/json':
+          #    lterminator = '\r\n' if 'User-Agent' in self.headers and 'windows' in self.headers['User-Agent'].lower() else '\n'
 
-              try:
-                outputs = json.loads(postdata.decode('utf-8'))
+          #    try:
+          #      outputs = json.loads(postdata.decode('utf-8'))
 
-                zfile = io.BytesIO()
-                z = zipfile.ZipFile(zfile, 'w', zipfile.ZIP_DEFLATED)
+          #      zfile = io.BytesIO()
+          #      z = zipfile.ZipFile(zfile, 'w', zipfile.ZIP_DEFLATED)
 
-                for o in outputs:
-                  (oname, oformat) = o.rsplit(':', 1) if ':' in o else (o, 'text')
-                  ofile = re.sub(r'_+', '_', re.sub(r'[^A-Za-z0-9_. -/]', '_', os.path.normpath(oname)))
-                  outputs[o] = re.sub(r'\r?\n', lterminator, self.d(outputs[o]).decode('utf-8'))
+          #      for o in outputs:
+          #        (oname, oformat) = o.rsplit(':', 1) if ':' in o else (o, 'text')
+          #        ofile = re.sub(r'_+', '_', re.sub(r'[^A-Za-z0-9_. -/]', '_', os.path.normpath(oname)))
+          #        outputs[o] = re.sub(r'\r?\n', lterminator, self.d(outputs[o]).decode('utf-8'))
 
-                  if '.' not in ofile:
-                    if oformat == 'html':
-                      ofile += '.html'
-                    else:
-                      ofile += '.txt'
+          #        if '.' not in ofile:
+          #          if oformat == 'html':
+          #            ofile += '.html'
+          #          else:
+          #            ofile += '.txt'
 
-                  z.writestr(ofile, outputs[o])
+          #        z.writestr(ofile, outputs[o])
 
-                z.close()
+          #      z.close()
 
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/zip')
-                self.send_header('Content-Length', str(len(zfile.getvalue())))
-                self.send_header('X-Content-Type-Options', 'nosniff')
-                self.send_header('X-Download-Filename', 'Outputs.' + datetime.datetime.now().strftime('%Y%m%d-%H%M%S') + '.zip')
-                self.end_headers()
-                self.wfile.write(zfile.getvalue())
-                return
+          #      self.send_response(200)
+          #      self.send_header('Content-Type', 'application/zip')
+          #      self.send_header('Content-Length', str(len(zfile.getvalue())))
+          #      self.send_header('X-Content-Type-Options', 'nosniff')
+          #      self.send_header('X-Download-Filename', 'Outputs.' + datetime.datetime.now().strftime('%Y%m%d-%H%M%S') + '.zip')
+          #      self.end_headers()
+          #      self.wfile.write(zfile.getvalue())
+          #      return
 
-              except Exception as e:
-                log(traceback.format_exc())
-                r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
+          #    except Exception as e:
+          #      log(traceback.format_exc())
+          #      r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
 
-            else:
-              r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
+          #  else:
+          #    r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
 
-          elif fpath == '/get_link':
+          if fpath == '/get_link':
             if aws_s3_url or github_url or repository:
               if self.headers['Content-Type'] == 'application/json':
                 try:
