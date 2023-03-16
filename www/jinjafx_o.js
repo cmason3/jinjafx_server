@@ -150,7 +150,8 @@
                   tabs += '<div id="o' + oid + '" class="h-100 tab-pane fade' + ((oid == 1) ? ' show active' : '') + '">';
                   tabs += '<h4 class="fw-bold">' + g + '</h4>';
 
-                  var tc = utf8.decode(window.opener.d(obj.outputs[output]));
+                  //var tc = utf8.decode(window.opener.d(obj.outputs[output]));
+                  var tc = window.opener.d(obj.outputs[output]);
                   if (oformat == 'html') {
                     tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + tc.replace(/&/g, '&amp;').replace(/"/g, "&quot;") + '"></iframe>';
                   }

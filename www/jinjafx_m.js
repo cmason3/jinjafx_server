@@ -212,7 +212,8 @@ function getStatusText(code) {
   function jinjafx_generate() {
     var vaulted_vars = dt.vars.indexOf('$ANSIBLE_VAULT;') > -1;
     dt.vars = e(dt.vars);
-    dt.template = e(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
+    //dt.template = e(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
+    dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
     dt.id = dt_id;
     dt.dataset = current_ds;
 
@@ -302,6 +303,14 @@ function getStatusText(code) {
       window.cmVars.focus();
       window.cmVars.setSelection(cVars.from(), cVars.to());
       set_status("darkred", "ERROR", "Non ASCII Character(s) in 'vars.yml'");
+      return false;
+    }
+
+    var cTemplate = window.cmTemplate.getSearchCursor(nonASCIIRegex);
+    if (cTemplate.findNext()) {
+      window.cmTemplate.focus();
+      window.cmTemplate.setSelection(cTemplate.from(), cTemplate.to());
+      set_status("darkred", "ERROR", "Non ASCII Character(s) in 'template.j2'");
       return false;
     }
 
@@ -424,7 +433,8 @@ function getStatusText(code) {
                     xHR.timeout = 10000;
                     xHR.setRequestHeader("Content-Type", "application/json");
 
-                    var rd = JSON.stringify({ "template": e(utf8.encode(rbody)) });
+                    //var rd = JSON.stringify({ "template": e(utf8.encode(rbody)) });
+                    var rd = JSON.stringify({ "template": e(rbody) });
                     if (rd.length > 1024) {
                       xHR.setRequestHeader("Content-Encoding", "gzip");
                       xHR.send(pako.gzip(rd));
@@ -505,7 +515,8 @@ function getStatusText(code) {
           return false;
         }
 
-        dt.template = e(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
+        //dt.template = e(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
+        dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
 
         if ((current_ds === 'Default') && (Object.keys(datasets).length === 1)) {
           dt.vars = e(window.cmVars.getValue().replace(/\t/g, "  "));

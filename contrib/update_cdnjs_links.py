@@ -7,7 +7,6 @@ libraries = {
   'codemirror': '5.65.11',
   'split.js': '1.6.5',
   'js-yaml': '4.1.0',
-  'utf8': '3.0.0',
   'dayjs': '1.11.7',
   'pako': '2.1.0'
 }
