@@ -186,9 +186,16 @@ function getStatusText(code) {
 
       return window.crypto.subtle.deriveBits({ name: 'PBKDF2', salt: salt, iterations: 10000, hash: 'SHA-256' }, key, 640).then(function(db) {
         return window.crypto.subtle.importKey('raw', db.slice(0, 32), 'AES-CTR', false, ['encrypt']).then(function(ekey) {
-          var b_plaintext = new t.encode(plaintext);
+          var b_plaintext = t.encode(plaintext);
+          var pkcs7_padding = 16 - (b_plaintext.byteLength % 16);
+          var r = new Uint8Array(b_plaintext.byteLength + pkcs7_padding);
 
-          return window.crypto.subtle.encrypt({ name: 'AES-CTR', counter: db.slice(64, 80), length: 64 }, ekey, b_plaintext).then(function(ciphertext) {
+          r.set(b_plaintext);
+          for (var i = b_plaintext.byteLength; i < r.byteLength; i++) {
+            r[i] = pkcs7_padding;
+          }
+
+          return window.crypto.subtle.encrypt({ name: 'AES-CTR', counter: db.slice(64, 80), length: 64 }, ekey, r).then(function(ciphertext) {
             return window.crypto.subtle.importKey('raw', db.slice(32, 64), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']).then(function(hkey) {
               return window.crypto.subtle.sign('HMAC', hkey, ciphertext).then(function(hmac) {
                 var h = bufferToHex(t.encode(bufferToHex(salt) + '\n' + bufferToHex(hmac) + '\n' + bufferToHex(ciphertext)));
@@ -200,25 +207,6 @@ function getStatusText(code) {
         });
       });
     });
-
-    /*
-    var salt = CryptoJS.lib.WordArray.random(32);
-
-    var key = CryptoJS.PBKDF2(password, salt, { hasher: CryptoJS.algo.SHA256, keySize: 20, iterations: 10000 });
-    var dk = [salt.toString(CryptoJS.enc.Hex), key.toString(CryptoJS.enc.Hex)]; // 160 -> 320
-
-    var ciphertext = CryptoJS.AES.encrypt(plaintext, CryptoJS.enc.Hex.parse(dk[1].substring(0, 64)), {
-      iv: CryptoJS.enc.Hex.parse(dk[1].substring(128, 160)),
-      mode: CryptoJS.mode.CTR,
-      padding: CryptoJS.pad.Pkcs7
-    }).ciphertext;
-
-    var hmac = CryptoJS.HmacSHA256(ciphertext, CryptoJS.enc.Hex.parse(dk[1].substring(64, 128)));
-    var vtext = dk[0] + '\n' + hmac.toString(CryptoJS.format.hex) + '\n' + ciphertext.toString(CryptoJS.format.hex);
-    var h = CryptoJS.enc.Hex.stringify(CryptoJS.enc.Utf8.parse(vtext));
-    vtext = h.match(/.{1,80}/g).map(x => ' '.repeat(10) + x).join('\n');
-    return '!vault |\n' + ' '.repeat(10) + '$ANSIBLE_VAULT;1.1;AES256\n' + vtext
-    */
   }
 
   function jinjafx_generate() {
