@@ -212,7 +212,6 @@ function getStatusText(code) {
   function jinjafx_generate() {
     var vaulted_vars = dt.vars.indexOf('$ANSIBLE_VAULT;') > -1;
     dt.vars = e(dt.vars);
-    //dt.template = e(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
     dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
     dt.id = dt_id;
     dt.dataset = current_ds;
@@ -433,7 +432,6 @@ function getStatusText(code) {
                     xHR.timeout = 10000;
                     xHR.setRequestHeader("Content-Type", "application/json");
 
-                    //var rd = JSON.stringify({ "template": e(utf8.encode(rbody)) });
                     var rd = JSON.stringify({ "template": e(rbody) });
                     if (rd.length > 1024) {
                       xHR.setRequestHeader("Content-Encoding", "gzip");
@@ -515,7 +513,6 @@ function getStatusText(code) {
           return false;
         }
 
-        //dt.template = e(utf8.encode(window.cmTemplate.getValue().replace(/\t/g, "  ")));
         dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
 
         if ((current_ds === 'Default') && (Object.keys(datasets).length === 1)) {
@@ -1715,14 +1712,6 @@ function getStatusText(code) {
 
   function load_datatemplate(_dt, _qs) {
     try {
-      /*
-      if (_qs != null) {
-        if (_qs.hasOwnProperty("template")) {
-          _dt.template = d(_qs.template);
-        }
-      }
-      */
-
       current_ds = 'Default';
 
       window.cmgVars.setValue("");
@@ -1748,17 +1737,6 @@ function getStatusText(code) {
         datasets = {
           'Default': [CodeMirror.Doc('', 'data'), CodeMirror.Doc('', 'yaml')]
         };
-
-        /*
-        if (_qs != null) {
-          if (_qs.hasOwnProperty("data")) {
-            _dt.data = window.atob(_qs.data);
-          }
-          if (_qs.hasOwnProperty("vars")) {
-            _dt.vars = window.atob(_qs.vars);
-          }
-        }
-        */
 
         datasets['Default'][0].setValue(_dt.hasOwnProperty("data") ? _dt.data : "");
         window.cmData.swapDoc(datasets['Default'][0]);

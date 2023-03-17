@@ -83,34 +83,6 @@
             link.download = 'Outputs.' + dayjs().format('YYYYMMDD') + '-' + dayjs().format('HHmmss') + '.zip';
             link.click();
           });
-
-          /*
-          var xHR = new XMLHttpRequest();
-          xHR.open("POST", 'download' + qs, true);
-
-          xHR.onload = function() {
-            if (this.status === 200) {
-              var link = document.createElement('a');
-              link.href = window.URL.createObjectURL(xHR.response);
-              link.download = xHR.getResponseHeader("X-Download-Filename");
-              link.click();
-            }
-          };
-          xHR.responseType = "blob";
-          xHR.setRequestHeader("Content-Type", "application/json");
-
-          var rd = JSON.stringify(obj.outputs);
-          if (rd.length > 2048 * 1024) {
-            set_status("darkred", "ERROR", 'Content Too Large');
-          }
-          else if (rd.length > 1024) {
-            xHR.setRequestHeader("Content-Encoding", "gzip");
-            xHR.send(pako.gzip(rd));
-          }
-          else {
-            xHR.send(rd);
-          }
-          */
         }
         var t = document.getElementById('t_' + document.querySelector('.tab-content > .active').getAttribute('id'));
         t.focus();
@@ -172,7 +144,6 @@
                   tabs += '<div id="o' + oid + '" class="h-100 tab-pane fade' + ((oid == 1) ? ' show active' : '') + '">';
                   tabs += '<h4 class="fw-bold">' + g + '</h4>';
 
-                  //var tc = utf8.decode(window.opener.d(obj.outputs[output]));
                   var tc = window.opener.d(obj.outputs[output]);
                   if (oformat == 'html') {
                     tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + tc.replace(/&/g, '&amp;').replace(/"/g, "&quot;") + '"></iframe>';
