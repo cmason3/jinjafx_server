@@ -66,7 +66,12 @@
         if (obj != null) {
           var zip = new JSZip();
           Object.keys(obj.outputs).forEach(function(o) {
-            var [ofile, oformat] = o.split(':', 2);
+            var ofile = o;
+            var oformat = 'text';
+
+            if (ofile.includes(':')) {
+              [ofile, oformat] = ofile.split(':', 2);
+            }
 
             ofile = ofile.replace(/[^A-Z0-9_. -/]/gi, '_').replace(/_+/g, '_');
 
