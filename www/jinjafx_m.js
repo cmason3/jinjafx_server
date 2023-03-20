@@ -16,12 +16,47 @@ function rot47(data) {
   });
 }
 
+var _fromCC = String.fromCharCode.bind(String);
+
+function _utob(c) {
+  if (c.length < 2) {
+    var cc = c.charCodeAt(0);
+    return cc < 0x80 ? c : cc < 0x800 ? (_fromCC(0xc0 | (cc >>> 6)) + _fromCC(0x80 | (cc & 0x3f))) : (_fromCC(0xe0 | ((cc >>> 12) & 0x0f)) + _fromCC(0x80 | ((cc >>> 6) & 0x3f)) + _fromCC(0x80 | (cc & 0x3f)));
+  }
+  else {
+    var cc = 0x10000 + (c.charCodeAt(0) - 0xD800) * 0x400 + (c.charCodeAt(1) - 0xDC00);
+    return (_fromCC(0xf0 | ((cc >>> 18) & 0x07)) + _fromCC(0x80 | ((cc >>> 12) & 0x3f)) + _fromCC(0x80 | ((cc >>> 6) & 0x3f)) + _fromCC(0x80 | (cc & 0x3f)));
+  }
+}
+
+function utob(u) {
+  // Borrowed from Dan Kogai (https://github.com/dankogai/js-base64)
+  return u.replace(/[\uD800-\uDBFF][\uDC00-\uDFFFF]|[^\x00-\x7F]/g, _utob);
+}
+
+function _btou(cccc) {
+  switch (cccc.length) {
+    case 4:
+      var cp = ((0x07 & cccc.charCodeAt(0)) << 18) | ((0x3f & cccc.charCodeAt(1)) << 12) | ((0x3f & cccc.charCodeAt(2)) << 6) | (0x3f & cccc.charCodeAt(3)), offset = cp - 0x10000;
+      return (_fromCC((offset >>> 10) + 0xD800) + _fromCC((offset & 0x3FF) + 0xDC00));
+    case 3:
+      return _fromCC(((0x0f & cccc.charCodeAt(0)) << 12) | ((0x3f & cccc.charCodeAt(1)) << 6) | (0x3f & cccc.charCodeAt(2)));
+    default:
+      return _fromCC(((0x1f & cccc.charCodeAt(0)) << 6) | (0x3f & cccc.charCodeAt(1)));
+  }
+}
+
+function btou(b) {
+  // Borrowed from Dan Kogai (https://github.com/dankogai/js-base64)
+  return b.replace(/[\xC0-\xDF][\x80-\xBF]|[\xE0-\xEF][\x80-\xBF]{2}|[\xF0-\xF7][\x80-\xBF]{3}/g, _btou);
+}
+
 function e(data) {
-  return window.btoa(rot47(data));
+  return window.btoa(utob(rot47(data)));
 }
 
 function d(data) {
-  return rot47(window.atob(data));
+  return rot47(btou(window.atob(data)));
 }
 
 function quote(str) {
@@ -302,14 +337,6 @@ function getStatusText(code) {
       window.cmVars.focus();
       window.cmVars.setSelection(cVars.from(), cVars.to());
       set_status("darkred", "ERROR", "Non ASCII Character(s) in 'vars.yml'");
-      return false;
-    }
-
-    var cTemplate = window.cmTemplate.getSearchCursor(nonASCIIRegex);
-    if (cTemplate.findNext()) {
-      window.cmTemplate.focus();
-      window.cmTemplate.setSelection(cTemplate.from(), cTemplate.to());
-      set_status("darkred", "ERROR", "Non ASCII Character(s) in 'template.j2'");
       return false;
     }
 
