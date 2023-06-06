@@ -3,11 +3,11 @@
 import sys, os, re, requests
 
 libraries = {
-  'bootstrap': '5.2.3',
-  'codemirror': '5.65.12',
+  'bootstrap': '5.3.0',
+  'codemirror': '5.65.13',
   'split.js': '1.6.5',
   'js-yaml': '4.1.0',
-  'dayjs': '1.11.7',
+  'dayjs': '1.11.8',
   'pako': '2.1.0',
   'jszip': '3.10.1'
 }

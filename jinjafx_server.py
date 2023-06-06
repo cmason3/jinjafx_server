@@ -21,7 +21,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes
 import cmarkgfm, emoji
 
-__version__ = '23.3.2'
+__version__ = '23.6.0'
 
 lock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
