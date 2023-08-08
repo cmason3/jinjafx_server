@@ -89,7 +89,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               src = self.headers['X-Forwarded-For']
 
             if 'X-Forwarded-ProtoVer' in self.headers:
-              path += ' HTTP/' + self.headers['X-Forwarded-ProtoVer']
+              path += ' HTTP/' + re.sub(r'([23]).0', '\\1', self.headers['X-Forwarded-ProtoVer'])
 
             if 'Content-Type' in self.headers:
               if 'Content-Encoding' in self.headers:
