@@ -784,785 +784,760 @@ function getStatusText(code) {
   }
 
   window.onload = function() {
-    dayjs.extend(window.dayjs_plugin_relativeTime);
-
-    if (!window.location.pathname.startsWith('/dt/')) {
-      var xHR = new XMLHttpRequest();
-      xHR.open("GET", "/jinjafx.html" + window.location.search, true);
-      xHR.send(null);
-    }
-
-    document.getElementById('delete_ds').onclick = function() { jinjafx('delete_dataset'); };
-    document.getElementById('add_ds').onclick = function() { jinjafx('add_dataset'); };
-    document.getElementById('get').onclick = function() { jinjafx('get_link'); };
-    document.getElementById('get2').onclick = function() { jinjafx('get_link'); };
-    document.getElementById('update').onclick = function() { jinjafx('update_link'); };
-    document.getElementById('protect').onclick = function() { jinjafx('protect'); };
-
-    if (window.crypto.subtle) {
-      document.getElementById('encrypt').classList.remove('d-none');
-    }
-
-    if (window.showOpenFilePicker) {
-      document.getElementById('import').onclick = async() => {
-        clear_status();
-        fe.focus();
-
-        if ((!dirty) || (confirm("Are You Sure?") === true)) {
-          const [h] = await window.showOpenFilePicker({
-            types: [{
-              description: 'JinjaFx DataTemplates',
-              accept: { 'text/plain': ['.txt', '.dt'] }
-            }]
-          });
-
-          const fh = await h.getFile();
-          const contents = await fh.text();
-
-          if (contents.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
-            var obj = jsyaml.load(contents, jsyaml_schema);
-            if (obj != null) {
-              pending_dt = obj['dt'];
-              apply_dt();
-              return true;
-            }
-          }
-          set_status("darkred", "ERROR", "Invalid DataTemplate");
-        }
-      };
-    }
-    else {
-      document.getElementById('import').onclick = function() {
-        clear_status();
-        fe.focus();
-
-        if ((!dirty) || (confirm("Are You Sure?") === true)) {
-          document.getElementById('import_file').click();
-        }
-      };
-
-      document.getElementById('import_file').addEventListener('change', function(e1) {
-        var r = new FileReader();
-        r.onload = function(e2) {
-          if (e2.target.result.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
-            var obj = jsyaml.load(e2.target.result, jsyaml_schema);
-            if (obj != null) {
-              pending_dt = obj['dt'];
-              apply_dt();
-              return true;
-            }
-          }
-          set_status("darkred", "ERROR", "Invalid DataTemplate");
-        };
-        r.readAsText(e1.target.files[0]);
-      }, false);
-    }
-
-    document.getElementById('export').onclick = function() { jinjafx('export'); };
-    document.getElementById('generate').onclick = function() { jinjafx('generate'); };
-    document.getElementById('encrypt').onclick = function() {
-      clear_status();
-      new bootstrap.Modal(document.getElementById('vault_encrypt'), {
-        keyboard: false
-      }).show();
-    };
-
-    sobj = document.getElementById("status");
-
-    window.onresize = function() {
-      document.getElementById("content").style.height = (window.innerHeight - 155) + "px";
-    };
-
-    window.onresize();
-
-    document.body.style.display = "block";
-
-    var gExtraKeys = {
-      "Alt-F": "findPersistent",
-      "Ctrl-F": "findPersistent",
-      "Cmd-F": "findPersistent",
-      "F11": function(cm) {
-        cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-      },
-      "Cmd-Enter": function(cm) {
-        cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-      },
-      "Esc": function(cm) {
-        if (cm.getOption("fullScreen")) {
-          cm.setOption("fullScreen", false);
-        }
-      },
-      "Ctrl-S": function(cm) {
-        if (!document.getElementById('update').classList.contains('d-none')) {
-          jinjafx('update_link');
-        }
-        else {
-          set_status("darkred", "ERROR", "No Link to Update");
-        }
-      },
-      "Cmd-S": function(cm) {
-        if (!document.getElementById('update').classList.contains('d-none')) {
-          jinjafx('update_link');
-        }
-        else {
-          set_status("darkred", "ERROR", "No Link to Update");
-        }
-      },
-      "Ctrl-G": function(cm) {
-        jinjafx('generate');
-      },
-      "Cmd-G": function(cm) {
-        jinjafx('generate');
-      },
-      "Ctrl-D": false,
-      "Cmd-D": false
-    };
-
-    CodeMirror.defineMode("data", cmDataMode);
-    window.cmData = CodeMirror.fromTextArea(data, {
-      tabSize: 2,
-      scrollbarStyle: "null",
-      styleSelectedText: false,
-      extraKeys: gExtraKeys,
-      mode: "data",
-      viewportMargin: 80,
-      smartIndent: false
-    });
-
-    window.cmgVars = CodeMirror.fromTextArea(t_gvars, {
-      tabSize: 2,
-      scrollbarStyle: "null",
-      styleSelectedText: false,
-      extraKeys: gExtraKeys,
-      mode: "yaml",
-      viewportMargin: 80,
-      smartIndent: false,
-      showTrailingSpace: true
-    });
-
-    window.cmVars = CodeMirror.fromTextArea(vars, {
-      tabSize: 2,
-      scrollbarStyle: "null",
-      styleSelectedText: false,
-      extraKeys: gExtraKeys,
-      mode: "yaml",
-      viewportMargin: 80,
-      smartIndent: false,
-      showTrailingSpace: true
-    });
-
-    CodeMirror.registerHelper("fold", "jinja2", function(cm, start) {
-      var startLine = cm.getLine(start.line);
-      var tokenStack = 1;
-
-      if ((startLine.indexOf('{#') != -1) && (startLine.indexOf('#}') == -1)) {
-        for (var ln = start.line + 1; (tokenStack > 0) && (ln <= cm.lastLine()); ln++) {
-          var theLine = cm.getLine(ln);
-
-          if (theLine.indexOf('#}') != -1) {
-            if (--tokenStack == 0) {
-              return {
-                from: CodeMirror.Pos(start.line, startLine.indexOf('{#') + 2),
-                to: CodeMirror.Pos(ln, theLine.indexOf('#}'))
-              };
-            }
-          }
-        }
+    try {
+      dayjs.extend(window.dayjs_plugin_relativeTime);
+  
+      if (!window.location.pathname.startsWith('/dt/')) {
+        var xHR = new XMLHttpRequest();
+        xHR.open("GET", "/jinjafx.html" + window.location.search, true);
+        xHR.send(null);
       }
-      else if (cm.getTokenTypeAt(CodeMirror.Pos(start.line, 0)) != 'comment') {
-        var smatch = startLine.match(/{%([+-]?[ \t]*(if|for|macro|call|filter))[ \t]+/);
-        if (smatch) {
-          var eregexp = new RegExp('{%([+-]?[ \t]*)end' + smatch[2] + '[ \t]*[+-]?%}');
-
-          if (!startLine.match(eregexp)) {
-            var sregexp = new RegExp('{%[+-]?[ \t]*' + smatch[2] + '[ \t]+');
-
-            for (var ln = start.line + 1; (tokenStack > 0) && (ln <= cm.lastLine()); ln++) {
-              if (cm.getTokenTypeAt(CodeMirror.Pos(ln, 0)) != 'comment') {
-                var theLine = cm.getLine(ln);
-                var sm = theLine.match(sregexp);
-                var ematch = theLine.match(eregexp);
-
-                if (sm && !ematch) {
-                  tokenStack += 1;
-                }
-                else if (!sm && ematch) {
-                  if (--tokenStack == 0) {
-                    return {
-                      from: CodeMirror.Pos(start.line, smatch.index + 2 + smatch[1].length),
-                      to: CodeMirror.Pos(ln, ematch.index + 2 + ematch[1].length)
-                    };
+  
+      document.getElementById('delete_ds').onclick = function() { jinjafx('delete_dataset'); };
+      document.getElementById('add_ds').onclick = function() { jinjafx('add_dataset'); };
+      document.getElementById('get').onclick = function() { jinjafx('get_link'); };
+      document.getElementById('get2').onclick = function() { jinjafx('get_link'); };
+      document.getElementById('update').onclick = function() { jinjafx('update_link'); };
+      document.getElementById('protect').onclick = function() { jinjafx('protect'); };
+  
+      if (window.crypto.subtle) {
+        document.getElementById('encrypt').classList.remove('d-none');
+      }
+  
+      if (window.showOpenFilePicker) {
+        document.getElementById('import').onclick = async() => {
+          clear_status();
+          fe.focus();
+  
+          if ((!dirty) || (confirm("Are You Sure?") === true)) {
+            const [h] = await window.showOpenFilePicker({
+              types: [{
+                description: 'JinjaFx DataTemplates',
+                accept: { 'text/plain': ['.txt', '.dt'] }
+              }]
+            });
+  
+            const fh = await h.getFile();
+            const contents = await fh.text();
+  
+            if (contents.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
+              var obj = jsyaml.load(contents, jsyaml_schema);
+              if (obj != null) {
+                pending_dt = obj['dt'];
+                apply_dt();
+                return true;
+              }
+            }
+            set_status("darkred", "ERROR", "Invalid DataTemplate");
+          }
+        };
+      }
+      else {
+        document.getElementById('import').onclick = function() {
+          clear_status();
+          fe.focus();
+  
+          if ((!dirty) || (confirm("Are You Sure?") === true)) {
+            document.getElementById('import_file').click();
+          }
+        };
+  
+        document.getElementById('import_file').addEventListener('change', function(e1) {
+          var r = new FileReader();
+          r.onload = function(e2) {
+            if (e2.target.result.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
+              var obj = jsyaml.load(e2.target.result, jsyaml_schema);
+              if (obj != null) {
+                pending_dt = obj['dt'];
+                apply_dt();
+                return true;
+              }
+            }
+            set_status("darkred", "ERROR", "Invalid DataTemplate");
+          };
+          r.readAsText(e1.target.files[0]);
+        }, false);
+      }
+  
+      document.getElementById('export').onclick = function() { jinjafx('export'); };
+      document.getElementById('generate').onclick = function() { jinjafx('generate'); };
+      document.getElementById('encrypt').onclick = function() {
+        clear_status();
+        new bootstrap.Modal(document.getElementById('vault_encrypt'), {
+          keyboard: false
+        }).show();
+      };
+  
+      sobj = document.getElementById("status");
+  
+      window.onresize = function() {
+        document.getElementById("content").style.height = (window.innerHeight - 155) + "px";
+      };
+  
+      window.onresize();
+  
+      var gExtraKeys = {
+        "Alt-F": "findPersistent",
+        "Ctrl-F": "findPersistent",
+        "Cmd-F": "findPersistent",
+        "F11": function(cm) {
+          cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+        },
+        "Cmd-Enter": function(cm) {
+          cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+        },
+        "Esc": function(cm) {
+          if (cm.getOption("fullScreen")) {
+            cm.setOption("fullScreen", false);
+          }
+        },
+        "Ctrl-S": function(cm) {
+          if (!document.getElementById('update').classList.contains('d-none')) {
+            jinjafx('update_link');
+          }
+          else {
+            set_status("darkred", "ERROR", "No Link to Update");
+          }
+        },
+        "Cmd-S": function(cm) {
+          if (!document.getElementById('update').classList.contains('d-none')) {
+            jinjafx('update_link');
+          }
+          else {
+            set_status("darkred", "ERROR", "No Link to Update");
+          }
+        },
+        "Ctrl-G": function(cm) {
+          jinjafx('generate');
+        },
+        "Cmd-G": function(cm) {
+          jinjafx('generate');
+        },
+        "Ctrl-D": false,
+        "Cmd-D": false
+      };
+  
+      CodeMirror.defineMode("data", cmDataMode);
+      window.cmData = CodeMirror.fromTextArea(data, {
+        tabSize: 2,
+        scrollbarStyle: "null",
+        styleSelectedText: false,
+        extraKeys: gExtraKeys,
+        mode: "data",
+        viewportMargin: 80,
+        smartIndent: false
+      });
+  
+      window.cmgVars = CodeMirror.fromTextArea(t_gvars, {
+        tabSize: 2,
+        scrollbarStyle: "null",
+        styleSelectedText: false,
+        extraKeys: gExtraKeys,
+        mode: "yaml",
+        viewportMargin: 80,
+        smartIndent: false,
+        showTrailingSpace: true
+      });
+  
+      window.cmVars = CodeMirror.fromTextArea(vars, {
+        tabSize: 2,
+        scrollbarStyle: "null",
+        styleSelectedText: false,
+        extraKeys: gExtraKeys,
+        mode: "yaml",
+        viewportMargin: 80,
+        smartIndent: false,
+        showTrailingSpace: true
+      });
+  
+      CodeMirror.registerHelper("fold", "jinja2", function(cm, start) {
+        var startLine = cm.getLine(start.line);
+        var tokenStack = 1;
+  
+        if ((startLine.indexOf('{#') != -1) && (startLine.indexOf('#}') == -1)) {
+          for (var ln = start.line + 1; (tokenStack > 0) && (ln <= cm.lastLine()); ln++) {
+            var theLine = cm.getLine(ln);
+  
+            if (theLine.indexOf('#}') != -1) {
+              if (--tokenStack == 0) {
+                return {
+                  from: CodeMirror.Pos(start.line, startLine.indexOf('{#') + 2),
+                  to: CodeMirror.Pos(ln, theLine.indexOf('#}'))
+                };
+              }
+            }
+          }
+        }
+        else if (cm.getTokenTypeAt(CodeMirror.Pos(start.line, 0)) != 'comment') {
+          var smatch = startLine.match(/{%([+-]?[ \t]*(if|for|macro|call|filter))[ \t]+/);
+          if (smatch) {
+            var eregexp = new RegExp('{%([+-]?[ \t]*)end' + smatch[2] + '[ \t]*[+-]?%}');
+  
+            if (!startLine.match(eregexp)) {
+              var sregexp = new RegExp('{%[+-]?[ \t]*' + smatch[2] + '[ \t]+');
+  
+              for (var ln = start.line + 1; (tokenStack > 0) && (ln <= cm.lastLine()); ln++) {
+                if (cm.getTokenTypeAt(CodeMirror.Pos(ln, 0)) != 'comment') {
+                  var theLine = cm.getLine(ln);
+                  var sm = theLine.match(sregexp);
+                  var ematch = theLine.match(eregexp);
+  
+                  if (sm && !ematch) {
+                    tokenStack += 1;
+                  }
+                  else if (!sm && ematch) {
+                    if (--tokenStack == 0) {
+                      return {
+                        from: CodeMirror.Pos(start.line, smatch.index + 2 + smatch[1].length),
+                        to: CodeMirror.Pos(ln, ematch.index + 2 + ematch[1].length)
+                      };
+                    }
                   }
                 }
               }
             }
           }
         }
+        return undefined;
+      });
+  
+      function cmOutputMode() {
+        return {
+          startState: function() {
+            return { 'comment': false, 'type': 0, 'output': 0 }
+          },
+          token: function(stream, state) {
+            if (stream.match(/{#/)) {
+              state.comment = true;
+              return null;
+            }
+            else if (stream.match(/#}/)) {
+              state.comment = false;
+              return null;
+            }
+            if (!state.comment) {
+              if (stream.match(/<(?=output(?::\S+)? [^><]+>)/i)) {
+                state.type = 1;
+                state.output = 1;
+                return "jfx-output-left";
+              }
+              else if (stream.match(/<(?=\/output *>)/i)) {
+                state.type = 2;
+                state.output = 1;
+                return "jfx-output-left";
+              }
+              else if (state.type > 0) {
+                if ((state.type == 1) && stream.match(/>(?=\[-?[0-9]+\])/)) {
+                  state.output = 10000;
+                  return "jfx-output";
+                }
+                else if (stream.match(/>/)) {
+                  state.type = state.output = 0;
+                  return "jfx-output-right";
+                }
+                else if ((state.output >= 10000) && stream.match(/]/)) {
+                  state.type = state.output = 0;
+                  return "jfx-output-right";
+                }
+                else if ((state.output == 7) && stream.match(/:(?:html|markdown|md) /)) {
+                  return "jfx-output-tag";
+                }
+                else if (stream.match(/./)) {
+                  return (state.output++ > 10000) ? "jfx-output-number" : "jfx-output";
+                }
+              }
+            }
+            stream.next();
+          }
+        };
       }
-      return undefined;
-    });
-
-    function cmOutputMode() {
-      return {
-        startState: function() {
-          return { 'comment': false, 'type': 0, 'output': 0 }
+  
+      CodeMirror.defineMode("template", function(config, parserConfig) {
+        return CodeMirror.overlayMode(CodeMirror.getMode(config, "jinja2"), cmOutputMode(), true);
+      });
+  
+      window.cmTemplate = CodeMirror.fromTextArea(template, {
+        lineNumbers: true,
+        tabSize: 2,
+        autofocus: true,
+        scrollbarStyle: "null",
+        styleSelectedText: false,
+        extraKeys: gExtraKeys,
+        mode: "template",
+        viewportMargin: 80,
+        smartIndent: false,
+        showTrailingSpace: true,
+        foldGutter: true,
+        foldOptions: {
+          rangeFinder: CodeMirror.helpers.fold.jinja2,
+          widget: ' \u22EF '
         },
-        token: function(stream, state) {
-          if (stream.match(/{#/)) {
-            state.comment = true;
-            return null;
-          }
-          else if (stream.match(/#}/)) {
-            state.comment = false;
-            return null;
-          }
-          if (!state.comment) {
-            if (stream.match(/<(?=output(?::\S+)? [^><]+>)/i)) {
-              state.type = 1;
-              state.output = 1;
-              return "jfx-output-left";
-            }
-            else if (stream.match(/<(?=\/output *>)/i)) {
-              state.type = 2;
-              state.output = 1;
-              return "jfx-output-left";
-            }
-            else if (state.type > 0) {
-              if ((state.type == 1) && stream.match(/>(?=\[-?[0-9]+\])/)) {
-                state.output = 10000;
-                return "jfx-output";
-              }
-              else if (stream.match(/>/)) {
-                state.type = state.output = 0;
-                return "jfx-output-right";
-              }
-              else if ((state.output >= 10000) && stream.match(/]/)) {
-                state.type = state.output = 0;
-                return "jfx-output-right";
-              }
-              else if ((state.output == 7) && stream.match(/:(?:html|markdown|md) /)) {
-                return "jfx-output-tag";
-              }
-              else if (stream.match(/./)) {
-                return (state.output++ > 10000) ? "jfx-output-number" : "jfx-output";
-              }
-            }
-          }
-          stream.next();
+        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+      });
+  
+      fe = window.cmTemplate;
+      window.cmData.on("focus", function() { fe = window.cmData });
+      window.cmVars.on("focus", function() { fe = window.cmVars; onDataBlur() });
+      window.cmgVars.on("focus", function() { fe = window.cmgVars; onDataBlur() });
+      window.cmTemplate.on("focus", function() { fe = window.cmTemplate; onDataBlur() });
+  
+      document.getElementById('header').onclick = onDataBlur;
+      document.getElementById('push').onclick = onDataBlur;
+      document.getElementById('footer').onclick = onDataBlur;
+  
+      document.getElementById("csv").onclick = function() {
+        window.cmData.getWrapperElement().style.display = 'block';
+        document.getElementById("csv").style.display = 'none';
+        window.cmData.refresh();
+        window.cmData.focus();
+  
+        if (cDataPos != null) {
+          window.cmData.setSelection(cDataPos[0], cDataPos[1]);
+          window.cmData.scrollIntoView({from: cDataPos[0], to: cDataPos[1]}, 20);
+          cDataPos = null;
+        }
+        csv_on = false;
+      };
+  
+      window.cmData.on("beforeChange", onPaste);
+      window.cmTemplate.on("beforeChange", onPaste);
+      window.cmVars.on("beforeChange", onPaste);
+      window.cmgVars.on("beforeChange", onPaste);
+  
+      window.cmData.on("change", onChange);
+      window.cmVars.on("change", onChange);
+      window.cmgVars.on("change", onChange);
+      window.cmTemplate.on("change", onChange);
+  
+      var hsplit = Split(["#cdata", "#cvars"], {
+        direction: "horizontal",
+        cursor: "col-resize",
+        sizes: [60, 40],
+        snapOffset: 0,
+        minSize: 45,
+        onDragStart: remove_info
+      });
+  
+      var vsplit = Split(["#top", "#ctemplate"], {
+        direction: "vertical",
+        cursor: "row-resize",
+        sizes: [40, 60],
+        snapOffset: 0,
+        minSize: 30,
+        onDragStart: remove_info
+      });
+  
+      document.getElementById('jinjafx_input').addEventListener('shown.bs.modal', function (e) {
+        var focusable = document.getElementById('jinjafx_input_form').querySelectorAll('input,select');
+        if (focusable.length) {
+          focusable[0].focus();
+        }
+      });
+  
+      document.getElementById('ml-input-reset').onclick = function(e) {
+        document.getElementById('jinjafx_input_form').innerHTML = r_input_form;
+        var focusable = document.getElementById('jinjafx_input_form').querySelectorAll('input,select');
+        if (focusable.length) {
+          focusable[0].focus();
         }
       };
-    }
-
-    CodeMirror.defineMode("template", function(config, parserConfig) {
-      return CodeMirror.overlayMode(CodeMirror.getMode(config, "jinja2"), cmOutputMode(), true);
-    });
-
-    window.cmTemplate = CodeMirror.fromTextArea(template, {
-      lineNumbers: true,
-      tabSize: 2,
-      autofocus: true,
-      scrollbarStyle: "null",
-      styleSelectedText: false,
-      extraKeys: gExtraKeys,
-      mode: "template",
-      viewportMargin: 80,
-      smartIndent: false,
-      showTrailingSpace: true,
-      foldGutter: true,
-      foldOptions: {
-        rangeFinder: CodeMirror.helpers.fold.jinja2,
-        widget: ' \u22EF '
-      },
-      gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
-    });
-
-    fe = window.cmTemplate;
-    window.cmData.on("focus", function() { fe = window.cmData });
-    window.cmVars.on("focus", function() { fe = window.cmVars; onDataBlur() });
-    window.cmgVars.on("focus", function() { fe = window.cmgVars; onDataBlur() });
-    window.cmTemplate.on("focus", function() { fe = window.cmTemplate; onDataBlur() });
-
-    document.getElementById('header').onclick = onDataBlur;
-    document.getElementById('push').onclick = onDataBlur;
-    document.getElementById('footer').onclick = onDataBlur;
-
-    document.getElementById("csv").onclick = function() {
-      window.cmData.getWrapperElement().style.display = 'block';
-      document.getElementById("csv").style.display = 'none';
-      window.cmData.refresh();
-      window.cmData.focus();
-
-      if (cDataPos != null) {
-        window.cmData.setSelection(cDataPos[0], cDataPos[1]);
-        window.cmData.scrollIntoView({from: cDataPos[0], to: cDataPos[1]}, 20);
-        cDataPos = null;
-      }
-      csv_on = false;
-    };
-
-    window.cmData.on("beforeChange", onPaste);
-    window.cmTemplate.on("beforeChange", onPaste);
-    window.cmVars.on("beforeChange", onPaste);
-    window.cmgVars.on("beforeChange", onPaste);
-
-    window.cmData.on("change", onChange);
-    window.cmVars.on("change", onChange);
-    window.cmgVars.on("change", onChange);
-    window.cmTemplate.on("change", onChange);
-
-    var hsplit = Split(["#cdata", "#cvars"], {
-      direction: "horizontal",
-      cursor: "col-resize",
-      sizes: [60, 40],
-      snapOffset: 0,
-      minSize: 45,
-      onDragStart: remove_info
-    });
-
-    var vsplit = Split(["#top", "#ctemplate"], {
-      direction: "vertical",
-      cursor: "row-resize",
-      sizes: [40, 60],
-      snapOffset: 0,
-      minSize: 30,
-      onDragStart: remove_info
-    });
-
-    document.getElementById('jinjafx_input').addEventListener('shown.bs.modal', function (e) {
-      var focusable = document.getElementById('jinjafx_input_form').querySelectorAll('input,select');
-      if (focusable.length) {
-        focusable[0].focus();
-      }
-    });
-
-    document.getElementById('ml-input-reset').onclick = function(e) {
-      document.getElementById('jinjafx_input_form').innerHTML = r_input_form;
-      var focusable = document.getElementById('jinjafx_input_form').querySelectorAll('input,select');
-      if (focusable.length) {
-        focusable[0].focus();
-      }
-    };
-
-    document.getElementById('ml-input-ok').onclick = function(e) {
-      if (document.getElementById('input_form').checkValidity() !== false) {
-        e.preventDefault();
-        jinput.hide();
-
-        var vars = {};
-        document.getElementById('input_form').querySelectorAll('input,select').forEach(function(e, i) {
-          if (e.getAttribute('data-var') != null) {
-            if (e.dataset.var.match(/\S/)) {
-              var v = e.value;
-              if ((e.tagName == 'INPUT') && ((e.type == 'checkbox') || (e.type == 'radio'))) {
-                v = e.checked;
-              }
-              if (vars.hasOwnProperty(e.dataset.var)) {
-                vars[e.dataset.var].push(v);
-              }
-              else {
-                vars[e.dataset.var] = [v];
+  
+      document.getElementById('ml-input-ok').onclick = function(e) {
+        if (document.getElementById('input_form').checkValidity() !== false) {
+          e.preventDefault();
+          jinput.hide();
+  
+          var vars = {};
+          document.getElementById('input_form').querySelectorAll('input,select').forEach(function(e, i) {
+            if (e.getAttribute('data-var') != null) {
+              if (e.dataset.var.match(/\S/)) {
+                var v = e.value;
+                if ((e.tagName == 'INPUT') && ((e.type == 'checkbox') || (e.type == 'radio'))) {
+                  v = e.checked;
+                }
+                if (vars.hasOwnProperty(e.dataset.var)) {
+                  vars[e.dataset.var].push(v);
+                }
+                else {
+                  vars[e.dataset.var] = [v];
+                }
               }
             }
-          }
-        });
-
-        var vars_yml = 'jinjafx_input:\r\n';
-        Object.keys(vars).forEach(function(v) {
-          for (i = 0; i < vars[v].length; i++) {
-            if (typeof vars[v][i] !== "boolean") {
-              vars[v][i] = '"' + vars[v][i].replace(/"/g, '\\x22') + '"';
+          });
+  
+          var vars_yml = 'jinjafx_input:\r\n';
+          Object.keys(vars).forEach(function(v) {
+            for (i = 0; i < vars[v].length; i++) {
+              if (typeof vars[v][i] !== "boolean") {
+                vars[v][i] = '"' + vars[v][i].replace(/"/g, '\\x22') + '"';
+              }
+            }
+            if (vars[v].length > 1) {
+              vars_yml += '  ' + v + ': [' + vars[v].join(', ') + ']\r\n';
+            }
+            else {
+              vars_yml += '  ' + v + ': ' + vars[v][0] + '\r\n';
+            }
+          });
+          dt.vars += '\r\n' + vars_yml;
+          jinjafx_generate();
+        }
+      };
+  
+      document.getElementById('jinjafx_input').addEventListener('hidden.bs.modal', function (e) {
+        fe.focus();
+      });
+  
+      document.getElementById('vault_input').addEventListener('shown.bs.modal', function (e) {
+        document.getElementById("vault").focus();
+      });
+  
+      document.getElementById('vault_encrypt').addEventListener('shown.bs.modal', function (e) {
+        document.getElementById("vault_string").focus();
+      });
+  
+      document.getElementById('vault_string').onkeyup = function(e) {
+        if (e.which == 13) {
+          document.getElementById('ml-vault-encrypt-ok').click();
+        }
+      };
+  
+      document.getElementById('vault_encrypt').addEventListener('hidden.bs.modal', function (e) {
+        clear_status();
+        document.getElementById("vault_string").value = '';
+        if (document.getElementById("password_vault1").value != document.getElementById("password_vault2").value) {
+          document.getElementById("password_vault1").value = '';
+          document.getElementById("password_vault2").value = '';
+          document.getElementById('password_vault2').classList.remove('is-invalid');
+          document.getElementById('password_vault2').classList.remove('is-valid');
+          document.getElementById("password_vault2").disabled = true;
+        }
+        fe.focus();
+      });
+  
+      document.getElementById('ml-vault-ok').onclick = function() {
+        dt.vpw = e(document.getElementById("vault").value);
+        if (dt_id != '') {
+          window.open("/output.html?dt=" + dt_id, "_blank");
+        }
+        else {
+          window.open("/output.html", "_blank");
+        }
+      };
+  
+      document.getElementById('vault').onkeyup = function(e) {
+        if (e.which == 13) {
+          document.getElementById('ml-vault-ok').click();
+        }
+      };
+  
+      document.getElementById('protect_dt').addEventListener('shown.bs.modal', function (e) {
+        document.getElementById("password_open1").focus();
+      });
+  
+      document.getElementById('vault_output').addEventListener('shown.bs.modal', function (e) {
+        document.getElementById("vault_text").focus();
+        document.getElementById("vault_text").select();
+      });
+  
+      document.getElementById('vault_output').addEventListener('hidden.bs.modal', function (e) {
+        fe.focus();
+      });
+  
+      document.getElementById('ml-vault-encrypt-ok').onclick = function() {
+        clear_status();
+        if (document.getElementById('vault_string').value.match(/\S/)) {
+          if (document.getElementById('password_vault1').value.match(/\S/)) {
+            if (document.getElementById('password_vault1').value == document.getElementById('password_vault2').value) {
+              bootstrap.Modal.getOrCreateInstance(document.getElementById('vault_encrypt')).hide()
+  
+              ansible_vault_encrypt(document.getElementById('vault_string').value, document.getElementById('password_vault1').value).then(function(x) {
+                document.getElementById('vault_text').value = x;
+              });
+  
+              new bootstrap.Modal(document.getElementById('vault_output'), {
+                keyboard: false
+              }).show();
+            }
+            else {
+              set_status("darkred", "ERROR", "Password Verification Failed");
+              document.getElementById('password_vault2').focus();
+              return false;
             }
           }
-          if (vars[v].length > 1) {
-            vars_yml += '  ' + v + ': [' + vars[v].join(', ') + ']\r\n';
-          }
           else {
-            vars_yml += '  ' + v + ': ' + vars[v][0] + '\r\n';
-          }
-        });
-        dt.vars += '\r\n' + vars_yml;
-        jinjafx_generate();
-      }
-    };
-
-    document.getElementById('jinjafx_input').addEventListener('hidden.bs.modal', function (e) {
-      fe.focus();
-    });
-
-    document.getElementById('vault_input').addEventListener('shown.bs.modal', function (e) {
-      document.getElementById("vault").focus();
-    });
-
-    document.getElementById('vault_encrypt').addEventListener('shown.bs.modal', function (e) {
-      document.getElementById("vault_string").focus();
-    });
-
-    document.getElementById('vault_string').onkeyup = function(e) {
-      if (e.which == 13) {
-        document.getElementById('ml-vault-encrypt-ok').click();
-      }
-    };
-
-    document.getElementById('vault_encrypt').addEventListener('hidden.bs.modal', function (e) {
-      clear_status();
-      document.getElementById("vault_string").value = '';
-      if (document.getElementById("password_vault1").value != document.getElementById("password_vault2").value) {
-        document.getElementById("password_vault1").value = '';
-        document.getElementById("password_vault2").value = '';
-        document.getElementById('password_vault2').classList.remove('is-invalid');
-        document.getElementById('password_vault2').classList.remove('is-valid');
-        document.getElementById("password_vault2").disabled = true;
-      }
-      fe.focus();
-    });
-
-    document.getElementById('ml-vault-ok').onclick = function() {
-      dt.vpw = e(document.getElementById("vault").value);
-      if (dt_id != '') {
-        window.open("/output.html?dt=" + dt_id, "_blank");
-      }
-      else {
-        window.open("/output.html", "_blank");
-      }
-    };
-
-    document.getElementById('vault').onkeyup = function(e) {
-      if (e.which == 13) {
-        document.getElementById('ml-vault-ok').click();
-      }
-    };
-
-    document.getElementById('protect_dt').addEventListener('shown.bs.modal', function (e) {
-      document.getElementById("password_open1").focus();
-    });
-
-    document.getElementById('vault_output').addEventListener('shown.bs.modal', function (e) {
-      document.getElementById("vault_text").focus();
-      document.getElementById("vault_text").select();
-    });
-
-    document.getElementById('vault_output').addEventListener('hidden.bs.modal', function (e) {
-      fe.focus();
-    });
-
-    document.getElementById('ml-vault-encrypt-ok').onclick = function() {
-      clear_status();
-      if (document.getElementById('vault_string').value.match(/\S/)) {
-        if (document.getElementById('password_vault1').value.match(/\S/)) {
-          if (document.getElementById('password_vault1').value == document.getElementById('password_vault2').value) {
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('vault_encrypt')).hide()
-
-            ansible_vault_encrypt(document.getElementById('vault_string').value, document.getElementById('password_vault1').value).then(function(x) {
-              document.getElementById('vault_text').value = x;
-            });
-
-            new bootstrap.Modal(document.getElementById('vault_output'), {
-              keyboard: false
-            }).show();
-          }
-          else {
-            set_status("darkred", "ERROR", "Password Verification Failed");
-            document.getElementById('password_vault2').focus();
+            set_status("darkred", "ERROR", "Password is Required");
+            document.getElementById('password_vault1').focus();
             return false;
           }
         }
         else {
-          set_status("darkred", "ERROR", "Password is Required");
-          document.getElementById('password_vault1').focus();
+          set_status("darkred", "ERROR", "Nothing to Encrypt");
+          document.getElementById('vault_string').focus();
           return false;
         }
-      }
-      else {
-        set_status("darkred", "ERROR", "Nothing to Encrypt");
-        document.getElementById('vault_string').focus();
-        return false;
-      }
-    };
-
-    document.getElementById('ml-protect-dt-ok').onclick = function() {
-      dt_opassword = null;
-      dt_mpassword = null;
-
-      if (document.getElementById('password_open1').value.match(/\S/)) {
-        if (document.getElementById('password_open1').value == document.getElementById('password_open2').value) {
-          dt_opassword = document.getElementById('password_open2').value;
-        }
-        else {
-          set_status("darkred", "ERROR", "Password Verification Failed");
-          return false;
-        }
-      }
-
-      if (document.getElementById('password_modify1').value.match(/\S/)) {
-        if (document.getElementById('password_modify1').value == document.getElementById('password_modify2').value) {
-          dt_mpassword = document.getElementById('password_modify2').value;
-        }
-        else {
-          set_status("darkred", "ERROR", "Password Verification Failed");
-          dt_opassword = null;
-          return false;
-        }
-      }
-
-      if ((dt_opassword != null) || (dt_mpassword != null)) {
-        if (dt_opassword === dt_mpassword) {
-          dt_mpassword = null;
-        }
-        document.getElementById('protect_text').innerHTML = 'Update Protection';
-        window.addEventListener('beforeunload', onBeforeUnload);
-        document.title = 'JinjaFx [unsaved]';
-        dirty = true;
-        set_status("green", "OK", "Protection Set - Update Required", 10000);
-        dt_password = null;
-      }
-      else {
-        set_status("darkred", "ERROR", "Invalid Password");
-      }
-    };
-
-    document.getElementById('protect_dt').addEventListener('hidden.bs.modal', function (e) {
-      document.getElementById("password_open1").value = '';
-      document.getElementById("password_open2").value = '';
-      document.getElementById("password_open2").disabled = true;
-      document.getElementById("password_modify1").value = '';
-      document.getElementById("password_modify2").value = '';
-      document.getElementById("password_modify2").disabled = true;
-      fe.focus();
-    });
-
-    document.getElementById('protect_input').addEventListener('shown.bs.modal', function (e) {
-      document.getElementById("in_protect").focus();
-      protect_ok = false;
-    });
-
-    document.getElementById('ml-protect-ok').onclick = function() {
-      protect_ok = true;
-    };
-
-    document.getElementById('in_protect').onkeyup = function(e) {
-      if (e.which == 13) {
-        document.getElementById('ml-protect-ok').click();
-      }
-    };
-
-    document.getElementById('protect_input').addEventListener('hidden.bs.modal', function (e) {
-      if (protect_ok == true) {
-        dt_password = document.getElementById("in_protect").value;
-        if (dt_password.match(/\S/)) {
-          if (protect_action == 1) {
-            try_to_load();
+      };
+  
+      document.getElementById('ml-protect-dt-ok').onclick = function() {
+        dt_opassword = null;
+        dt_mpassword = null;
+  
+        if (document.getElementById('password_open1').value.match(/\S/)) {
+          if (document.getElementById('password_open1').value == document.getElementById('password_open2').value) {
+            dt_opassword = document.getElementById('password_open2').value;
           }
           else {
-            update_link(dt_id);
+            set_status("darkred", "ERROR", "Password Verification Failed");
+            return false;
+          }
+        }
+  
+        if (document.getElementById('password_modify1').value.match(/\S/)) {
+          if (document.getElementById('password_modify1').value == document.getElementById('password_modify2').value) {
+            dt_mpassword = document.getElementById('password_modify2').value;
+          }
+          else {
+            set_status("darkred", "ERROR", "Password Verification Failed");
+            dt_opassword = null;
+            return false;
+          }
+        }
+  
+        if ((dt_opassword != null) || (dt_mpassword != null)) {
+          if (dt_opassword === dt_mpassword) {
+            dt_mpassword = null;
+          }
+          document.getElementById('protect_text').innerHTML = 'Update Protection';
+          window.addEventListener('beforeunload', onBeforeUnload);
+          document.title = 'JinjaFx [unsaved]';
+          dirty = true;
+          set_status("green", "OK", "Protection Set - Update Required", 10000);
+          dt_password = null;
+        }
+        else {
+          set_status("darkred", "ERROR", "Invalid Password");
+        }
+      };
+  
+      document.getElementById('protect_dt').addEventListener('hidden.bs.modal', function (e) {
+        document.getElementById("password_open1").value = '';
+        document.getElementById("password_open2").value = '';
+        document.getElementById("password_open2").disabled = true;
+        document.getElementById("password_modify1").value = '';
+        document.getElementById("password_modify2").value = '';
+        document.getElementById("password_modify2").disabled = true;
+        fe.focus();
+      });
+  
+      document.getElementById('protect_input').addEventListener('shown.bs.modal', function (e) {
+        document.getElementById("in_protect").focus();
+        protect_ok = false;
+      });
+  
+      document.getElementById('ml-protect-ok').onclick = function() {
+        protect_ok = true;
+      };
+  
+      document.getElementById('in_protect').onkeyup = function(e) {
+        if (e.which == 13) {
+          document.getElementById('ml-protect-ok').click();
+        }
+      };
+  
+      document.getElementById('protect_input').addEventListener('hidden.bs.modal', function (e) {
+        if (protect_ok == true) {
+          dt_password = document.getElementById("in_protect").value;
+          if (dt_password.match(/\S/)) {
+            if (protect_action == 1) {
+              try_to_load();
+            }
+            else {
+              update_link(dt_id);
+            }
+          }
+          else {
+            if (protect_action == 1) {
+              reset_location('');
+              dt_password = null;
+            }
+            loaded = true;
+            document.getElementById('lbuttons').classList.remove('d-none');
+            set_status("darkred", "ERROR", "Invalid Password");
           }
         }
         else {
           if (protect_action == 1) {
             reset_location('');
+            document.getElementById('lbuttons').classList.remove('d-none');
             dt_password = null;
+            loaded = true;
           }
-          loaded = true;
-          document.getElementById('lbuttons').classList.remove('d-none');
-          set_status("darkred", "ERROR", "Invalid Password");
-        }
-      }
-      else {
-        if (protect_action == 1) {
-          reset_location('');
-          document.getElementById('lbuttons').classList.remove('d-none');
-          dt_password = null;
-          loaded = true;
-        }
-        else {
-          set_status("#e64c00", "OK", "Link Not Updated");
-        }
-      }
-      document.getElementById("in_protect").value = '';
-      clear_wait();
-    });
-
-    document.getElementById('dataset_input').addEventListener('shown.bs.modal', function (e) {
-      document.getElementById("ds_name").focus();
-    });
-
-    document.getElementById('ml-dataset-ok').onclick = function() {
-      var new_ds = document.getElementById("ds_name").value;
-
-      if (new_ds.match(/^[A-Z][A-Z0-9_ -]*$/i)) {
-        if (!datasets.hasOwnProperty(new_ds)) {
-          datasets[new_ds] = [CodeMirror.Doc('', 'data'), CodeMirror.Doc('', 'yaml')];
-          rebuild_datasets();
-          window.addEventListener('beforeunload', onBeforeUnload);
-          if (document.getElementById('get_link').value != 'false') {
-            document.title = 'JinjaFx [unsaved]';
+          else {
+            set_status("#e64c00", "OK", "Link Not Updated");
           }
-          dirty = true;
         }
-        switch_dataset(new_ds, true);
-      }
-      else {
-        set_status("darkred", "ERROR", "Invalid Data Set Name");
-      }
-    };
-
-    document.getElementById('ds_name').onkeyup = function(e) {
-      if (e.which == 13) {
-        document.getElementById('ml-dataset-ok').click();
-      }
-    };
-
-    function check_open() {
-      if (document.getElementById('password_open1').value == document.getElementById('password_open2').value) {
-        document.getElementById('password_open2').classList.remove('is-invalid');
-        document.getElementById('password_open2').classList.add('is-valid');
-      }
-      else {
-        document.getElementById('password_open2').classList.remove('is-valid');
-        document.getElementById('password_open2').classList.add('is-invalid');
-      }
-    };
-
-    function check_vault() {
-      if (document.getElementById('password_vault1').value == document.getElementById('password_vault2').value) {
-        document.getElementById('password_vault2').classList.remove('is-invalid');
-        document.getElementById('password_vault2').classList.add('is-valid');
-      }
-      else {
-        document.getElementById('password_vault2').classList.remove('is-valid');
-        document.getElementById('password_vault2').classList.add('is-invalid');
-      }
-    };
-
-    document.getElementById('password_vault1').onkeyup = function(e) {
-      if (document.getElementById('password_vault1').value.match(/\S/)) {
-        if (document.getElementById('password_vault2').disabled == true) {
-          document.getElementById('password_vault2').disabled = false;
-          document.getElementById('password_vault2').classList.add('is-invalid');
-        }
-        else {
-          check_vault();
-        }
-      }
-      else {
-        document.getElementById('password_vault2').disabled = true;
-        document.getElementById('password_vault2').value = '';
-        document.getElementById('password_vault2').classList.remove('is-valid');
-        document.getElementById('password_vault2').classList.remove('is-invalid');
-      }
-    };
-
-    document.getElementById('password_vault2').onkeyup = function(e) {
-      check_vault();
-    };
-
-    document.getElementById('password_open1').onkeyup = function(e) {
-      if (document.getElementById('password_open1').value.match(/\S/)) {
-        if (document.getElementById('password_open2').disabled == true) {
-          document.getElementById('password_open2').disabled = false;
-          document.getElementById('password_open2').classList.add('is-invalid');
-        }
-        else {
-          check_open();
-        }
-      }
-      else {
-        document.getElementById('password_open2').disabled = true;
-        document.getElementById('password_open2').value = '';
-        document.getElementById('password_open2').classList.remove('is-valid');
-        document.getElementById('password_open2').classList.remove('is-invalid');
-      }
-    };
-
-    document.getElementById('password_open2').onkeyup = function(e) {
-      check_open();
-    };
-
-    function check_modify() {
-      if (document.getElementById('password_modify1').value == document.getElementById('password_modify2').value) {
-        document.getElementById('password_modify2').classList.remove('is-invalid');
-        document.getElementById('password_modify2').classList.add('is-valid');
-      }
-      else {
-        document.getElementById('password_modify2').classList.remove('is-valid');
-        document.getElementById('password_modify2').classList.add('is-invalid');
-      }
-    }
-
-    document.getElementById('password_modify1').onkeyup = function(e) {
-      if (document.getElementById('password_modify1').value.match(/\S/)) {
-        if (document.getElementById('password_modify2').disabled == true) {
-          document.getElementById('password_modify2').disabled = false;
-          document.getElementById('password_modify2').classList.add('is-invalid');
-        }
-        else {
-          check_modify();
-        }
-      }
-      else {
-        document.getElementById('password_modify2').disabled = true;
-        document.getElementById('password_modify2').value = '';
-        document.getElementById('password_modify2').classList.remove('is-valid');
-        document.getElementById('password_modify2').classList.remove('is-invalid');
-      }
-    };
-
-    document.getElementById('password_modify2').onkeyup = function(e) {
-      check_modify();
-    };
-
-    document.querySelectorAll('.modal').forEach(function(elem, i) {
-      elem.onkeydown = function(e) {
-        if (e.keyCode === 9) {
-          var focusable = elem.querySelectorAll('input,select,textarea,button');
-          if (focusable.length) {
-            var first = focusable[0];
-            var last = focusable[focusable.length - 1];
-
-            if ((e.target === first) && e.shiftKey) {
-              last.focus();
-              e.preventDefault();
+        document.getElementById("in_protect").value = '';
+        clear_wait();
+      });
+  
+      document.getElementById('dataset_input').addEventListener('shown.bs.modal', function (e) {
+        document.getElementById("ds_name").focus();
+      });
+  
+      document.getElementById('ml-dataset-ok').onclick = function() {
+        var new_ds = document.getElementById("ds_name").value;
+  
+        if (new_ds.match(/^[A-Z][A-Z0-9_ -]*$/i)) {
+          if (!datasets.hasOwnProperty(new_ds)) {
+            datasets[new_ds] = [CodeMirror.Doc('', 'data'), CodeMirror.Doc('', 'yaml')];
+            rebuild_datasets();
+            window.addEventListener('beforeunload', onBeforeUnload);
+            if (document.getElementById('get_link').value != 'false') {
+              document.title = 'JinjaFx [unsaved]';
             }
-            else if ((e.target === last) && !e.shiftKey) {
-              first.focus();
-              e.preventDefault();
-            }
+            dirty = true;
           }
+          switch_dataset(new_ds, true);
+        }
+        else {
+          set_status("darkred", "ERROR", "Invalid Data Set Name");
         }
       };
-    });
-
-    if (window.location.pathname.startsWith('/dt/') && (window.location.pathname.length > 4)) {
-      qs['dt'] = decodeURIComponent(window.location.pathname.substr(4));
-
-      if (document.getElementById('get_link').value != 'false') {
-        try_to_load();
-
-        document.getElementById('lbuttons').classList.remove('d-none');
-
-        if (fe != window.cmData) {
-          onDataBlur();
+  
+      document.getElementById('ds_name').onkeyup = function(e) {
+        if (e.which == 13) {
+          document.getElementById('ml-dataset-ok').click();
+        }
+      };
+  
+      function check_open() {
+        if (document.getElementById('password_open1').value == document.getElementById('password_open2').value) {
+          document.getElementById('password_open2').classList.remove('is-invalid');
+          document.getElementById('password_open2').classList.add('is-valid');
+        }
+        else {
+          document.getElementById('password_open2').classList.remove('is-valid');
+          document.getElementById('password_open2').classList.add('is-invalid');
+        }
+      };
+  
+      function check_vault() {
+        if (document.getElementById('password_vault1').value == document.getElementById('password_vault2').value) {
+          document.getElementById('password_vault2').classList.remove('is-invalid');
+          document.getElementById('password_vault2').classList.add('is-valid');
+        }
+        else {
+          document.getElementById('password_vault2').classList.remove('is-valid');
+          document.getElementById('password_vault2').classList.add('is-invalid');
+        }
+      };
+  
+      document.getElementById('password_vault1').onkeyup = function(e) {
+        if (document.getElementById('password_vault1').value.match(/\S/)) {
+          if (document.getElementById('password_vault2').disabled == true) {
+            document.getElementById('password_vault2').disabled = false;
+            document.getElementById('password_vault2').classList.add('is-invalid');
+          }
+          else {
+            check_vault();
+          }
+        }
+        else {
+          document.getElementById('password_vault2').disabled = true;
+          document.getElementById('password_vault2').value = '';
+          document.getElementById('password_vault2').classList.remove('is-valid');
+          document.getElementById('password_vault2').classList.remove('is-invalid');
+        }
+      };
+  
+      document.getElementById('password_vault2').onkeyup = function(e) {
+        check_vault();
+      };
+  
+      document.getElementById('password_open1').onkeyup = function(e) {
+        if (document.getElementById('password_open1').value.match(/\S/)) {
+          if (document.getElementById('password_open2').disabled == true) {
+            document.getElementById('password_open2').disabled = false;
+            document.getElementById('password_open2').classList.add('is-invalid');
+          }
+          else {
+            check_open();
+          }
+        }
+        else {
+          document.getElementById('password_open2').disabled = true;
+          document.getElementById('password_open2').value = '';
+          document.getElementById('password_open2').classList.remove('is-valid');
+          document.getElementById('password_open2').classList.remove('is-invalid');
+        }
+      };
+  
+      document.getElementById('password_open2').onkeyup = function(e) {
+        check_open();
+      };
+  
+      function check_modify() {
+        if (document.getElementById('password_modify1').value == document.getElementById('password_modify2').value) {
+          document.getElementById('password_modify2').classList.remove('is-invalid');
+          document.getElementById('password_modify2').classList.add('is-valid');
+        }
+        else {
+          document.getElementById('password_modify2').classList.remove('is-valid');
+          document.getElementById('password_modify2').classList.add('is-invalid');
         }
       }
-      else {
-        set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
-        reset_location('');
-        loaded = true;
-      }
-    }
-    else if (window.location.href.indexOf('?') > -1) {
-      var v = window.location.href.substr(window.location.href.indexOf('?') + 1).split('&');
-
-      for (var i = 0; i < v.length; i++) {
-        var p = v[i].split('=');
-        qs[p[0].toLowerCase()] = decodeURIComponent(p.length > 1 ? p[1] : '');
-      }
-
-      if (qs.hasOwnProperty('dt')) {
+  
+      document.getElementById('password_modify1').onkeyup = function(e) {
+        if (document.getElementById('password_modify1').value.match(/\S/)) {
+          if (document.getElementById('password_modify2').disabled == true) {
+            document.getElementById('password_modify2').disabled = false;
+            document.getElementById('password_modify2').classList.add('is-invalid');
+          }
+          else {
+            check_modify();
+          }
+        }
+        else {
+          document.getElementById('password_modify2').disabled = true;
+          document.getElementById('password_modify2').value = '';
+          document.getElementById('password_modify2').classList.remove('is-valid');
+          document.getElementById('password_modify2').classList.remove('is-invalid');
+        }
+      };
+  
+      document.getElementById('password_modify2').onkeyup = function(e) {
+        check_modify();
+      };
+  
+      document.querySelectorAll('.modal').forEach(function(elem, i) {
+        elem.onkeydown = function(e) {
+          if (e.keyCode === 9) {
+            var focusable = elem.querySelectorAll('input,select,textarea,button');
+            if (focusable.length) {
+              var first = focusable[0];
+              var last = focusable[focusable.length - 1];
+  
+              if ((e.target === first) && e.shiftKey) {
+                last.focus();
+                e.preventDefault();
+              }
+              else if ((e.target === last) && !e.shiftKey) {
+                first.focus();
+                e.preventDefault();
+              }
+            }
+          }
+        };
+      });
+  
+      if (window.location.pathname.startsWith('/dt/') && (window.location.pathname.length > 4)) {
+        qs['dt'] = decodeURIComponent(window.location.pathname.substr(4));
+  
         if (document.getElementById('get_link').value != 'false') {
           try_to_load();
-
+  
           document.getElementById('lbuttons').classList.remove('d-none');
-
+  
           if (fe != window.cmData) {
             onDataBlur();
           }
@@ -1573,17 +1548,47 @@ function getStatusText(code) {
           loaded = true;
         }
       }
+      else if (window.location.href.indexOf('?') > -1) {
+        var v = window.location.href.substr(window.location.href.indexOf('?') + 1).split('&');
+  
+        for (var i = 0; i < v.length; i++) {
+          var p = v[i].split('=');
+          qs[p[0].toLowerCase()] = decodeURIComponent(p.length > 1 ? p[1] : '');
+        }
+  
+        if (qs.hasOwnProperty('dt')) {
+          if (document.getElementById('get_link').value != 'false') {
+            try_to_load();
+  
+            document.getElementById('lbuttons').classList.remove('d-none');
+  
+            if (fe != window.cmData) {
+              onDataBlur();
+            }
+          }
+          else {
+            set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
+            reset_location('');
+            loaded = true;
+          }
+        }
+        else {
+          reset_location('');
+          loaded = true;
+        }
+      }
       else {
-        reset_location('');
+        if (document.getElementById('get_link').value != 'false') {
+          document.getElementById('lbuttons').classList.remove('d-none');
+        }
+        document.getElementById('template_info').style.visibility = 'visible';
         loaded = true;
       }
+
+      document.body.style.display = "block";
     }
-    else {
-      if (document.getElementById('get_link').value != 'false') {
-        document.getElementById('lbuttons').classList.remove('d-none');
-      }
-      document.getElementById('template_info').style.visibility = 'visible';
-      loaded = true;
+    catch (e) {
+      document.write('<pre>' + e.stack + '</pre>');
     }
   };
 
