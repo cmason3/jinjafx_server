@@ -875,7 +875,7 @@ function getStatusText(code) {
       };
   
       window.onresize();
-  
+
       var gExtraKeys = {
         "Alt-F": "findPersistent",
         "Ctrl-F": "findPersistent",
@@ -916,6 +916,8 @@ function getStatusText(code) {
         "Ctrl-D": false,
         "Cmd-D": false
       };
+
+      document.body.style.display = "block";
   
       CodeMirror.defineMode("data", cmDataMode);
       window.cmData = CodeMirror.fromTextArea(data, {
@@ -1584,11 +1586,14 @@ function getStatusText(code) {
         document.getElementById('template_info').style.visibility = 'visible';
         loaded = true;
       }
-
-      document.body.style.display = "block";
     }
     catch (e) {
-      document.write('<pre>' + e.stack + '</pre>');
+      if (e.stack.includes(e.name)) {
+        document.write('<pre>' + quote(e.stack) + '</pre>');
+      }
+      else {
+        document.write('<pre>' + quote(e.name) + ': ' + quote(e.message) + '<br />' + quote(e.stack) + '</pre>');
+      }
     }
   };
 
