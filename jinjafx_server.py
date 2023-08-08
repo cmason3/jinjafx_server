@@ -105,9 +105,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               ae = ''
 
             if self.elapsed is not None:
-              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + proto_ver + ' [' + self.format_bytes(self.length) + '] in ' + str(self.elapsed) + 'ms', ae)
+              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + proto_ver + ctype + ' [' + self.format_bytes(self.length) + '] in ' + str(self.elapsed) + 'ms', ae)
             else:
-              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + ctype + proto_ver + ' [' + self.format_bytes(self.length) + ']', ae)
+              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + proto_ver + ctype + ' [' + self.format_bytes(self.length) + ']', ae)
 
           elif self.command != None:
             if (args[1] != '200' and args[1] != '304') or (not path.endswith('.js') and not path.endswith('.css') and not path.endswith('.png')) or verbose:
