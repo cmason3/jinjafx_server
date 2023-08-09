@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <!--
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'">
+    -->
+    <meta http-equiv="refresh" content="10">
+    <meta name="viewport" content="width=1536, user-scalable=no">
+    <title>JinjaFx Logs</title>
+    <link rel="shortcut icon" href="/874f2915/jinjafx.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.1/css/bootstrap.min.css" integrity="sha512-Z/def5z5u2aR89OuzYcxmDJ0Bnd5V1cKqBEbvLOiUNWdg9PQeXVvXLI90SE4QOHGlfLqUnDNVAYyZi8UwUTmWQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="/f8555653/jinjafx.css">
+    <style>
+      pre { white-space: pre-wrap; word-break: break-all; height: calc(100vh - 2rem); overflow-y: hidden; }
+    </style>
+    <script>
+      window.onload = window.onresize = function() {
+        let e = document.getElementById('container');
+        e.scrollTop = e.scrollHeight;
+      };
+    </script>
+  </head>
+  <body class="text-light bg-dark">
+    <div id="wrap" class="p-2 bg-transparent">
+      <pre id="container">{{ logs }}</pre>
+    </div>
+  </body>
+</html>

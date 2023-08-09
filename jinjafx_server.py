@@ -40,6 +40,7 @@ rl_limit = 0
 logfile = None
 timelimit = 0
 n_threads = 4
+logring = []
 
 
 class JinjaFxServer(HTTPServer):
@@ -70,7 +71,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     path = path.replace('/jinjafx.html', '/')
 
     if not self.hide or verbose:
-      if not isinstance(args[0], int) and path != '/ping':
+      if not isinstance(args[0], int) and path != '/ping' and path != '/logs':
         if self.error is not None:
           ansi = '31'
         elif args[1] == '200' or args[1] == '204':
@@ -163,6 +164,23 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       if fpath == '/ping':
         cache = False
         r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+
+#      elif fpath == '/logs':
+#        cache = False
+
+#        with open(base + '/www/logs.html', 'rb') as f:
+#          r = [ 'text/html', 200, f.read(), sys._getframe().f_lineno ]
+
+#        with lock:
+#          logs = '\r\n'.join(logring)
+
+#        logs = logs.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+#        logs = logs.replace('\033[1;31m', '<span class="text-danger">')
+#        logs = logs.replace('\033[1;32m', '<span class="text-success">')
+#        logs = logs.replace('\033[1;33m', '<span class="text-warning">')
+#        logs = logs.replace('\033[0m', '</span>')
+
+#        r[2] = r[2].decode('utf-8').replace('{{ logs }}', logs).encode('utf-8')
 
       else:
         if fpath == '/':
@@ -878,9 +896,14 @@ def main(rflag=[0]):
 
 
 def log(t, ae=''):
+  global logring
+
   with lock:
     timestamp = datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19]
     print('[' + timestamp + '] ' + t + ae)
+
+    logring.append('[' + timestamp + '] ' + t + ae)
+    logring = logring[-128:]
 
     if logfile is not None:
       try:
