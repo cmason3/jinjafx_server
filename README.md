@@ -31,19 +31,23 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
    -tl <time limit>                   - specify a time limit per request (seconds)
    -ml <memory limit>                 - specify a global memory limit (megabytes < total)
    -logfile <logfile>                 - specify a logfile for persistent logging
+   -weblog                            - enable web log interface (/logs)
    -v                                 - log all HTTP requests
 
  Environment Variables:
    AWS_ACCESS_KEY              - specify an aws access key to authenticate for '-s3'
    AWS_SECRET_KEY              - specify an aws secret key to authenticate for '-s3'
    GITHUB_TOKEN                - specify a github personal access token for '-github'
+   JFX_WEBLOG_KEY              - specify a key to allow access to web log interface
 ```
 
 For health checking purposes, if you specify the URL `/ping` then you should get an "OK" response if the JinaFx Server is up and working (these requests are omitted from the logs). The preferred method of running the JinjaFx Server is with HAProxy in front of it as it supports TLS termination and HTTP/2 - please see the [/docker](https://github.com/cmason3/jinjafx_server/blob/main/docker) directory for more information.
 
 The "-r", "-s3" or "-github" arguments (mutually exclusive) allow you to specify a repository ("-r" is a local directory, "-s3" is an AWS S3 URL and "-github" is a GitHub repository) that will be used to store DataTemplates on the server via the "Get Link" and "Update Link" buttons. The generated link is guaranteed to be unique and a different link will be created every time - version 1.3.0 changed the behaviour, where previously the same link was always generated for the same DataTemplate, but this made it difficult to update DataTemplates without the link changing as it was basically a cryptographic hash of your DataTemplate. If you use an AWS S3 bucket then you will also need to provide some credentials via the two environment variables which has read and write permissions to the S3 URL.
 
-The "-rl" argument is used to provide an optional rate limit of the source IP - the "rate" is how many requests are permitted and the "limit" is the interval in which those requests are permitted - it can be specified in "s", "m" or "h" (e.g. "5/30s", "10/1m" or "30/1h").
+The "-rl" argument is used to provide an optional rate limit of the source IP - the "rate" is how many requests are permitted and the "limit" is the interval in which those requests are permitted - it can be specified in "s", "m" or "h" (e.g. "5/30s", "10/1m" or "30/1h"). This is currently only applied to "Get Link" and Web Log authentication.
+
+The "-weblog" argument in combination with the "JFX_WEBLOG_KEY" environment variables enables the Web Log interface to view the current application logs - this can be accessed from a web browser using the URL `/logs?key=<JFX_WEBLOG_KEY>`.
 
 ### Shortcut Keys
 

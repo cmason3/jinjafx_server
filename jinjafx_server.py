@@ -31,6 +31,7 @@ aws_access_key = None
 aws_secret_key = None
 github_url = None
 github_token = None
+jfx_weblog_key = None
 repository = None
 verbose = False
 
@@ -71,7 +72,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     path = path.replace('/jinjafx.html', '/')
 
     if not self.hide or verbose:
-      if not isinstance(args[0], int) and path != '/ping' and path != '/logs':
+      if not isinstance(args[0], int) and path != '/ping':
         if self.error is not None:
           ansi = '31'
         elif args[1] == '200' or args[1] == '204':
@@ -81,7 +82,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         else:
           ansi = '31'
 
-        if (args[1] != '204' and args[1] != '404' and args[1] != '501') or self.critical or verbose:
+        if (args[1] != '204' and args[1] != '404' and args[1] != '501' and (not path.startswith('/logs') or args[1] != '200')) or self.critical or verbose:
           src = str(self.client_address[0])
           proto_ver = ''
           ctype = ''
@@ -151,6 +152,28 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     return self.rot47(base64.b64decode(data))
 
 
+  def ratelimit(self, remote_addr, check_only=False):
+    if rl_rate != 0:
+      t = int(time.time())
+
+      with lock:
+        if remote_addr in rtable:
+          rtable[remote_addr] = list(filter(lambda s: s >= (t - rl_limit), rtable[remote_addr][-(rl_rate + 1):]))
+
+        if check_only:
+          if remote_addr not in rtable:
+            return False
+
+        else:
+          rtable.setdefault(remote_addr, []).append(t)
+
+        if len(rtable[remote_addr]) > rl_rate:
+          if (rtable[remote_addr][-1] - rtable[remote_addr][0]) <= rl_limit:
+            return True
+
+    return False
+
+
   def do_GET(self, head=False, cache=True, versioned=False):
     try:
       self.critical = False
@@ -159,28 +182,54 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
       fpath = self.path.split('?', 1)[0]
 
+      if hasattr(self, 'headers') and 'X-Forwarded-For' in self.headers:
+        remote_addr = self.headers['X-Forwarded-For']
+      else:
+        remote_addr = str(self.client_address[0])
+
       r = [ 'text/plain', 500, '500 Internal Server Error\r\n', sys._getframe().f_lineno ]
 
       if fpath == '/ping':
         cache = False
         r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
-#      elif fpath == '/logs':
-#        cache = False
+      elif fpath == '/logs' and jfx_weblog_key is not None:
+        cache = False
 
-#        with open(base + '/www/logs.html', 'rb') as f:
-#          r = [ 'text/html', 200, f.read(), sys._getframe().f_lineno ]
+        if '?' in self.path:
+          qs = self.path.split('?', 1)[1].split('&')
+  
+          if 'key=' + jfx_weblog_key in qs:
+            if not self.ratelimit(remote_addr, True):
+              self.path = self.path.replace(jfx_weblog_key, '*****')
+  
+              with open(base + '/www/logs.html', 'rb') as f:
+                r = [ 'text/html', 200, f.read(), sys._getframe().f_lineno ]
+  
+              with lock:
+                logs = '\r\n'.join(logring)
+  
+              logs = logs.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+              logs = logs.replace('\033[1;31m', '<span class="text-danger">')
+              logs = logs.replace('\033[1;32m', '<span class="text-success">')
+              logs = logs.replace('\033[1;33m', '<span class="text-warning">')
+              logs = logs.replace('\033[0m', '</span>')
+              r[2] = r[2].decode('utf-8').replace('{{ logs }}', logs).encode('utf-8')
 
-#        with lock:
-#          logs = '\r\n'.join(logring)
+            else:
+              r = [ 'text/plain', 429, '429 Too Many Requests\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
-#        logs = logs.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-#        logs = logs.replace('\033[1;31m', '<span class="text-danger">')
-#        logs = logs.replace('\033[1;32m', '<span class="text-success">')
-#        logs = logs.replace('\033[1;33m', '<span class="text-warning">')
-#        logs = logs.replace('\033[0m', '</span>')
+          else:
+            if not self.ratelimit(remote_addr, False):
+              r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+            else:
+              r = [ 'text/plain', 429, '429 Too Many Requests\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
-#        r[2] = r[2].decode('utf-8').replace('{{ logs }}', logs).encode('utf-8')
+        else:
+          if not self.ratelimit(remote_addr, False):
+            r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+          else:
+            r = [ 'text/plain', 429, '429 Too Many Requests\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
       else:
         if fpath == '/':
@@ -359,6 +408,11 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     params = { x[0]: x[1] for x in [x.split('=') for x in uc[1].split('&') ] } if len(uc) > 1 else { }
     fpath = uc[0]
 
+    if hasattr(self, 'headers') and 'X-Forwarded-For' in self.headers:
+      remote_addr = self.headers['X-Forwarded-For']
+    else:
+      remote_addr = str(self.client_address[0])
+
     r = [ 'text/plain', 500, '500 Internal Server Error\r\n', sys._getframe().f_lineno ]
 
     if 'Content-Length' in self.headers:
@@ -485,15 +539,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             if aws_s3_url or github_url or repository:
               if self.headers['Content-Type'] == 'application/json':
                 try:
-                  remote_addr = str(self.client_address[0])
                   dt_password = ''
                   dt_opassword = ''
                   dt_mpassword = ''
                   dt_revision = 1
 
                   if hasattr(self, 'headers'):
-                    if 'X-Forwarded-For' in self.headers:
-                      remote_addr = self.headers['X-Forwarded-For']
                     if 'X-Dt-Password' in self.headers:
                       dt_password = self.headers['X-Dt-Password']
                     if 'X-Dt-Open-Password' in self.headers:
@@ -503,17 +554,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     if 'X-Dt-Revision' in self.headers:
                       dt_revision = int(self.headers['X-Dt-Revision'])
 
-                  ratelimit = False
-                  if rl_rate != 0:
-                    rtable.setdefault(remote_addr, []).append(int(time.time()))
-
-                    if len(rtable[remote_addr]) > rl_rate:
-                      if (rtable[remote_addr][-1] - rtable[remote_addr][0]) <= rl_limit:
-                        ratelimit = True
-
-                      rtable[remote_addr] = rtable[remote_addr][-rl_rate:]
-
-                  if not ratelimit:
+                  if not self.ratelimit(remote_addr, False):
                     dt = json.loads(postdata.decode('utf-8'))
 
                     vdt = {}
@@ -790,6 +831,7 @@ def main(rflag=[0]):
   global aws_secret_key
   global github_url
   global github_token
+  global jfx_weblog_key
   global repository
   global rl_rate
   global rl_limit
@@ -815,9 +857,16 @@ def main(rflag=[0]):
     parser.add_argument('-tl', metavar='<time limit>', type=int, default=0)
     parser.add_argument('-ml', metavar='<memory limit>', type=int, default=0)
     parser.add_argument('-logfile', metavar='<logfile>', type=str)
+    parser.add_argument('-weblog', action='store_true', default=False)
     parser.add_argument('-v', action='store_true', default=False)
     args = parser.parse_args()
     verbose = args.v
+
+    if args.weblog:
+      jfx_weblog_key = os.getenv('JFX_WEBLOG_KEY')
+
+      if jfx_weblog_key is None:
+        parser.error("argument -weblog: environment variable 'JFX_WEBLOG_KEY' is mandatory")
 
     if args.s3 is not None:
       aws_s3_url = args.s3
