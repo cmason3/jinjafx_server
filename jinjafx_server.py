@@ -23,7 +23,8 @@ import cmarkgfm, emoji
 
 __version__ = '23.8.2'
 
-lock = threading.RLock()
+llock = threading.RLock()
+rlock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
 
 aws_s3_url = None
@@ -152,23 +153,24 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     return self.rot47(base64.b64decode(data))
 
 
-  def ratelimit(self, remote_addr, check_only=False):
+  def ratelimit(self, remote_addr, n=0, check_only=False):
     if rl_rate != 0:
+      key = f'{remote_addr}:{n}'
       t = int(time.time())
 
-      with lock:
-        if remote_addr in rtable:
-          rtable[remote_addr] = list(filter(lambda s: s >= (t - rl_limit), rtable[remote_addr][-(rl_rate + 1):]))
+      with rlock:
+        if key in rtable:
+          rtable[key] = list(filter(lambda s: s >= (t - rl_limit), rtable[key][-(rl_rate + 1):]))
 
         if check_only:
-          if remote_addr not in rtable:
+          if key not in rtable:
             return False
 
         else:
-          rtable.setdefault(remote_addr, []).append(t)
+          rtable.setdefault(key, []).append(t)
 
-        if len(rtable[remote_addr]) > rl_rate:
-          if (rtable[remote_addr][-1] - rtable[remote_addr][0]) <= rl_limit:
+        if len(rtable[key]) > rl_rate:
+          if (rtable[key][-1] - rtable[key][0]) <= rl_limit:
             return True
 
     return False
@@ -200,13 +202,13 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           qs = self.path.split('?', 1)[1].split('&')
   
           if 'key=' + jfx_weblog_key in qs:
-            if not self.ratelimit(remote_addr, True):
+            if not self.ratelimit(remote_addr, 3,  True):
               self.path = self.path.replace(jfx_weblog_key, '*****')
   
               with open(base + '/www/logs.html', 'rb') as f:
                 r = [ 'text/html', 200, f.read(), sys._getframe().f_lineno ]
   
-              with lock:
+              with llock:
                 logs = '\r\n'.join(logring)
   
               logs = logs.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
@@ -220,13 +222,13 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               r = [ 'text/plain', 429, '429 Too Many Requests\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
           else:
-            if not self.ratelimit(remote_addr, False):
+            if not self.ratelimit(remote_addr, 3, False):
               r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
             else:
               r = [ 'text/plain', 429, '429 Too Many Requests\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
         else:
-          if not self.ratelimit(remote_addr, False):
+          if not self.ratelimit(remote_addr, 3, False):
             r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
           else:
             r = [ 'text/plain', 429, '429 Too Many Requests\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
@@ -248,72 +250,76 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           self.critical = True
 
           if aws_s3_url or github_url or repository:
-            if aws_s3_url:
-              rr = aws_s3_get(aws_s3_url, 'jfx_' + fpath[8:] + '.yml')
-
-              if rr.status_code == 200:
-                r = [ 'application/json', 200, json.dumps({ 'dt': self.e(rr.text.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
-
-                dt = rr.text
-
-              elif rr.status_code == 403:
-                r = [ 'text/plain', 403, '403 Forbidden\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-
-              elif rr.status_code == 404:
-                r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-
-            elif github_url:
-              rr = github_get(github_url, 'jfx_' + fpath[8:] + '.yml')
-
-              if rr.status_code == 200:
-                jobj = rr.json()
-                content = jobj['content']
-
-                if jobj.get('encoding') and jobj.get('encoding') == 'base64':
-                  content = base64.b64decode(content).decode('utf-8')
-
-                r = [ 'application/json', 200, json.dumps({ 'dt': self.e(content.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
-
-                dt = content
-
-              elif rr.status_code == 401:
-                r = [ 'text/plain', 403, '403 Forbidden\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-
-              elif rr.status_code == 404:
-                r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+            if not self.ratelimit(remote_addr, 2, False):
+              if aws_s3_url:
+                rr = aws_s3_get(aws_s3_url, 'jfx_' + fpath[8:] + '.yml')
+  
+                if rr.status_code == 200:
+                  r = [ 'application/json', 200, json.dumps({ 'dt': self.e(rr.text.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
+  
+                  dt = rr.text
+  
+                elif rr.status_code == 403:
+                  r = [ 'text/plain', 403, '403 Forbidden\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+  
+                elif rr.status_code == 404:
+                  r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+  
+              elif github_url:
+                rr = github_get(github_url, 'jfx_' + fpath[8:] + '.yml')
+  
+                if rr.status_code == 200:
+                  jobj = rr.json()
+                  content = jobj['content']
+  
+                  if jobj.get('encoding') and jobj.get('encoding') == 'base64':
+                    content = base64.b64decode(content).decode('utf-8')
+  
+                  r = [ 'application/json', 200, json.dumps({ 'dt': self.e(content.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
+  
+                  dt = content
+  
+                elif rr.status_code == 401:
+                  r = [ 'text/plain', 403, '403 Forbidden\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+  
+                elif rr.status_code == 404:
+                  r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+  
+              else:
+                fpath = os.path.normpath(repository + '/jfx_' + fpath[8:] + '.yml')
+  
+                if os.path.isfile(fpath):
+                  with open(fpath, 'rb') as f:
+                    rr = f.read()
+                    dt = rr.decode('utf-8')
+  
+                    r = [ 'application/json', 200, json.dumps({ 'dt': self.e(rr).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
+  
+                  os.utime(fpath, None)
+  
+                else:
+                  r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+  
+              if r[1] == 200:
+                mo = re.search(r'dt_password: "(\S+)"', dt)
+                if mo != None:
+                  if 'X-Dt-Password' in self.headers:
+                    t = binascii.unhexlify(mo.group(1).encode('utf-8'))
+                    if t != self.derive_key(self.headers['X-Dt-Password'], t[2:int(t[1]) + 2], t[0]):
+                      mm = re.search(r'dt_mpassword: "(\S+)"', dt)
+                      if mm != None:
+                        t = binascii.unhexlify(mm.group(1).encode('utf-8'))
+                        if t != self.derive_key(self.headers['X-Dt-Password'], t[2:int(t[1]) + 2], t[0]):
+                          r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+  
+                      else:
+                        r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+  
+                  else:
+                    r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
             else:
-              fpath = os.path.normpath(repository + '/jfx_' + fpath[8:] + '.yml')
-
-              if os.path.isfile(fpath):
-                with open(fpath, 'rb') as f:
-                  rr = f.read()
-                  dt = rr.decode('utf-8')
-
-                  r = [ 'application/json', 200, json.dumps({ 'dt': self.e(rr).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
-
-                os.utime(fpath, None)
-
-              else:
-                r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-
-            if r[1] == 200:
-              mo = re.search(r'dt_password: "(\S+)"', dt)
-              if mo != None:
-                if 'X-Dt-Password' in self.headers:
-                  t = binascii.unhexlify(mo.group(1).encode('utf-8'))
-                  if t != self.derive_key(self.headers['X-Dt-Password'], t[2:int(t[1]) + 2], t[0]):
-                    mm = re.search(r'dt_mpassword: "(\S+)"', dt)
-                    if mm != None:
-                      t = binascii.unhexlify(mm.group(1).encode('utf-8'))
-                      if t != self.derive_key(self.headers['X-Dt-Password'], t[2:int(t[1]) + 2], t[0]):
-                        r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-
-                    else:
-                      r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-
-                else:
-                  r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+              r = [ 'text/plain', 429, '429 Too Many Requests\r\n', sys._getframe().f_lineno ]
 
         elif re.search(r'^/[A-Z0-9_-]+\.[A-Z0-9]+$', fpath, re.IGNORECASE) and (os.path.isfile(base + '/www' + fpath) or fpath == '/jinjafx.html'):
           if fpath.endswith('.js'):
@@ -554,7 +560,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     if 'X-Dt-Revision' in self.headers:
                       dt_revision = int(self.headers['X-Dt-Revision'])
 
-                  if not self.ratelimit(remote_addr, False):
+                  if not self.ratelimit(remote_addr, 1, False):
                     dt = json.loads(postdata.decode('utf-8'))
 
                     vdt = {}
@@ -947,7 +953,7 @@ def main(rflag=[0]):
 def log(t, ae=''):
   global logring
 
-  with lock:
+  with llock:
     timestamp = datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19]
     print('[' + timestamp + '] ' + t + ae)
 
