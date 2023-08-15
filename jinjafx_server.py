@@ -160,7 +160,19 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
       with rlock:
         if key in rtable:
-          rtable[key] = list(filter(lambda s: s >= (t - rl_limit), rtable[key][-(rl_rate + 1):]))
+          if isinstance(rtable[key], int):
+            if t > rtable[key]:
+              log('DEBUG: RATE LIMIT CLEARED')
+              del rtable[key]
+
+            else:
+              if not check_only:
+                log('DEBUG: RATE LIMITED EXTENDED')
+                rtable[key] += (rl_limit * 2)
+              return True
+
+          else:
+            rtable[key] = list(filter(lambda s: s >= (t - rl_limit), rtable[key][-(rl_rate + 1):]))
 
         if check_only:
           if key not in rtable:
@@ -171,6 +183,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
         if len(rtable[key]) > rl_rate:
           if (rtable[key][-1] - rtable[key][0]) <= rl_limit:
+            if check_only:
+              log('DEBUG: THIS SHOULD NEVER HAPPEN')
+            log('DEBUG: RATE LIMIT ACTIVATED')
+            rtable[key] = t + (rl_limit * 2)
             return True
 
     return False
