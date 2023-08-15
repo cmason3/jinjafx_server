@@ -155,6 +155,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
   def ratelimit(self, remote_addr, n=0, check_only=False):
     if rl_rate != 0:
+      rl_duration = rl_limit * 2
       key = f'{remote_addr}:{n}'
       t = int(time.time())
 
@@ -167,8 +168,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
             else:
               if not check_only:
-                log('DEBUG: RATE LIMITED EXTENDED')
-                rtable[key] += (rl_limit * 2)
+                rtable[key] = min(rtable[key] + rl_duration, t + (rl_duration * 2)) 
+                log(f'DEBUG: RATE LIMITED EXTENDED to {rtable[key]}')
               return True
 
           else:
@@ -185,8 +186,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           if (rtable[key][-1] - rtable[key][0]) <= rl_limit:
             if check_only:
               log('DEBUG: THIS SHOULD NEVER HAPPEN')
-            log('DEBUG: RATE LIMIT ACTIVATED')
-            rtable[key] = t + (rl_limit * 2)
+            rtable[key] = t + rl_duration
+            log(f'DEBUG: RATE LIMIT ACTIVATED to {rtable[key]}')
             return True
 
     return False
