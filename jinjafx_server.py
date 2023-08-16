@@ -169,26 +169,25 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             else:
               if not check_only:
                 rtable[key] = min(rtable[key] + rl_duration, t + (rl_duration * 2)) 
-                log(f'DEBUG: RATE LIMITED EXTENDED to {rtable[key]}')
+                log(f'DEBUG: RATE LIMIT EXTENDED - TIME LEFT = {rtable[key] - t}s')
+              else:
+                log(f'DEBUG: RATE LIMIT PENDING - TIME LEFT = {rtable[key] - t}s')
               return True
 
           else:
             rtable[key] = list(filter(lambda s: s >= (t - rl_limit), rtable[key][-(rl_rate + 1):]))
 
-        if check_only:
-          if key not in rtable:
-            return False
-
-        else:
+        if not check_only:
           rtable.setdefault(key, []).append(t)
 
-        if len(rtable[key]) > rl_rate:
-          if (rtable[key][-1] - rtable[key][0]) <= rl_limit:
-            if check_only:
-              log('DEBUG: THIS SHOULD NEVER HAPPEN')
-            rtable[key] = t + rl_duration
-            log(f'DEBUG: RATE LIMIT ACTIVATED to {rtable[key]}')
-            return True
+        if key in rtable:
+          if len(rtable[key]) > rl_rate:
+            if (rtable[key][-1] - rtable[key][0]) <= rl_limit:
+              if check_only:
+                log('DEBUG: THIS SHOULD NEVER HAPPEN')
+              rtable[key] = t + rl_duration
+              log(f'DEBUG: RATE LIMIT ACTIVATED to {rtable[key]}')
+              return True
 
     return False
 
@@ -219,9 +218,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           qs = self.path.split('?', 1)[1].split('&')
   
           if 'key=' + jfx_weblog_key in qs:
+            self.path = self.path.replace(jfx_weblog_key, '*****')
+
             if not self.ratelimit(remote_addr, 3,  True):
-              self.path = self.path.replace(jfx_weblog_key, '*****')
-  
               with open(base + '/www/logs.html', 'rb') as f:
                 r = [ 'text/html', 200, f.read(), sys._getframe().f_lineno ]
   
