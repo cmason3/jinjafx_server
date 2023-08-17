@@ -85,7 +85,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         else:
           ansi = '31'
 
-        if (args[1] != '204' and args[1] != '404' and args[1] != '501' and path != '/output.html' and (not path.startswith('/logs') or args[1] != '200')) or self.critical or verbose:
+        if (args[1] != '204' and args[1] != '404' and args[1] != '501' and not path.startswith('/output.html') and not '/dt/' in path and (not path.startswith('/logs') or args[1] != '200')) or self.critical or verbose:
           src = str(self.client_address[0])
           proto_ver = ''
           ctype = ''
