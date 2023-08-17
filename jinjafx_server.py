@@ -16,7 +16,9 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse, parse_qs
 from jinja2 import __version__ as jinja2_version
+
 import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime, resource
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes
 import cmarkgfm, emoji
@@ -213,13 +215,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
       elif fpath == '/logs' and jfx_weblog_key is not None:
         cache = False
+        qs = parse_qs(urlparse(self.path).query)
 
-        if '?' in self.path:
-          qs = self.path.split('?', 1)[1].split('&')
-  
-          if 'key=' + jfx_weblog_key in qs:
-            self.path = self.path.replace(jfx_weblog_key, '*****')
+        if 'key' in qs:
+          self.path = self.path.replace('=' + qs['key'][0], '=*****')
 
+          if qs['key'][0] == jfx_weblog_key:
             if not self.ratelimit(remote_addr, 3,  True):
               with open(base + '/www/logs.html', 'rb') as f:
                 r = [ 'text/html', 200, f.read(), sys._getframe().f_lineno ]
