@@ -215,12 +215,13 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
       elif fpath == '/logs' and jfx_weblog_key is not None:
         cache = False
-        qs = parse_qs(urlparse(self.path).query)
+        qs = parse_qs(urlparse(self.path).query, keep_blank_values=True)
 
         if 'key' in qs:
-          self.path = self.path.replace('=' + qs['key'][0], '=*****')
+          for kv in qs['key']:
+            self.path = self.path.replace('key=' + kv, 'key=*')
 
-          if qs['key'][0] == jfx_weblog_key:
+          if qs['key'][-1] == jfx_weblog_key:
             if not self.ratelimit(remote_addr, 3,  True):
               with open(base + '/www/logs.html', 'rb') as f:
                 r = [ 'text/html', 200, f.read(), sys._getframe().f_lineno ]
