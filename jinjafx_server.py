@@ -165,15 +165,11 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         if key in rtable:
           if isinstance(rtable[key], int):
             if t > rtable[key]:
-              log('DEBUG: RATE LIMIT CLEARED')
               del rtable[key]
 
             else:
               if not check_only:
                 rtable[key] = min(rtable[key] + rl_duration, t + (rl_duration * 2)) 
-                log(f'DEBUG: RATE LIMIT EXTENDED - TIME LEFT = {rtable[key] - t}s')
-              else:
-                log(f'DEBUG: RATE LIMIT PENDING - TIME LEFT = {rtable[key] - t}s')
               return True
 
           else:
@@ -185,10 +181,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         if key in rtable:
           if len(rtable[key]) > rl_rate:
             if (rtable[key][-1] - rtable[key][0]) <= rl_limit:
-              if check_only:
-                log('DEBUG: THIS SHOULD NEVER HAPPEN')
               rtable[key] = t + rl_duration
-              log(f'DEBUG: RATE LIMIT ACTIVATED to {rtable[key]}')
               return True
 
     return False
