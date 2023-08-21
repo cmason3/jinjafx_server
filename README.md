@@ -47,7 +47,7 @@ The "-r", "-s3" or "-github" arguments (mutually exclusive) allow you to specify
 
 The "-rl" argument is used to provide an optional rate limit of the source IP - the "rate" is how many requests are permitted and the "limit" is the interval in which those requests are permitted - it can be specified in "s", "m" or "h" (e.g. "5/30s", "10/1m" or "30/1h"). This is currently only applied to "Get Link" and Web Log authentication.
 
-The "-weblog" argument in combination with the "JFX_WEBLOG_KEY" environment variables enables the Web Log interface to view the current application logs - this can be accessed from a web browser using the URL `/logs?key=<JFX_WEBLOG_KEY>`.
+The "-weblog" argument in combination with the "JFX_WEBLOG_KEY" environment variable enables the Web Log interface to view the current application logs - this can be accessed from a web browser using the URL `/logs?key=<JFX_WEBLOG_KEY>`.
 
 ### Shortcut Keys
 
