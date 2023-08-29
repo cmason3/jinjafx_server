@@ -131,9 +131,17 @@
                 var tabs = '';
 
                 Object.keys(obj.outputs).sort(function(a, b) {
+                  if (a.indexOf(':') > -1) {
+                    a = a.split(':').slice(0, -1).join(':')
+                  }
+                  if (b.indexOf(':') > -1) {
+                    b = b.split(':').slice(0, -1).join(':')
+                  }
+
                   if (a == 'Output') {
                     return -1;
                   }
+
                   return a > b ? 1 : b > a ? -1 : 0;
                 }).forEach(function(output) {
                   var oname = output;
