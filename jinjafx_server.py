@@ -15,6 +15,7 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+from http.cookies import SimpleCookie
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 from jinja2 import __version__ as jinja2_version
@@ -23,7 +24,7 @@ import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes
 import cmarkgfm, emoji
 
-__version__ = '23.8.3'
+__version__ = '23.8.4'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -85,10 +86,13 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         else:
           ansi = '31'
 
-        if (args[1] != '204' and args[1] != '404' and args[1] != '501' and not path.startswith('/output.html') and not '/dt/' in path and (not path.startswith('/logs') or args[1] != '200')) or self.critical or verbose:
+        if (args[1] != '204' and args[1] != '404' and args[1] != '501' and not path.startswith('/output.html') and not '/dt/' in path and (not path.startswith('/logs') or (args[1] != '200' and args[1] != '304'))) or self.critical or verbose:
           src = str(self.client_address[0])
           proto_ver = ''
           ctype = ''
+
+          if path.startswith('/logs') and args[1] == '302':
+            ansi = '32'
 
           if hasattr(self, 'headers'):
             if 'X-Forwarded-For' in self.headers:
@@ -192,6 +196,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       self.critical = False
       self.hide = False
       self.error = None
+      cheaders = {}
 
       fpath = self.path.split('?', 1)[0]
 
@@ -207,14 +212,27 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
       elif fpath == '/logs' and jfx_weblog_key is not None:
-        cache = False
         qs = parse_qs(urlparse(self.path).query, keep_blank_values=True)
+        key = None
 
         if 'key' in qs:
           for kv in qs['key']:
             self.path = self.path.replace('key=' + kv, 'key=*')
 
-          if qs['key'][-1] == jfx_weblog_key:
+          key = qs['key'][-1]
+
+        elif hasattr(self, 'headers'):
+          cookies = SimpleCookie(self.headers.get('Cookie'))
+          if 'jfx_weblog_key' in cookies:
+            key = cookies['jfx_weblog_key'].value
+
+        if key == jfx_weblog_key:
+          if 'key' in qs:
+            cheaders['Set-Cookie'] = 'jfx_weblog_key=' + key + '; path=/logs'
+            cheaders['Location'] = '/logs'
+            r = [ 'text/plain', 302, '302 Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+
+          else:
             if not self.ratelimit(remote_addr, 3,  True):
               with open(base + '/www/logs.html', 'rb') as f:
                 r = [ 'text/html', 200, f.read(), sys._getframe().f_lineno ]
@@ -232,13 +250,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             else:
               r = [ 'text/plain', 429, '429 Too Many Requests\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
-          else:
-            if not self.ratelimit(remote_addr, 3, False):
-              r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-            else:
-              r = [ 'text/plain', 429, '429 Too Many Requests\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-
         else:
+          cheaders['Set-Cookie'] = 'jfx_weblog_key=; path=/logs; max-age=0'
           if not self.ratelimit(remote_addr, 3, False):
             r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
           else:
@@ -392,6 +405,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
         self.send_header('Cache-Control', 'max-age=0, must-revalidate')
         self.send_header('ETag', etag)
+
+      for k in cheaders:
+        self.send_header(k, cheaders[k])
 
       self.end_headers()
       if not head:
