@@ -12,12 +12,13 @@
     <style>
       body { color: white; background: #000040; }
       pre { white-space: pre-wrap; word-break: break-all; height: calc(100vh - 2rem); overflow-y: hidden; }
-      #container { font-family: 'Fira Code', monospace; font-size: 14px; font-variant-ligatures: none; }
+      #container { font-family: 'Fira Code', monospace; font-size: 14px; font-variant-ligatures: none; display: none; }
     </style>
     <script>
       window.onload = window.onresize = function() {
         let e = document.getElementById('container');
         e.scrollTop = e.scrollHeight;
+        e.style.display = 'block';
       };
     </script>
   </head>
