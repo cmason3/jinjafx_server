@@ -234,18 +234,20 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
           else:
             if not self.ratelimit(remote_addr, 3,  True):
-              with open(base + '/www/logs.html', 'rb') as f:
-                r = [ 'text/html', 200, f.read(), sys._getframe().f_lineno ]
+              if 'raw' in qs:
+                with llock:
+                  logs = '\r\n'.join(logring)
   
-              with llock:
-                logs = '\r\n'.join(logring)
-  
-              logs = logs.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-              logs = logs.replace('\033[1;31m', '<span class="text-danger">')
-              logs = logs.replace('\033[1;32m', '<span class="text-success">')
-              logs = logs.replace('\033[1;33m', '<span class="text-warning">')
-              logs = logs.replace('\033[0m', '</span>')
-              r[2] = r[2].decode('utf-8').replace('{{ logs }}', logs).encode('utf-8')
+                logs = logs.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                logs = logs.replace('\033[1;31m', '<span class="text-danger">')
+                logs = logs.replace('\033[1;32m', '<span class="text-success">')
+                logs = logs.replace('\033[1;33m', '<span class="text-warning">')
+                logs = logs.replace('\033[0m', '</span>')
+                r = [ 'text/plain', 200, logs.encode('utf-8'), sys._getframe().f_lineno ]
+
+              else:
+                with open(base + '/www/logs.html', 'rb') as f:
+                  r = [ 'text/html', 200, f.read(), sys._getframe().f_lineno ]
 
             else:
               r = [ 'text/plain', 429, '429 Too Many Requests\r\n'.encode('utf-8'), sys._getframe().f_lineno ]

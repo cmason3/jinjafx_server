@@ -2,7 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="refresh" content="300">
     <meta name="viewport" content="width=1280, user-scalable=no">
     <title>JinjaFx Logs</title>
     <link rel="shortcut icon" href="/874f2915/jinjafx.png">
@@ -10,21 +9,66 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/fira_code.min.css" integrity="sha512-MbysAYimH1hH2xYzkkMHB6MqxBqfP0megxsCLknbYqHVwXTCg9IqHbk+ZP/vnhO8UEW6PaXAkKe2vQ+SWACxxA==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="/f8555653/jinjafx.css">
     <style>
-      body { color: white; background: #000040; }
-      pre { white-space: pre-wrap; word-break: break-all; height: calc(100vh - 2rem); overflow-y: hidden; }
-      #container { font-family: 'Fira Code', monospace; font-size: 14px; font-variant-ligatures: none; display: none; }
+      body {
+        color: white;
+        background: #000040;
+      }
+      pre {
+        height: 100%;
+        font-family: 'Fira Code', monospace;
+        font-size: 14px;
+        font-variant-ligatures: none;
+        white-space: pre-wrap;
+        word-break: break-all;
+        overflow-y: hidden;
+      }
     </style>
     <script>
-      window.onload = window.onresize = function() {
-        let e = document.getElementById('container');
-        e.scrollTop = e.scrollHeight;
-        e.style.display = 'block';
-      };
+      (function() {
+        let interval = 60;
+
+        function scroll() {
+          let e = document.getElementById('container');
+          e.scrollTop = e.scrollHeight;
+        }
+
+        function update() {
+          var xHR = new XMLHttpRequest();
+          xHR.open("GET", '/logs?raw', true);
+
+          xHR.onload = function() {
+            if (this.status == 200) {
+              document.getElementById('container').innerHTML = xHR.responseText;
+              scroll();
+              setTimeout(update, interval * 1000);
+            }
+            else {
+              document.getElementById('container').innerHTML = 'HTTP ERROR ' + this.status;
+            }
+          };
+
+          xHR.onerror = function() {
+            document.getElementById('container').innerHTML = 'XMLHttpRequest ERROR';
+            setTimeout(update, interval * 1000);
+          };
+
+          xHR.ontimeout = function() {
+            document.getElementById('container').innerHTML = 'XMLHttpRequest TIMEOUT';
+            setTimeout(update, interval * 1000);
+          };
+
+          xHR.timeout = 3000;
+          xHR.send();
+        }
+
+        window.onresize = scroll;
+        window.onload = function() {
+          update();
+        };
+      })();
     </script>
   </head>
   <body>
-    <div id="wrap" class="p-2 bg-transparent">
-      <pre id="container">{{ logs }}</pre>
-    </div>
+    <pre id="container" class="p-3"></pre>
   </body>
 </html>
