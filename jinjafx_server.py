@@ -229,7 +229,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         if key == jfx_weblog_key:
           if 'key' in qs:
             cheaders['Set-Cookie'] = 'jfx_weblog_key=' + key + '; path=/logs'
-            cheaders['Location'] = '/logs'
+            if 'raw' in qs:
+              cheaders['Location'] = '/logs?raw'
+            else:
+              cheaders['Location'] = '/logs'
             r = [ 'text/plain', 302, '302 Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
           else:
