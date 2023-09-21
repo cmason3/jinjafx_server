@@ -15,16 +15,20 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+import sys
+if sys.version_info < (3, 8):
+  sys.exit('Requires Python >= 3.8')
+
 from http.cookies import SimpleCookie
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 from jinja2 import __version__ as jinja2_version
 
-import jinjafx, os, io, sys, socket, signal, threading, yaml, json, base64, time, datetime, resource
+import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, datetime, resource
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes
 import cmarkgfm, emoji
 
-__version__ = '23.8.3'
+__version__ = '23.9.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()
