@@ -15,6 +15,6 @@ FROM docker.io/library/python:3.11-slim
 
 COPY --from=BUILD --chown=99:99 /opt/jinjafx /opt/jinjafx
 
-USER 99
+USER 99:99
 
 ENTRYPOINT [ "/opt/jinjafx/bin/python3", "-u", "-m", "jinjafx_server", "-s", "-l", "0.0.0.0", "-p", "8080" ]
