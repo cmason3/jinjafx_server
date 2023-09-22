@@ -1072,7 +1072,6 @@ def aws_s3_put(s3_url, fname, content, ctype):
     'Content-Encoding': 'gzip',
     'x-amz-content-sha256': hashlib.sha256(content).hexdigest(),
     'x-amz-date': datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
-#    'x-amz-date': datetime.datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
   }
   headers = aws_s3_authorization('PUT', fname, s3_url.split('.')[2], headers)
   return requests.put('https://' + s3_url + '/' + fname, headers=headers, data=content)
@@ -1084,7 +1083,6 @@ def aws_s3_get(s3_url, fname):
     'Accept-Encoding': 'gzip',
     'x-amz-content-sha256': hashlib.sha256(b'').hexdigest(),
     'x-amz-date': datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
-#    'x-amz-date': datetime.datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
   }
   headers = aws_s3_authorization('GET', fname, s3_url.split('.')[2], headers)
   return requests.get('https://' + s3_url + '/' + fname, headers=headers)
