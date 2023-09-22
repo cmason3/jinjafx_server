@@ -1,25 +1,20 @@
-FROM docker.io/library/python:3.11-slim
+FROM docker.io/library/python:3.11-slim AS BUILD
 
 ARG BRANCH="main"
-
-ENV PATH ${PATH}:/opt/jinjafx/.local/bin
 
 RUN set -eux; \
 
 apt-get update; \
 apt-get install -y --no-install-recommends git; \
 
-groupadd -g 99 -r jinjafx; \
-useradd -m jinjafx -u 99 -g 99 -d /opt/jinjafx -k /dev/null; \
+python3 -m venv /opt/jinjafx; \
+/opt/jinjafx/bin/python3 -m pip install --upgrade git+https://github.com/cmason3/jinjafx_server.git@${BRANCH} lxml; \
+/opt/jinjafx/bin/python3 -m pip uninstall -y pip
 
-# runuser -u jinjafx -- python3 -m pip --disable-pip-version-check --no-cache-dir install --user jinjafx-server
-runuser -u jinjafx -- python3 -m pip --disable-pip-version-check --no-cache-dir install --user git+https://github.com/cmason3/jinjafx_server.git@${BRANCH} lxml; \
+FROM docker.io/library/python:3.11-slim
 
-apt-get purge -y --auto-remove git; \
-rm -rf /var/lib/apt/lists/*
+COPY --from=BUILD --chown=99:99 /opt/jinjafx /opt/jinjafx
 
-USER jinjafx
+USER 99
 
-WORKDIR /opt/jinjafx
-
-ENTRYPOINT [ "python3", "-u", ".local/bin/jinjafx_server", "-s", "-l", "0.0.0.0", "-p", "8080" ]
+ENTRYPOINT [ "/opt/jinjafx/bin/python3", "-u", "-m", "jinjafx_server", "-s", "-l", "0.0.0.0", "-p", "8080" ]
