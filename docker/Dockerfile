@@ -18,8 +18,8 @@ ENV LD_LIBRARY_PATH=/usr/local/lib
 
 COPY --from=BUILD /usr/local/lib/python3.11 /usr/local/lib/python3.11
 COPY --from=BUILD /usr/local/lib/libpython3* /usr/local/lib/
-COPY --from=BUILD /lib/x86_64-linux-gnu/* /lib/x86_64-linux-gnu/
-COPY --from=BUILD /lib64/* /lib64/
+COPY --from=BUILD /lib/x86_64-linux-gnu /lib/x86_64-linux-gnu
+COPY --from=BUILD /lib64 /lib64
 COPY --from=BUILD --chown=99:99 /opt/jinjafx /opt/jinjafx
 
 USER 99:99
