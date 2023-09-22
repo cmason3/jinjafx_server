@@ -11,7 +11,8 @@ python3 -m venv /opt/jinjafx; \
 /opt/jinjafx/bin/python3 -m pip install --upgrade git+https://github.com/cmason3/jinjafx_server.git@${BRANCH} lxml; \
 /opt/jinjafx/bin/python3 -m pip uninstall -y pip
 
-FROM docker.io/library/python:3.11-slim
+# FROM docker.io/library/python:3.11-slim
+FROM gcr.io/distroless/python3-debian12
 
 COPY --from=BUILD --chown=99:99 /opt/jinjafx /opt/jinjafx
 
