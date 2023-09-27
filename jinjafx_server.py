@@ -28,7 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes
 import cmarkgfm, emoji
 
-__version__ = '23.9.0'
+__version__ = '23.9.1'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -1071,7 +1071,7 @@ def aws_s3_put(s3_url, fname, content, ctype):
     'Content-Type': ctype,
     'Content-Encoding': 'gzip',
     'x-amz-content-sha256': hashlib.sha256(content).hexdigest(),
-    'x-amz-date': datetime.datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+    'x-amz-date': datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
   }
   headers = aws_s3_authorization('PUT', fname, s3_url.split('.')[2], headers)
   return requests.put('https://' + s3_url + '/' + fname, headers=headers, data=content)
@@ -1082,7 +1082,7 @@ def aws_s3_get(s3_url, fname):
     'Host': s3_url,
     'Accept-Encoding': 'gzip',
     'x-amz-content-sha256': hashlib.sha256(b'').hexdigest(),
-    'x-amz-date': datetime.datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+    'x-amz-date': datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
   }
   headers = aws_s3_authorization('GET', fname, s3_url.split('.')[2], headers)
   return requests.get('https://' + s3_url + '/' + fname, headers=headers)
