@@ -1,4 +1,4 @@
-FROM docker.io/library/python:3.11-slim AS BUILD
+FROM docker.io/library/python:3.12-slim AS BUILD
 
 ARG BRANCH="main"
 
@@ -12,7 +12,7 @@ python3 -m venv /opt/jinjafx; \
 /opt/jinjafx/bin/python3 -m pip uninstall -y pip
 
 
-FROM docker.io/library/python:3.11-slim
+FROM docker.io/library/python:3.12-slim
 
 COPY --from=BUILD --chown=99:99 /opt/jinjafx /opt/jinjafx
 
