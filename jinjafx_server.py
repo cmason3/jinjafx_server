@@ -537,6 +537,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 output = '\n'.join(outputs[o]) + '\n'
                 if len(output.strip()) > 0:
                   if oformat == 'markdown' or oformat == 'md':
+                    jsr['outputs'].update({ oname + ':md': self.e(output.encode('utf-8')).decode('utf-8') })
+
                     o = oname + ':html'
                     options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART | cmarkgfm.cmark.Options.CMARK_OPT_UNSAFE)
                     output = cmarkgfm.github_flavored_markdown_to_html(html_escape(output), options).replace('&amp;amp;', '&amp;').replace('&amp;', '&')
