@@ -152,26 +152,28 @@
                     oformat = output.substring(output.lastIndexOf(':') + 1);
                   }
 
-                  var g = window.opener.quote(oname)
+                  if (oformat != 'md') {
+                    var g = window.opener.quote(oname)
 
-                  tabs += '<div id="o' + oid + '" class="h-100 tab-pane fade' + ((oid == 1) ? ' show active' : '') + '">';
-                  tabs += '<h4 class="fw-bold">' + g + '</h4>';
+                    tabs += '<div id="o' + oid + '" class="h-100 tab-pane fade' + ((oid == 1) ? ' show active' : '') + '">';
+                    tabs += '<h4 class="fw-bold">' + g + '</h4>';
 
-                  var tc = window.opener.d(obj.outputs[output]);
-                  if (oformat == 'html') {
-                    tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + tc.replace(/&/g, '&amp;').replace(/"/g, "&quot;") + '"></iframe>';
+                    var tc = window.opener.d(obj.outputs[output]);
+                    if (oformat == 'html') {
+                      tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + tc.replace(/&/g, '&amp;').replace(/"/g, "&quot;") + '"></iframe>';
+                    }
+                    else {
+                      tabs += '<textarea id="t_o' + oid + '" class="output" readonly>' + window.opener.quote(tc) + '</textarea>';
+                    }
+
+                    tabs += '</div>';
+
+                    links += '<li class="nav-item">';
+                    links += '<a class="nav-link' + ((oid == 1) ? ' active"' : '"') + ' data-bs-toggle="tab" href="#o' + oid + '">' + g + '</a>';
+                    links += '</li>';
+
+                    oid += 1;
                   }
-                  else {
-                    tabs += '<textarea id="t_o' + oid + '" class="output" readonly>' + window.opener.quote(tc) + '</textarea>';
-                  }
-
-                  tabs += '</div>';
-
-                  links += '<li class="nav-item">';
-                  links += '<a class="nav-link' + ((oid == 1) ? ' active"' : '"') + ' data-bs-toggle="tab" href="#o' + oid + '">' + g + '</a>';
-                  links += '</li>';
-
-                  oid += 1;
                 });
 
                 document.body.style.display = 'none';
