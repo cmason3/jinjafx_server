@@ -31,7 +31,7 @@ import cmarkgfm, emoji
 from shutil import which
 pandoc = which('pandoc')
 
-__version__ = '23.10.0'
+__version__ = '23.11.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -383,6 +383,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
                 r[2] = r[2].decode('utf-8').replace('{{ jinjafx.version }}', jinjafx.__version__ + ' / Jinja2 v' + jinja2_version).replace('{{ get_link }}', get_link).encode('utf-8')
 
+              elif fpath == '/output.html':
+                if pandoc:
+                  r[2] = r[2].decode('utf-8').replace('{{ pandoc_class }}', '').encode('utf-8')
+                else:
+                  r[2] = r[2].decode('utf-8').replace('{{ pandoc_class }}', ' d-none').encode('utf-8')
+
         else:
           r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
@@ -590,7 +596,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               if self.headers['Content-Type'] == 'application/json':
                 try:
                   markdown = self.d(json.loads(postdata.decode('utf-8')))
-                  p = subprocess.run([pandoc, '-f', 'markdown+emoji'], input=markdown, stdout=subprocess.PIPE, check=True)
+                  p = subprocess.run([pandoc, '-f', 'gfm+emoji', '-t', 'docx'], input=markdown, stdout=subprocess.PIPE, check=True)
                   self.send_response(200)
                   self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
                   self.send_header('Content-Length', str(len(p.stdout)))
