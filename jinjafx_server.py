@@ -364,6 +364,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             ctype = 'text/css'
           elif fpath.endswith('.png'):
             ctype = 'image/png'
+          elif fpath.endswith('.docx'):
+            ctype = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
           else:
             ctype = 'text/html'
 
@@ -596,7 +598,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               if self.headers['Content-Type'] == 'application/json':
                 try:
                   markdown = self.d(json.loads(postdata.decode('utf-8')))
-                  reference_url = 'http://127.0.0.1:8080/reference.docx'
+                  reference_url = 'http://localhost:8080/reference.docx'
                   p = subprocess.run([pandoc, '-f', 'gfm+emoji', '-t', 'docx', '--sandbox', '--reference-doc=' + reference_url], input=markdown, stdout=subprocess.PIPE, check=True)
                   self.send_response(200)
                   self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
