@@ -221,7 +221,7 @@
 
                 document.title = 'Outputs' + ((dataset != 'Default') ? ' (' + dataset + ')' : '');
 
-                if (oc > 1) {
+                if (oid > 2) {
                   document.getElementById('pills').classList.remove('d-none');
                 }
 
