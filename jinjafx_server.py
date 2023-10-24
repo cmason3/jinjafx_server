@@ -387,7 +387,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 if pandoc:
                   r[2] = r[2].decode('utf-8').replace('{{ pandoc_class }}', '').encode('utf-8')
                 else:
-                  r[2] = r[2].decode('utf-8').replace('{{ pandoc_class }}', ' d-none').encode('utf-8')
+                  r[2] = r[2].decode('utf-8').replace('{{ pandoc_class }}', ' hide').encode('utf-8')
 
         else:
           r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]

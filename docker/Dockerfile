@@ -5,7 +5,7 @@ ARG BRANCH="main"
 RUN set -eux; \
 
 apt-get update; \
-apt-get install -y --no-install-recommends git build-essential; \
+apt-get install -y --no-install-recommends git build-essential pandoc; \
 
 python3 -m venv /opt/jinjafx; \
 /opt/jinjafx/bin/python3 -m pip install --upgrade git+https://github.com/cmason3/jinjafx_server.git@${BRANCH} lxml; \
@@ -15,6 +15,7 @@ python3 -m venv /opt/jinjafx; \
 FROM docker.io/library/python:3.12-slim
 
 COPY --from=BUILD --chown=99:99 /opt/jinjafx /opt/jinjafx
+COPY --from=BUILD --chown=99:99 /usr/bin/pandoc /usr/bin/pandoc
 
 USER 99:99
 

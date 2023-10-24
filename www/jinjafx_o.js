@@ -229,21 +229,21 @@
                   document.getElementById("row").style.height = (window.innerHeight - 200) + "px";
                 };
 
+                window.onresize();
+                document.body.style.display = 'block';
+
                 function toggle_docx() {
                   var e = document.getElementsByClassName('nav-link active');
                   for (var i = 0; i < e.length; i++) {
                     active = e.item(i).text;
                     if (active + ':md' in obj.outputs) {
-                      document.getElementById('docx').classList.remove('disabled');
+                      document.getElementById('docx').classList.remove('d-none');
                     }
                     else {
-                      document.getElementById('docx').classList.add('disabled');
+                      document.getElementById('docx').classList.add('d-none');
                     }
                   }
                 }
-
-                window.onresize();
-                document.body.style.display = 'block';
 
                 var e = document.getElementsByClassName('nav-link');
                 for (var i = 0; i < e.length; i++) {
