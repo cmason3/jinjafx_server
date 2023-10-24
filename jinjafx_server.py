@@ -28,6 +28,9 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
+from shutil import which
+pandoc = which('pandoc')
+
 __version__ = '23.10.0'
 
 llock = threading.RLock()
@@ -41,7 +44,6 @@ github_url = None
 github_token = None
 jfx_weblog_key = None
 repository = None
-pandoc_bin = '/home/cmason3/jinjafx_server/pandoc'
 verbose = False
 
 rtable = {}
@@ -584,11 +586,11 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
         else:
           if fpath == '/md2docx':
-            if pandoc_bin:
+            if pandoc:
               if self.headers['Content-Type'] == 'application/json':
                 try:
                   markdown = self.d(json.loads(postdata.decode('utf-8')))
-                  p = subprocess.run([pandoc_bin, '-f', 'markdown+emoji'], input=markdown, stdout=subprocess.PIPE, check=True)
+                  p = subprocess.run([pandoc, '-f', 'markdown+emoji'], input=markdown, stdout=subprocess.PIPE, check=True)
                   self.send_response(200)
                   self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
                   self.send_header('Content-Length', str(len(p.stdout)))
