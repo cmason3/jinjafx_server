@@ -67,7 +67,7 @@
         sobj.innerHTML = '';
         if (obj != null) {
           var xHR = new XMLHttpRequest();
-          xHR.open("POST", 'md2docx' + qs, true);
+          xHR.open("POST", 'html2docx' + qs, true);
 
           xHR.onload = function() {
             if (this.status === 200) {
@@ -81,13 +81,13 @@
           xHR.responseType = "blob";
           xHR.setRequestHeader("Content-Type", "application/json");
 
-          var md = JSON.stringify(obj.outputs[active + ':md']);
-          if (md.length > 1024) {
+          var o = JSON.stringify(obj.outputs[active + ':html']);
+          if (o.length > 1024) {
             xHR.setRequestHeader("Content-Encoding", "gzip");
-            xHR.send(pako.gzip(md));
+            xHR.send(pako.gzip(o));
           }
           else {
-            xHR.send(md);
+            xHR.send(o);
           }
         }
         var t = document.getElementById('t_' + document.querySelector('.tab-content > .active').getAttribute('id'));
@@ -106,15 +106,13 @@
               [ofile, oformat] = ofile.split(':', 2);
             }
 
-            if (oformat != 'md') {
-              ofile = ofile.replace(/[^A-Z0-9_. -/]/gi, '_').replace(/_+/g, '_');
+            ofile = ofile.replace(/[^A-Z0-9_. -/]/gi, '_').replace(/_+/g, '_');
 
-              if (!ofile.includes('.')) {
-                ofile += '.' + oformat.replace('text', 'txt');
-              }
-
-              zip.file(ofile, window.opener.d(obj.outputs[o]));
+            if (!ofile.includes('.')) {
+              ofile += '.' + oformat.replace('text', 'txt');
             }
+
+            zip.file(ofile, window.opener.d(obj.outputs[o]));
           });
 
           zip.generateAsync({ type: 'blob' }).then(function(content) {
@@ -187,28 +185,26 @@
                     oformat = output.substring(output.lastIndexOf(':') + 1);
                   }
 
-                  if (oformat != 'md') {
-                    var g = window.opener.quote(oname)
+                  var g = window.opener.quote(oname)
 
-                    tabs += '<div id="o' + oid + '" class="h-100 tab-pane fade' + ((oid == 1) ? ' show active' : '') + '">';
-                    tabs += '<h4 class="fw-bold">' + g + '</h4>';
+                  tabs += '<div id="o' + oid + '" class="h-100 tab-pane fade' + ((oid == 1) ? ' show active' : '') + '">';
+                  tabs += '<h4 class="fw-bold">' + g + '</h4>';
 
-                    var tc = window.opener.d(obj.outputs[output]);
-                    if (oformat == 'html') {
-                      tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + tc.replace(/&/g, '&amp;').replace(/"/g, "&quot;") + '"></iframe>';
-                    }
-                    else {
-                      tabs += '<textarea id="t_o' + oid + '" class="output" readonly>' + window.opener.quote(tc) + '</textarea>';
-                    }
-
-                    tabs += '</div>';
-
-                    links += '<li class="nav-item">';
-                    links += '<a class="nav-link' + ((oid == 1) ? ' active"' : '"') + ' data-bs-toggle="tab" href="#o' + oid + '">' + g + '</a>';
-                    links += '</li>';
-
-                    oid += 1;
+                  var tc = window.opener.d(obj.outputs[output]);
+                  if (oformat == 'html') {
+                    tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + tc.replace(/&/g, '&amp;').replace(/"/g, "&quot;") + '"></iframe>';
                   }
+                  else {
+                    tabs += '<textarea id="t_o' + oid + '" class="output" readonly>' + window.opener.quote(tc) + '</textarea>';
+                  }
+
+                  tabs += '</div>';
+
+                  links += '<li class="nav-item">';
+                  links += '<a class="nav-link' + ((oid == 1) ? ' active"' : '"') + ' data-bs-toggle="tab" href="#o' + oid + '">' + g + '</a>';
+                  links += '</li>';
+
+                  oid += 1;
                 });
 
                 document.body.style.display = 'none';
@@ -221,7 +217,7 @@
 
                 document.title = 'Outputs' + ((dataset != 'Default') ? ' (' + dataset + ')' : '');
 
-                if (oid > 2) {
+                if (oc > 1) {
                   document.getElementById('pills').classList.remove('d-none');
                 }
 
@@ -236,7 +232,7 @@
                   var e = document.getElementsByClassName('nav-link active');
                   for (var i = 0; i < e.length; i++) {
                     active = e.item(i).text;
-                    if (active + ':md' in obj.outputs) {
+                    if (active + ':html' in obj.outputs) {
                       document.getElementById('docx').classList.remove('d-none');
                     }
                     else {

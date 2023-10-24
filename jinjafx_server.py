@@ -546,8 +546,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 output = '\n'.join(outputs[o]) + '\n'
                 if len(output.strip()) > 0:
                   if oformat == 'markdown' or oformat == 'md':
-                    jsr['outputs'].update({ oname + ':md': self.e(output.encode('utf-8')).decode('utf-8') })
-
                     o = oname + ':html'
                     options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART | cmarkgfm.cmark.Options.CMARK_OPT_UNSAFE)
                     output = cmarkgfm.github_flavored_markdown_to_html(html_escape(output), options).replace('&amp;amp;', '&amp;').replace('&amp;', '&')
@@ -591,12 +589,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
 
         else:
-          if fpath == '/md2docx':
+          if fpath == '/html2docx':
             if pandoc:
               if self.headers['Content-Type'] == 'application/json':
                 try:
-                  markdown = self.d(json.loads(postdata.decode('utf-8')))
-                  p = subprocess.run([pandoc, '-f', 'gfm+emoji', '-t', 'docx', '--sandbox', '--reference-doc=' + base + '/pandoc/reference.docx'], input=markdown, stdout=subprocess.PIPE, check=True)
+                  html = self.d(json.loads(postdata.decode('utf-8')))
+                  p = subprocess.run([pandoc, '-f', 'html', '-t', 'docx', '--sandbox', '--reference-doc=' + base + '/pandoc/reference.docx'], input=html, stdout=subprocess.PIPE, check=True)
                   self.send_response(200)
                   self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
                   self.send_header('Content-Length', str(len(p.stdout)))
