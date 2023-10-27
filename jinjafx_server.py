@@ -593,15 +593,19 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             if pandoc:
               if self.headers['Content-Type'] == 'application/json':
                 try:
-                  html = self.d(json.loads(postdata.decode('utf-8')))
-                  p = subprocess.run([pandoc, '-f', 'html', '-t', 'docx', '--sandbox', '--reference-doc=' + base + '/pandoc/reference.docx'], input=html, stdout=subprocess.PIPE, check=True)
-                  self.send_response(200)
-                  self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-                  self.send_header('Content-Length', str(len(p.stdout)))
-                  self.send_header('X-Download-Filename', 'Output.' + datetime.datetime.now().strftime('%Y%m%d-%H%M%S') + '.docx')
-                  self.end_headers()
-                  self.wfile.write(p.stdout)
-                  return
+                  if not self.ratelimit(remote_addr, 4, False):
+                    html = self.d(json.loads(postdata.decode('utf-8')))
+                    p = subprocess.run([pandoc, '-f', 'html', '-t', 'docx', '--sandbox', '--reference-doc=' + base + '/pandoc/reference.docx'], input=html, stdout=subprocess.PIPE, check=True)
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    self.send_header('Content-Length', str(len(p.stdout)))
+                    self.send_header('X-Download-Filename', 'Output.' + datetime.datetime.now().strftime('%Y%m%d-%H%M%S') + '.docx')
+                    self.end_headers()
+                    self.wfile.write(p.stdout)
+                    return
+
+                  else:
+                    r = [ 'text/plain', 429, '429 Too Many Requests\r\n', sys._getframe().f_lineno ]
 
                 except Exception as e:
                   log(traceback.format_exc())

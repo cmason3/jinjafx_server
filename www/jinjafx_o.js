@@ -76,6 +76,18 @@
               link.download = xHR.getResponseHeader("X-Download-Filename");
               link.click();
             }
+            else {
+              var sT = (this.statusText.length == 0) ? window.opener.getStatusText(this.status) : this.statusText;
+              set_status("darkred", "HTTP ERROR " + this.status, sT);
+            }
+          };
+
+          xHR.timeout = 15;
+          xHR.onerror = function() {
+            set_status("darkred", "ERROR", "XMLHttpRequest.onError()");
+          };
+          xHR.ontimeout = function() {
+            set_status("darkred", "ERROR", "XMLHttpRequest.onTimeout()");
           };
 
           xHR.responseType = "blob";
