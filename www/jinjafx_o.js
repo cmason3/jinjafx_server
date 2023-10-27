@@ -82,7 +82,7 @@
             }
           };
 
-          xHR.timeout = 15;
+          xHR.timeout = 10000;
           xHR.onerror = function() {
             set_status("darkred", "ERROR", "XMLHttpRequest.onError()");
           };
