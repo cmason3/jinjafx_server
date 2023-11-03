@@ -1,4 +1,5 @@
 (function() {
+  var active = null;
   var obj = null;
   var tid = 0;
   var qs = '';
@@ -50,6 +51,7 @@
       };
 
       document.getElementById('print').onclick = function() {
+        sobj.innerHTML = '';
         var t = document.getElementById('t_' + document.querySelector('.tab-content > .active').getAttribute('id'));
 
         if (t.nodeName == 'IFRAME') {
@@ -59,6 +61,49 @@
           document.getElementById('print_pre').innerHTML = window.opener.quote(t.value);
           window.print();
         }
+      };
+
+      document.getElementById('docx').onclick = function() {
+        sobj.innerHTML = '';
+        if (obj != null) {
+          var xHR = new XMLHttpRequest();
+          xHR.open("POST", 'html2docx' + qs, true);
+
+          xHR.onload = function() {
+            if (this.status === 200) {
+              var link = document.createElement('a');
+              link.href = window.URL.createObjectURL(xHR.response);
+              link.download = xHR.getResponseHeader("X-Download-Filename");
+              link.click();
+            }
+            else {
+              var sT = (this.statusText.length == 0) ? window.opener.getStatusText(this.status) : this.statusText;
+              set_status("darkred", "HTTP ERROR " + this.status, sT);
+            }
+          };
+
+          xHR.timeout = 10000;
+          xHR.onerror = function() {
+            set_status("darkred", "ERROR", "XMLHttpRequest.onError()");
+          };
+          xHR.ontimeout = function() {
+            set_status("darkred", "ERROR", "XMLHttpRequest.onTimeout()");
+          };
+
+          xHR.responseType = "blob";
+          xHR.setRequestHeader("Content-Type", "application/json");
+
+          var o = JSON.stringify(obj.outputs[active + ':html']);
+          if (o.length > 1024) {
+            xHR.setRequestHeader("Content-Encoding", "gzip");
+            xHR.send(pako.gzip(o));
+          }
+          else {
+            xHR.send(o);
+          }
+        }
+        var t = document.getElementById('t_' + document.querySelector('.tab-content > .active').getAttribute('id'));
+        t.focus();
       };
 
       document.getElementById('download').onclick = function() {
@@ -194,6 +239,26 @@
 
                 window.onresize();
                 document.body.style.display = 'block';
+
+                function toggle_docx() {
+                  var e = document.getElementsByClassName('nav-link active');
+                  for (var i = 0; i < e.length; i++) {
+                    active = e.item(i).text;
+                    if (active + ':html' in obj.outputs) {
+                      document.getElementById('docx').classList.remove('d-none');
+                    }
+                    else {
+                      document.getElementById('docx').classList.add('d-none');
+                    }
+                  }
+                }
+
+                var e = document.getElementsByClassName('nav-link');
+                for (var i = 0; i < e.length; i++) {
+                  e.item(i).onclick = toggle_docx;
+                }
+
+                toggle_docx();
 
                 if (stderr != null) {
                   var html = '<ul class="mb-0">'

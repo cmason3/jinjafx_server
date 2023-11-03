@@ -25,10 +25,13 @@ from urllib.parse import urlparse, parse_qs
 from jinja2 import __version__ as jinja2_version
 
 import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, datetime, resource
-import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes
+import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '23.10.0'
+from shutil import which
+pandoc = which('pandoc')
+
+__version__ = '23.11.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -380,6 +383,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
                 r[2] = r[2].decode('utf-8').replace('{{ jinjafx.version }}', jinjafx.__version__ + ' / Jinja2 v' + jinja2_version).replace('{{ get_link }}', get_link).encode('utf-8')
 
+              elif fpath == '/output.html':
+                if pandoc:
+                  r[2] = r[2].decode('utf-8').replace('{{ pandoc_class }}', '').encode('utf-8')
+                else:
+                  r[2] = r[2].decode('utf-8').replace('{{ pandoc_class }}', ' hide').encode('utf-8')
+
         else:
           r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
@@ -541,7 +550,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART | cmarkgfm.cmark.Options.CMARK_OPT_UNSAFE)
                     output = cmarkgfm.github_flavored_markdown_to_html(html_escape(output), options).replace('&amp;amp;', '&amp;').replace('&amp;', '&')
                     head = '<!DOCTYPE html>\n<html>\n<head>\n'
-                    head += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css" crossorigin="anonymous">\n'
+                    head += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.3.0/github-markdown.min.css" crossorigin="anonymous">\n'
                     head += '<style>\n  pre, code { white-space: pre-wrap !important; word-wrap: break-word !important; }\n</style>\n</head>\n'
                     output = emoji.emojize(output, language='alias').encode('ascii', 'xmlcharrefreplace').decode('utf-8')
                     output = head + '<body>\n<div class="markdown-body">\n' + output + '</div>\n</body>\n</html>\n'
@@ -580,7 +589,32 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
 
         else:
-          if fpath == '/get_link':
+          if fpath == '/html2docx':
+            if pandoc:
+              if self.headers['Content-Type'] == 'application/json':
+                try:
+                  if not self.ratelimit(remote_addr, 4, False):
+                    html = self.d(json.loads(postdata.decode('utf-8')))
+                    p = subprocess.run([pandoc, '-f', 'html', '-t', 'docx', '--sandbox', '--reference-doc=' + base + '/pandoc/reference.docx'], input=html, stdout=subprocess.PIPE, check=True)
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    self.send_header('Content-Length', str(len(p.stdout)))
+                    self.send_header('X-Download-Filename', 'Output.' + datetime.datetime.now().strftime('%Y%m%d-%H%M%S') + '.docx')
+                    self.end_headers()
+                    self.wfile.write(p.stdout)
+                    return
+
+                  else:
+                    r = [ 'text/plain', 429, '429 Too Many Requests\r\n', sys._getframe().f_lineno ]
+
+                except Exception as e:
+                  log(traceback.format_exc())
+                  r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
+
+              else:
+                r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
+
+          elif fpath == '/get_link':
             if aws_s3_url or github_url or repository:
               if self.headers['Content-Type'] == 'application/json':
                 try:

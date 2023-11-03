@@ -36,6 +36,9 @@ pre#print_pre {
 .fs-85 {
   font-size: 85%;
 }
+.hide {
+  display: none !important;
+}
 .nosb {
   overflow-y: scroll;
   scrollbar-width: none;
