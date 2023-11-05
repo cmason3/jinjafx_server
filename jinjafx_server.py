@@ -558,6 +558,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   elif oformat == 'html':
                     output = output.encode('ascii', 'xmlcharrefreplace').decode('utf-8')
 
+                  elif oformat != 'text':
+                    raise Exception('unknown output format "' + oformat + '" specified for output "' + oname + '"')
+
                   jsr['outputs'].update({ o: self.e(output.encode('utf-8')).decode('utf-8') })
                   if o != '_stderr_':
                     ocount += 1
