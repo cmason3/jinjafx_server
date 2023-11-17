@@ -28,10 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-from shutil import which
-pandoc = which('pandoc')
-
-__version__ = '23.11.0'
+__version__ = '23.11.1'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -45,6 +42,7 @@ github_token = None
 jfx_weblog_key = None
 repository = None
 verbose = False
+pandoc = None
 
 rtable = {}
 rl_rate = 0
@@ -920,6 +918,7 @@ def main(rflag=[0]):
   global timelimit
   global logfile
   global verbose
+  global pandoc
 
   try:
     print('JinjaFx Server v' + __version__ + ' - Jinja2 Templating Tool')
@@ -940,9 +939,17 @@ def main(rflag=[0]):
     parser.add_argument('-ml', metavar='<memory limit>', type=int, default=0)
     parser.add_argument('-logfile', metavar='<logfile>', type=str)
     parser.add_argument('-weblog', action='store_true', default=False)
+    parser.add_argument('-pandoc', action='store_true', default=False)
     parser.add_argument('-v', action='store_true', default=False)
     args = parser.parse_args()
     verbose = args.v
+
+    if args.pandoc:
+      from shutil import which
+      pandoc = which('pandoc')
+
+      if not pandoc:
+        parser.error("argument -pandoc: unable to find pandoc within the path")
 
     if args.weblog:
       jfx_weblog_key = os.getenv('JFX_WEBLOG_KEY')

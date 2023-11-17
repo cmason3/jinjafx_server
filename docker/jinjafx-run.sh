@@ -7,7 +7,7 @@
 # GITHUB_URL=<owner>/<repo>[:<branch>]
 # GITHUB_TOKEN="<github_token>"
 
-ARGS="-rl 5/20s -logfile /var/log/jinjafx.log"
+ARGS="-rl 5/20s -logfile /var/log/jinjafx.log -pandoc"
 
 if [[ "$(id -u)" != "0" ]]; then
   echo 'requires root'

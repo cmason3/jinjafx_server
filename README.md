@@ -20,6 +20,7 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
  jinjafx_server -s [-l <address>] [-p <port>]
                 [-r <directory> | -s3 <aws s3 url> | -github <owner>/<repo>[:<branch>]]
                 [-rl <rate/limit>] [-tl <time limit>] [-ml <memory limit>]
+                [-logfile <logfile>] [-weblog] [-pandoc] [-v]
 
    -s                                 - start the JinjaFx Server
    -l <address>                       - specify a listen address (default is '127.0.0.1')
@@ -32,6 +33,7 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
    -ml <memory limit>                 - specify a global memory limit (megabytes < total)
    -logfile <logfile>                 - specify a logfile for persistent logging
    -weblog                            - enable web log interface (/logs)
+   -pandoc                            - enable support for DOCX using pandoc (requires pandoc)
    -v                                 - log all HTTP requests
 
  Environment Variables:
