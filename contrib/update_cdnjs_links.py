@@ -4,7 +4,7 @@ import sys, os, re, requests
 
 libraries = {
   'bootstrap': '5.3.2',
-  'codemirror': '5.65.15',
+  'codemirror': '5.65.16',
   'firacode': '6.2.0',
   'split.js': '1.6.5',
   'js-yaml': '4.1.0',
