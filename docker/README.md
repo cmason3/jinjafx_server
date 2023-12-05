@@ -25,7 +25,7 @@ printf <PASSWORD> | podman secret create jfx_weblog_key -
 cp jinjafx.container /etc/containers/systemd/
 systemctl daemon-reload
 
-systemctl enable --now jinjafx
+systemctl start jinjafx
 ```
 
 Once the `jinjafx` container is running you should be able to point your browser at http://127.0.0.1:8080 and it will be passed through to the JinjaFx Server (although the preferred approach is running HAProxy in front of JinjaFx Server so it can deal with TLS termination with HTTP/2 or HTTP/3).
