@@ -1,0 +1,14 @@
+[Unit]
+Description=JinjaFx Server
+
+[Container]
+ContainerName=jinjafx
+Image=docker.io/cmason3/jinjafx_server:latest
+Volume=/var/log/jinjafx.log:/var/log/jinjafx.log:Z
+Exec=-logfile /var/log/jinjafx.log
+PublishPort=8080
+LogDriver=none
+
+[Service]
+TimeoutStartSec=300
+Restart=always
