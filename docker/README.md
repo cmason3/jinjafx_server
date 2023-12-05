@@ -18,16 +18,10 @@ chmod 664 /var/log/jinjafx.log
 ### JinjaFx Server
 
 ```
-podman create --name jinjafx --tz=local --log-driver=none -v /var/log/jinjafx.log:/var/log/jinjafx.log:Z -p 127.0.0.1:8080:8080 docker.io/cmason3/jinjafx_server:latest -logfile /var/log/jinjafx.log
-
-podman generate systemd -n --restart-policy=always jinjafx | tee /etc/systemd/system/jinjafx.service 1>/dev/null
-
+cp jinjafx.container /etc/containers/systemd/
 systemctl daemon-reload
+
 systemctl enable --now jinjafx
 ```
 
-Once the `jinjafx` container is running you should be able to point your browser at http://127.0.0.1:8080 and it will be passed through to the JinjaFx Server (although the preferred approach is running HAProxy in front of JinjaFx Server so it can deal with TLS termination with HTTP/2 or HTTP/3). I have also included a `jinjafx-run.sh` helper script, which automates the running and updating of the JinjaFx container - if you want to run or update the running container to the container image tagged as "latest" then you can run the following command (it assumes Podman):
-
-```
-sudo sh jinjafx-run.sh latest
-```
+Once the `jinjafx` container is running you should be able to point your browser at http://127.0.0.1:8080 and it will be passed through to the JinjaFx Server (although the preferred approach is running HAProxy in front of JinjaFx Server so it can deal with TLS termination with HTTP/2 or HTTP/3).
