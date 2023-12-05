@@ -13,3 +13,6 @@ LogDriver=none
 [Service]
 TimeoutStartSec=300
 Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target
