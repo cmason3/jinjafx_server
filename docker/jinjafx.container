@@ -5,6 +5,7 @@ Description=JinjaFx Server
 ContainerName=jinjafx
 Image=docker.io/cmason3/jinjafx_server:latest
 Volume=/var/log/jinjafx.log:/var/log/jinjafx.log:Z
+Secret=jfx_weblog_key,type=env,target=JFX_WEBLOG_KEY
 Exec=-logfile /var/log/jinjafx.log
 PublishPort=8080
 LogDriver=none
