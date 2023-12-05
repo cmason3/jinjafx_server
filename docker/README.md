@@ -1,4 +1,4 @@
-## Docker/Podman for JinjaFx Server
+## Podman for JinjaFx Server
 
 JinjaFx Server will always be available in Docker Hub at [https://hub.docker.com/repository/docker/cmason3/jinjafx_server](https://hub.docker.com/repository/docker/cmason3/jinjafx_server) - the `latest` tag will always refer to the latest released version.
 
@@ -17,7 +17,11 @@ chmod 664 /var/log/jinjafx.log
 
 ### JinjaFx Server
 
+The following commands require Podman v4.5 or higher and use the new quadlets method of deploying containers via systemd:
+
 ```
+printf <PASSWORD> | podman secret create jfx_weblog_key -
+
 cp jinjafx.container /etc/containers/systemd/
 systemctl daemon-reload
 
