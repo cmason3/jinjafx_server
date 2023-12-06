@@ -17,7 +17,9 @@ The following commands require Podman v4.5 or higher and use the new quadlets me
 ```
 printf <PASSWORD> | podman secret create jfx_weblog_key -
 
-curl https://raw.githubusercontent.com/cmason3/jinjafx_server/main/docker/jinjafx.container -Os --create-dirs --output-dir ~/.config/containers/systemd
+curl https://raw.githubusercontent.com/cmason3/jinjafx_server/main/docker/jinjafx.container \
+  -Os --create-dirs --output-dir ~/.config/containers/systemd
+
 systemctl --user daemon-reload
 
 systemctl --user start jinjafx
