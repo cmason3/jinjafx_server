@@ -7,9 +7,8 @@ The following commands will launch a container for JinjaFx Server which listens 
 As we are using Rootless Podman we will be running Podman as a non-root user, which will map to the root user inside the container. We will also create a persistent logfile outside of the container and we will need to give the local user access to it via a mapped volume (as we are using a persistent logfile we will also disable logging inside the container using `LogDriver=none`).
 
 ```
-sudo touch /var/log/jinjafx.log
-sudo chgrp ${USER} /var/log/jinjafx.log
-sudo chmod 664 /var/log/jinjafx.log
+mkdir ~/logs
+touch ~/logs/jinjafx.log
 ```
 
 The following commands require Podman v4.5 or higher and use the new quadlets method of deploying containers via systemd:
