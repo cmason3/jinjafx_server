@@ -12,8 +12,6 @@ sudo chgrp ${USER} /var/log/jinjafx.log
 sudo chmod 664 /var/log/jinjafx.log
 ```
 
-### JinjaFx Server
-
 The following commands require Podman v4.5 or higher and use the new quadlets method of deploying containers via systemd:
 
 ```
