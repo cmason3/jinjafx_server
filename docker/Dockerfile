@@ -17,9 +17,7 @@ python3 -m venv /opt/jinjafx; \
 
 FROM docker.io/library/python:3.12-slim
 
-COPY --from=BUILD --chown=99:99 /opt/jinjafx /opt/jinjafx
-COPY --from=BUILD --chown=99:99 /usr/bin/pandoc /usr/bin/pandoc
-
-USER 99:99
+COPY --from=BUILD /opt/jinjafx /opt/jinjafx
+COPY --from=BUILD /usr/bin/pandoc /usr/bin/pandoc
 
 ENTRYPOINT [ "/opt/jinjafx/bin/python3", "-u", "-m", "jinjafx_server", "-s", "-l", "0.0.0.0", "-p", "8080" ]
