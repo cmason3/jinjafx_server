@@ -13,7 +13,7 @@ mkdir ~/logs
 touch ~/logs/jinjafx.log
 ```
 
-The following commands require Podman v4.5 or higher and use the new quadlets method of deploying containers via systemd. We are also passing through the `JFX_WEBLOG_KEY` environment variable that is stored as a Podman Secret.
+The following commands require Podman v4.5 or higher and use the new quadlets method of deploying containers via systemd. We are also passing through the `JFX_WEBLOG_KEY` environment variable that we store as a Podman Secret.
 
 ```
 printf <PASSWORD> | podman secret create jfx_weblog_key -
