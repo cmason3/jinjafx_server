@@ -4,7 +4,9 @@ JinjaFx Server will always be available in Docker Hub at [https://hub.docker.com
 
 The following commands will launch a container for JinjaFx Server which listens on localhost on port 8080.
 
-As we are using Rootless Podman we will be running Podman as a non-root user, which will map to the root user inside the container. We will also create a persistent logfile outside of the container and we will need to give the local user access to it via a mapped volume (as we are using a persistent logfile we will also disable logging inside the container using `LogDriver=none`).
+Rootless Podman has two methods of running, either with root inside the container, which is mapped to the current non-root user outside the container, or if we use `UserNS=keep-id` then we use the current outside non-root user inside the container as well. Running with non-root inside and non-root outside is always preferred from a security perspective and as JinjaFx Server doesn't require root priviledges this is what this does.
+
+For ease of logging, we will also create a persistent logfile outside of the container and will give the local user access to it via a mapped volume (as we are using a persistent logfile we will also disable logging inside the container using `LogDriver=none`).
 
 ```
 mkdir ~/logs
