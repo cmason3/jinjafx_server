@@ -6,7 +6,7 @@ ContainerName=jinjafx
 Image=docker.io/cmason3/jinjafx_server:latest
 Volume=${HOME}/logs/jinjafx.log:/var/log/jinjafx.log:Z
 Secret=jfx_weblog_key,type=env,target=JFX_WEBLOG_KEY
-Exec=-pandoc -logfile /var/log/jinjafx.log
+Exec=-weblog -pandoc -logfile /var/log/jinjafx.log
 PublishPort=127.0.0.1:8080:8080
 LogDriver=none
 
