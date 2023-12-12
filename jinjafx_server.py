@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # JinjaFx Server - Jinja2 Templating Tool
-# Copyright (c) 2020-2023 Chris Mason <chris@netnix.org>
+# Copyright (c) 2020-2024 Chris Mason <chris@netnix.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -922,7 +922,7 @@ def main(rflag=[0]):
 
   try:
     print('JinjaFx Server v' + __version__ + ' - Jinja2 Templating Tool')
-    print('Copyright (c) 2020-2023 Chris Mason <chris@netnix.org>\n')
+    print('Copyright (c) 2020-2024 Chris Mason <chris@netnix.org>\n')
 
     update_versioned_links(base + '/www')
 
