@@ -11,24 +11,23 @@ libraries = {
   'dayjs': '1.11.10',
   'pako': '2.1.0',
   'jszip': '3.10.1',
-  'github-markdown-css': '5.3.0'
+  'github-markdown-css': '5.5.0'
 }
 
-def update_file(f):
+def update_file(cdnjs_url, sri, f):
   data = []
 
   with open(f, 'rt') as fh:
     for ln in fh.readlines():
-      m = cdnjs.search(ln)
-      if m:
-        if m.group(2) in r['sri']:
+      if m := cdnjs_url.search(ln):
+        if m.group(2) in sri:
           if m.group(1) != libraries[lib]:
-            ln = cdnjs.sub('https://cdnjs.cloudflare.com/ajax/libs/' + lib + '/' + libraries[lib] + '/' + m.group(2) + '"', ln)
-            ln = re.sub(r'integrity=".+?"', 'integrity="' + r['sri'][m.group(2)] + '"', ln)
-            print(fn + ' - updated ' + lib + '/' + m.group(2) + ' to ' + libraries[lib])
+            ln = cdnjs_url.sub('https://cdnjs.cloudflare.com/ajax/libs/' + lib + '/' + libraries[lib] + '/' + m.group(2) + '"', ln)
+            ln = re.sub(r'integrity=".+?"', 'integrity="' + sri[m.group(2)] + '"', ln)
+            print(os.path.basename(f) + ' - updated ' + lib + '/' + m.group(2) + ' to ' + libraries[lib])
 
           else:
-            print(fn + ' - skipping ' + lib + '/' + m.group(2) + ' - already at ' + libraries[lib])
+            print(os.path.basename(f) + ' - skipping ' + lib + '/' + m.group(2) + ' - already at ' + libraries[lib])
 
         else:
           print('warning: can\'t find resource "' + m.group(2) + '" on cdnjs', file=sys.stderr)
@@ -48,11 +47,11 @@ for lib in libraries:
   r = requests.get(api_url + '?fields=sri').json()
 
   if 'sri' in r:
-    #update_file(os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + '/../jinjafx_server.py'))
+    update_file(cdnjs, r['sri'], os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + '/../jinjafx_server.py'))
 
     for fn in os.listdir(www):
       if fn.endswith('.html'):
-        update_file(www + '/' + fn)
+        update_file(cdnjs, r['sri'], www + '/' + fn)
 
   elif 'error' in r:
     print('error: ' + r['message'], file=sys.stderr)
