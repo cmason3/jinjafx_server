@@ -10,42 +10,49 @@ libraries = {
   'js-yaml': '4.1.0',
   'dayjs': '1.11.10',
   'pako': '2.1.0',
-  'jszip': '3.10.1'
+  'jszip': '3.10.1',
+  'github-markdown-css': '5.3.0'
 }
 
+def update_file(f):
+  data = []
+
+  with open(f, 'rt') as fh:
+    for ln in fh.readlines():
+      m = cdnjs.search(ln)
+      if m:
+        if m.group(2) in r['sri']:
+          if m.group(1) != libraries[lib]:
+            ln = cdnjs.sub('https://cdnjs.cloudflare.com/ajax/libs/' + lib + '/' + libraries[lib] + '/' + m.group(2) + '"', ln)
+            ln = re.sub(r'integrity=".+?"', 'integrity="' + r['sri'][m.group(2)] + '"', ln)
+            print(fn + ' - updated ' + lib + '/' + m.group(2) + ' to ' + libraries[lib])
+
+          else:
+            print(fn + ' - skipping ' + lib + '/' + m.group(2) + ' - already at ' + libraries[lib])
+
+        else:
+          print('warning: can\'t find resource "' + m.group(2) + '" on cdnjs', file=sys.stderr)
+
+      data.append(ln)
+
+  if len(data) > 0:
+    with open(f, 'wt') as fh:
+      fh.writelines(data)
+
+
 for lib in libraries:
-  www = os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + '/../www')
+  www = os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + '/../www/')
   cdnjs = re.compile(r'https://cdnjs.cloudflare.com/ajax/libs/' + re.escape(lib) + '/(.+?)/(.+?)"')
 
   api_url = 'https://api.cdnjs.com/libraries/' + lib + '/' + libraries[lib]
   r = requests.get(api_url + '?fields=sri').json()
 
   if 'sri' in r:
+    #update_file(os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + '/../jinjafx_server.py'))
+
     for fn in os.listdir(www):
       if fn.endswith('.html'):
-        html = []
-
-        with open(www + '/' + fn, 'rt') as fh:
-          for ln in fh.readlines():
-            m = cdnjs.search(ln)
-            if m:
-              if m.group(2) in r['sri']:
-                if m.group(1) != libraries[lib]:
-                  ln = cdnjs.sub('https://cdnjs.cloudflare.com/ajax/libs/' + lib + '/' + libraries[lib] + '/' + m.group(2) + '"', ln)
-                  ln = re.sub(r'integrity=".+?"', 'integrity="' + r['sri'][m.group(2)] + '"', ln)
-                  print(fn + ' - updated ' + lib + '/' + m.group(2) + ' to ' + libraries[lib])
-
-                else:
-                  print(fn + ' - skipping ' + lib + '/' + m.group(2) + ' - already at ' + libraries[lib])
-
-              else:
-                print('warning: can\'t find resource "' + m.group(2) + '" on cdnjs', file=sys.stderr)
-
-            html.append(ln)
-
-        if len(html) > 0:
-          with open(www + '/' + fn, 'wt') as fh:
-            fh.writelines(html)
+        update_file(www + '/' + fn)
 
   elif 'error' in r:
     print('error: ' + r['message'], file=sys.stderr)
