@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # JinjaFx Server - Jinja2 Templating Tool
-# Copyright (c) 2020-2023 Chris Mason <chris@netnix.org>
+# Copyright (c) 2020-2024 Chris Mason <chris@netnix.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -28,7 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '23.12.0'
+__version__ = '23.12.1'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -548,7 +548,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART | cmarkgfm.cmark.Options.CMARK_OPT_UNSAFE)
                     output = cmarkgfm.github_flavored_markdown_to_html(html_escape(output), options).replace('&amp;amp;', '&amp;').replace('&amp;', '&')
                     head = '<!DOCTYPE html>\n<html>\n<head>\n'
-                    head += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.3.0/github-markdown.min.css" crossorigin="anonymous">\n'
+                    head += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.0/github-markdown.min.css" crossorigin="anonymous">\n'
                     head += '<style>\n  pre, code { white-space: pre-wrap !important; word-wrap: break-word !important; }\n</style>\n</head>\n'
                     output = emoji.emojize(output, language='alias').encode('ascii', 'xmlcharrefreplace').decode('utf-8')
                     output = head + '<body>\n<div class="markdown-body">\n' + output + '</div>\n</body>\n</html>\n'
@@ -922,7 +922,7 @@ def main(rflag=[0]):
 
   try:
     print('JinjaFx Server v' + __version__ + ' - Jinja2 Templating Tool')
-    print('Copyright (c) 2020-2023 Chris Mason <chris@netnix.org>\n')
+    print('Copyright (c) 2020-2024 Chris Mason <chris@netnix.org>\n')
 
     update_versioned_links(base + '/www')
 
