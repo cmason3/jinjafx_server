@@ -3,7 +3,7 @@
 import sys, os, re, requests
 
 libraries = {
-  'bootstrap': '5.3.2',
+  'bootstrap': '5.3.3',
   'codemirror': '5.65.16',
   'firacode': '6.2.0',
   'split.js': '1.6.5',
@@ -11,7 +11,7 @@ libraries = {
   'dayjs': '1.11.10',
   'pako': '2.1.0',
   'jszip': '3.10.1',
-  'github-markdown-css': '5.5.0'
+  'github-markdown-css': '5.5.1'
 }
 
 def update_file(cdnjs_url, sri, f):
