@@ -16,8 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import sys
-if sys.version_info < (3, 8):
-  sys.exit('Requires Python >= 3.8')
+if sys.version_info < (3, 9):
+  sys.exit('Requires Python >= 3.9')
 
 from http.cookies import SimpleCookie
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -28,7 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '24.3.0'
+__version__ = '24.4.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()
