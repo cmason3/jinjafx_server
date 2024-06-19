@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [24.6.1] - Jun 20, 2024
+- Updated `Content-Security-Policy` to explicitly allow `data:` scheme for `img-src` as `*` doesn't permit it
+
 ### [24.6.0] - Jun 20, 2024
 - Added an actual CHANGELOG.md instead of relying on GitHub Release history
 - The `Content-Security-Policy` header is now set as a HTTP response header and uses a standard value for all pages
@@ -309,6 +312,7 @@
 ### 21.11.0 - Nov 29, 2021
 - Initial release
 
+[24.6.1]: https://github.com/cmason3/jinjafx_server/compare/24.6.0...24.6.1
 [24.6.0]: https://github.com/cmason3/jinjafx_server/compare/24.5.0...24.6.0
 [24.5.0]: https://github.com/cmason3/jinjafx_server/compare/24.3.0...24.5.0
 [24.3.0]: https://github.com/cmason3/jinjafx_server/compare/24.1.1...24.3.0
