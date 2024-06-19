@@ -11,7 +11,7 @@ libraries = {
   'dayjs': '1.11.11',
   'pako': '2.1.0',
   'jszip': '3.10.1',
-  'github-markdown-css': '5.5.1'
+  'github-markdown-css': '5.6.1'
 }
 
 def update_file(cdnjs_url, sri, f):

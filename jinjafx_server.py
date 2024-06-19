@@ -28,7 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '24.5.0'
+__version__ = '24.6.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -406,7 +406,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
         self.send_header('Content-Type', r[0])
         self.send_header('Content-Length', str(len(r[2])))
-        self.send_header('X-Content-Type-Options', 'nosniff')
 
       if versioned:
         self.send_header('Cache-Control', 'public, max-age=31536000')
@@ -416,7 +415,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
       elif r[1] == 200 or r[1] == 304:
         if r[1] == 200:
-          self.send_header('Content-Security-Policy', "frame-ancestors 'none'")
+          # self.send_header('Content-Security-Policy', "frame-ancestors 'none'")
+          self.send_header('X-Content-Type-Options', 'nosniff')
+          self.send_header('Content-Security-Policy', "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src 'self' https://cdnjs.cloudflare.com; img-src *; frame-ancestors 'none'")
           self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
 
         self.send_header('Cache-Control', 'max-age=0, must-revalidate')
@@ -548,7 +549,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART | cmarkgfm.cmark.Options.CMARK_OPT_UNSAFE)
                     output = cmarkgfm.github_flavored_markdown_to_html(html_escape(output), options).replace('&amp;amp;', '&amp;').replace('&amp;', '&')
                     head = '<!DOCTYPE html>\n<html>\n<head>\n'
-                    head += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown.min.css" crossorigin="anonymous">\n'
+                    head += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.6.1/github-markdown.min.css" crossorigin="anonymous">\n'
                     head += '<style>\n  pre, code { white-space: pre-wrap !important; word-wrap: break-word !important; }\n</style>\n</head>\n'
                     output = emoji.emojize(output, language='alias').encode('ascii', 'xmlcharrefreplace').decode('utf-8')
                     output = head + '<body>\n<div class="markdown-body">\n' + output + '</div>\n</body>\n</html>\n'
