@@ -1,7 +1,10 @@
 ## CHANGELOG
 
-### [24.6.0] - In Development
+### [24.6.0] - June 20, 2024
 - Added an actual CHANGELOG.md instead of relying on GitHub Release history
+- The `Content-Security-Policy` header is now set as a HTTP response header and uses a standard value for all pages
+- The `Content-Security-Policy` header now allows an `img-src` of all, which means external images are now supported in Markdown
+- Updated `github-markdown-css` JavaScript library to 5.6.1
 
 ### [24.5.0] - May 15, 2024
 - Drop support for Python 3.8
@@ -306,9 +309,85 @@
 ### 21.11.0 - Nov 29, 2021
 - Initial release
 
-[1.0.6]: https://github.com/cmason3/jinjafx/compare/v1.0.5...v1.0.6
-[1.0.5]: https://github.com/cmason3/jinjafx/compare/v1.0.4...v1.0.5
-[1.0.4]: https://github.com/cmason3/jinjafx/compare/v1.0.3...v1.0.4
-[1.0.3]: https://github.com/cmason3/jinjafx/compare/v1.0.2...v1.0.3
-[1.0.2]: https://github.com/cmason3/jinjafx/compare/v1.0.1...v1.0.2
-[1.0.1]: https://github.com/cmason3/jinjafx/compare/v1.0.0...v1.0.1
+[24.6.0]: https://github.com/cmason3/jinjafx_server/compare/24.5.0...24.6.0
+[24.5.0]: https://github.com/cmason3/jinjafx_server/compare/24.3.0...24.5.0
+[24.3.0]: https://github.com/cmason3/jinjafx_server/compare/24.1.1...24.3.0
+[24.1.1]: https://github.com/cmason3/jinjafx_server/compare/24.1.0...24.1.1
+[24.1.0]: https://github.com/cmason3/jinjafx_server/compare/23.12.1...24.1.0
+[23.12.1]: https://github.com/cmason3/jinjafx_server/compare/23.12.0...23.12.1
+[23.12.0]: https://github.com/cmason3/jinjafx_server/compare/23.11.1...23.12.0
+[23.11.1]: https://github.com/cmason3/jinjafx_server/compare/23.11.0...23.11.1
+[23.11.0]: https://github.com/cmason3/jinjafx_server/compare/23.9.1...23.11.0
+[23.9.1]: https://github.com/cmason3/jinjafx_server/compare/23.9.0...23.9.1
+[23.9.0]: https://github.com/cmason3/jinjafx_server/compare/23.8.3...23.9.0
+[23.8.3]: https://github.com/cmason3/jinjafx_server/compare/23.8.2...23.8.3
+[23.8.2]: https://github.com/cmason3/jinjafx_server/compare/23.8.1...23.8.2
+[23.8.1]: https://github.com/cmason3/jinjafx_server/compare/23.8.0...23.8.1
+[23.8.0]: https://github.com/cmason3/jinjafx_server/compare/23.6.0...23.8.0
+[23.6.0]: https://github.com/cmason3/jinjafx_server/compare/23.3.2...23.6.0
+[23.3.2]: https://github.com/cmason3/jinjafx_server/compare/23.3.1...23.3.2
+[23.3.1]: https://github.com/cmason3/jinjafx_server/compare/23.3.0...23.3.1
+[23.3.0]: https://github.com/cmason3/jinjafx_server/compare/23.2.1...23.3.0
+[23.2.1]: https://github.com/cmason3/jinjafx_server/compare/23.2.0...23.2.1
+[23.2.0]: https://github.com/cmason3/jinjafx_server/compare/23.1.0...23.2.0
+[23.1.0]: https://github.com/cmason3/jinjafx_server/compare/22.12.2...23.1.0
+[22.12.2]: https://github.com/cmason3/jinjafx_server/compare/22.12.1...22.12.2
+[22.12.1]: https://github.com/cmason3/jinjafx_server/compare/22.11.4...22.12.1
+[22.11.4]: https://github.com/cmason3/jinjafx_server/compare/22.11.2...22.11.4
+[22.11.2]: https://github.com/cmason3/jinjafx_server/compare/22.11.1...22.11.2
+[22.11.1]: https://github.com/cmason3/jinjafx_server/compare/22.11.0...22.11.1
+[22.11.0]: https://github.com/cmason3/jinjafx_server/compare/22.10.1...22.11.0
+[22.10.1]: https://github.com/cmason3/jinjafx_server/compare/22.10.0...22.10.1
+[22.10.0]: https://github.com/cmason3/jinjafx_server/compare/22.9.5...22.10.0
+[22.9.5]: https://github.com/cmason3/jinjafx_server/compare/22.9.4...22.9.5
+[22.9.4]: https://github.com/cmason3/jinjafx_server/compare/22.9.2...22.9.4
+[22.9.2]: https://github.com/cmason3/jinjafx_server/compare/22.9.1...22.9.2
+[22.9.1]: https://github.com/cmason3/jinjafx_server/compare/22.9.0...22.9.1
+[22.9.0]: https://github.com/cmason3/jinjafx_server/compare/22.8.1...22.9.0
+[22.8.1]: https://github.com/cmason3/jinjafx_server/compare/22.8.0...22.8.1
+[22.8.0]: https://github.com/cmason3/jinjafx_server/compare/22.7.9...22.8.0
+[22.7.9]: https://github.com/cmason3/jinjafx_server/compare/22.7.8...22.7.9
+[22.7.8]: https://github.com/cmason3/jinjafx_server/compare/22.7.7...22.7.8
+[22.7.7]: https://github.com/cmason3/jinjafx_server/compare/22.7.6...22.7.7
+[22.7.6]: https://github.com/cmason3/jinjafx_server/compare/22.7.4...22.7.6
+[22.7.4]: https://github.com/cmason3/jinjafx_server/compare/22.7.3...22.7.4
+[22.7.3]: https://github.com/cmason3/jinjafx_server/compare/22.7.2...22.7.3
+[22.7.2]: https://github.com/cmason3/jinjafx_server/compare/22.7.1...22.7.2
+[22.7.1]: https://github.com/cmason3/jinjafx_server/compare/22.7.0...22.7.1
+[22.7.0]: https://github.com/cmason3/jinjafx_server/compare/22.6.2...22.7.0
+[22.6.2]: https://github.com/cmason3/jinjafx_server/compare/22.6.1...22.6.2
+[22.6.1]: https://github.com/cmason3/jinjafx_server/compare/22.6.0...22.6.1
+[22.6.0]: https://github.com/cmason3/jinjafx_server/compare/22.5.9...22.6.0
+[22.5.9]: https://github.com/cmason3/jinjafx_server/compare/22.5.8...22.5.9
+[22.5.8]: https://github.com/cmason3/jinjafx_server/compare/22.5.7...22.5.8
+[22.5.7]: https://github.com/cmason3/jinjafx_server/compare/22.5.6...22.5.7
+[22.5.6]: https://github.com/cmason3/jinjafx_server/compare/22.5.5...22.5.6
+[22.5.5]: https://github.com/cmason3/jinjafx_server/compare/22.5.4...22.5.5
+[22.5.4]: https://github.com/cmason3/jinjafx_server/compare/22.5.3...22.5.4
+[22.5.3]: https://github.com/cmason3/jinjafx_server/compare/22.5.2...22.5.3
+[22.5.2]: https://github.com/cmason3/jinjafx_server/compare/22.5.1...22.5.2
+[22.5.1]: https://github.com/cmason3/jinjafx_server/compare/22.5.0...22.5.1
+[22.5.0]: https://github.com/cmason3/jinjafx_server/compare/22.4.6...22.5.0
+[22.4.6]: https://github.com/cmason3/jinjafx_server/compare/22.4.5...22.4.6
+[22.4.5]: https://github.com/cmason3/jinjafx_server/compare/22.4.4...22.4.5
+[22.4.4]: https://github.com/cmason3/jinjafx_server/compare/22.4.2...22.4.4
+[22.4.2]: https://github.com/cmason3/jinjafx_server/compare/22.4.1...22.4.2
+[22.4.1]: https://github.com/cmason3/jinjafx_server/compare/22.4.0...22.4.1
+[22.4.0]: https://github.com/cmason3/jinjafx_server/compare/22.3.6...22.4.0
+[22.3.6]: https://github.com/cmason3/jinjafx_server/compare/22.3.5...22.3.6
+[22.3.5]: https://github.com/cmason3/jinjafx_server/compare/22.3.4...22.3.5
+[22.3.4]: https://github.com/cmason3/jinjafx_server/compare/22.3.3...22.3.4
+[22.3.3]: https://github.com/cmason3/jinjafx_server/compare/22.3.2...22.3.3
+[22.3.2]: https://github.com/cmason3/jinjafx_server/compare/22.3.1...22.3.2
+[22.3.1]: https://github.com/cmason3/jinjafx_server/compare/22.2.2...22.3.1
+[22.2.2]: https://github.com/cmason3/jinjafx_server/compare/22.2.1...22.2.2
+[22.2.1]: https://github.com/cmason3/jinjafx_server/compare/22.1.7...22.2.1
+[22.1.7]: https://github.com/cmason3/jinjafx_server/compare/22.1.6...22.1.7
+[22.1.6]: https://github.com/cmason3/jinjafx_server/compare/22.1.5...22.1.6
+[22.1.5]: https://github.com/cmason3/jinjafx_server/compare/22.1.4...22.1.5
+[22.1.4]: https://github.com/cmason3/jinjafx_server/compare/22.1.3...22.1.4
+[22.1.3]: https://github.com/cmason3/jinjafx_server/compare/22.1.2...22.1.3
+[22.1.2]: https://github.com/cmason3/jinjafx_server/compare/21.12.3...22.1.2
+[21.12.3]: https://github.com/cmason3/jinjafx_server/compare/21.12.2...21.12.3
+[21.12.2]: https://github.com/cmason3/jinjafx_server/compare/21.12.1...21.12.2
+[21.12.1]: https://github.com/cmason3/jinjafx_server/compare/21.11.0...21.12.1
