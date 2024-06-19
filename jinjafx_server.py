@@ -28,7 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '24.6.0'
+__version__ = '24.6.1'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -415,9 +415,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
       elif r[1] == 200 or r[1] == 304:
         if r[1] == 200:
-          # self.send_header('Content-Security-Policy', "frame-ancestors 'none'")
           self.send_header('X-Content-Type-Options', 'nosniff')
-          self.send_header('Content-Security-Policy', "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src 'self' https://cdnjs.cloudflare.com; img-src *; frame-ancestors 'none'")
+          self.send_header('Content-Security-Policy', "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src 'self' https://cdnjs.cloudflare.com; img-src data: *; frame-ancestors 'none'")
           self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
 
         self.send_header('Cache-Control', 'max-age=0, must-revalidate')
