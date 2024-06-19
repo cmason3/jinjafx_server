@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [24.6.0] - June 20, 2024
+### [24.6.0] - Jun 20, 2024
 - Added an actual CHANGELOG.md instead of relying on GitHub Release history
 - The `Content-Security-Policy` header is now set as a HTTP response header and uses a standard value for all pages
 - The `Content-Security-Policy` header now allows an `img-src` of all, which means external images are now supported in Markdown
@@ -13,79 +13,79 @@
 - Updated `github-markdown-css` to 5.5.1
 - Updated Pandoc to 3.2 in Dockerfile
 
-### [24.3.0] - March 7, 2024
+### [24.3.0] - Mar 7, 2024
 - Update pandoc to v3.1.12.2
 - Update bootstrap js lib to v5.3.3
 - Update github-markdown-css to v5.5.1
 
-### [24.1.1] - January 16, 2024
+### [24.1.1] - Jan 16, 2024
 - Update Pandoc reference template
 
-### [24.1.0] - January 9, 2024
+### [24.1.0] - Jan 9, 2024
 - Update `Dockerfile` to use Pandoc 3.1.11.1
 
-### [23.12.1] - December 12, 2023
+### [23.12.1] - Dec 12, 2023
 - Update `github-markdown-css` on CDNJS to version 5.5.0
 - Update `update_cdnjs_links.py` to scan `jinjafx_server.py` for libraries to update
 - Update copyright notices in preparation for 2024
 
-### [23.12.0] - December 4, 2023
+### [23.12.0] - Dec 4, 2023
 - Update `Dockerfile` to use Pandoc 3.1.9
 - Update CodeMirror JavaScript library to 5.65.16
 
-### [23.11.1] - November 17, 2023
+### [23.11.1] - Nov 17, 2023
 - Add `-pandoc` command line option to explicitly enable support for converting HTML to DOCX using pandoc
 
-### [23.11.0] - November 3, 2023
+### [23.11.0] - Nov 3, 2023
 - Update JavaScript libraries to the latest versions
 - Add support for the conversion from HTML/Markdown to DOCX via Pandoc
 - Update GitHub Markdown CSS to 5.3.0
 
-### [23.9.1] - September 27, 2023
+### [23.9.1] - Sep 27, 2023
 - Fix deprecation of `datetime.datetime.utcnow()`
 
-### [23.9.0] - September 21, 2023
+### [23.9.0] - Sep 21, 2023
 - Enforce minimal Python version in code
 
-### [23.8.3] - August 23, 2023
+### [23.8.3] - Aug 23, 2023
 - Add support for keyless YAML via the `_` variable
 
-### [23.8.2] - August 21, 2023
+### [23.8.2] - Aug 21, 2023
 - Add `-weblog` feature to view logs from the browser
 - Improve rate limiting algorithm and extend to `weblog` and `get_dt`
 - Separate out thread locks for logging and rate limiting
 - Improve logging by including HTTP version number and mask out a couple of messages unless verbose logging is enabled
 
-### [23.8.1] - August 8, 2023
+### [23.8.1] - Aug 8, 2023
 - Improve error reporting if an exception happens in `window.onload()`
 
-### [23.8.0] - August 7, 2023
+### [23.8.0] - Aug 7, 2023
 - Update JavaScript libraries to latest version
 
-### [23.6.0] - June 6, 2023
+### [23.6.0] - Jun 6, 2023
 - Drop support for Python 3.7
 - Update JavaScript libraries to latest version
 
-### [23.3.2] - March 20, 2023
+### [23.3.2] - Mar 20, 2023
 - Added support for Unicode symbols within templates (including Emojis)
 - Fixed an issue where downloads weren't working in some scenarios
 
-### [23.3.1] - March 17, 2023
+### [23.3.1] - Mar 17, 2023
 - Code cleanup - removed unused commented out code
 
-### [23.3.0] - March 16, 2023
+### [23.3.0] - Mar 16, 2023
 - Replaced CryptoJS with native Subtle Crypto for Ansible Vault encryption
 - Removed dependency on utf8 library as we no longer allow non-ASCII templates
 - Downloads are now handled in the browser and don't require a POST request
 - Updated CodeMirror JavaScript library to 5.65.12
 
-### [23.2.1] - February 22, 2023
+### [23.2.1] - Feb 22, 2023
 - Updated content encoding within JSON requests and responses
 
-### [23.2.0] - February 1, 2023
+### [23.2.0] - Feb 1, 2023
 - Improvements around exception handling and logging
 
-### [23.1.0] - December 31, 2022
+### [23.1.0] - Dec 31, 2022
 - Add support for `global.yml` when using DataSets
 - Remove support for Python 3.6 due to end of life
 - Update Python build to use `pyproject.toml` to avoid deprecation
@@ -95,101 +95,101 @@
 - Remove expansion icons from panes in favour of full screen mode
 - Minor updates to JavaScript libraries
 
-### [22.12.2] - December 14, 2022
+### [22.12.2] - Dec 14, 2022
 - Update various JavaScript libraries to latest versions
 - Update copyright year to 2023
 
-### [22.12.1] - December 8, 2022
+### [22.12.1] - Dec 8, 2022
 - Improve exception reporting when using a persistent logfile
 
-### [22.11.4] - November 28, 2022
+### [22.11.4] - Nov 28, 2022
 - Add support for GitHub integration via the GitHub API to allow GitHub to be used to store DataTemplates
 
-### [22.11.2] - November 18, 2022
+### [22.11.2] - Nov 18, 2022
 - Fix issue with `-logfile` due to error in regexp for removing ansi colours
 
-### [22.11.1] - November 10, 2022
+### [22.11.1] - Nov 10, 2022
 - Updated the colour palette to hopefully be more aesthetically pleasing
 - Updated `update_cdnjs_links.py` so it will update all html files automatically with latest JavaScript libs
 - Added `update_versioned_links.py` to create static content links based on sha256 as a `pre-commit` Git Hook
 - Updated various JavaScript libraries to latest versions
 
-### [22.11.0] - November 8, 2022
+### [22.11.0] - Nov 8, 2022
 - Add support for command line option `-logfile` for persistent logging
 
-### [22.10.1] - November 7, 2022
+### [22.10.1] - Nov 7, 2022
 - Fix issue with zIndex of `template.j2`
 
-### [22.10.0] - October 25, 2022
+### [22.10.0] - Oct 25, 2022
 - Update Dockerfile to use Python 3.11
 - Update JavaScript libraries to latest version
 - Fixed code scanning alert #67
 
-### [22.9.5] - September 26, 2022
+### [22.9.5] - Sep 26, 2022
 - Add support for a `Save As` button on DataTemplate Export
 
-### [22.9.4] - September 20, 2022
+### [22.9.4] - Sep 20, 2022
 - Add support for an `Import DataTemplate` button
 
-### [22.9.2] - September 9, 2022
+### [22.9.2] - Sep 9, 2022
 - Add `jinjafx.html` to permanent cache
 
-### [22.9.1] - September 7, 2022
+### [22.9.1] - Sep 7, 2022
 - Moved js/css/png content to versioned urls to enable permanent cacheing
 
-### [22.9.0] - September 7, 2022
+### [22.9.0] - Sep 7, 2022
 - Updated `codemirror` to 5.65.8
 - Updated `bootstrap` to 5.2.0
 - Updated `dayjs` to 1.11.5
 
-### [22.8.1] - August 19, 2022
+### [22.8.1] - Aug 19, 2022
 - Added support for `-ml` command line argument to set the maximum memory usage
 
-### [22.8.0] - August 19, 2022
+### [22.8.0] - Aug 19, 2022
 - Added support for `-tl` command line argument to set the maximum execution time of a request
 - Fixed an issue where text highlighting wasn't visible when showing where non-ASCII characters were detected in `data.csv`
 - JinjaFx Server will now execute JinjaFx using the Jinja2 SandboxEnvironment
 - POST requests will now display total duration in output logging
 
-### [22.7.9] - July 21, 2022
+### [22.7.9] - Jul 21, 2022
 - Various cosmetic changes associated with syntax highlighting
 
-### [22.7.8] - July 11, 2022
+### [22.7.8] - Jul 11, 2022
 - Revert all font related changes to pre 22.7.0 as they didn't really work
 - Finalise `<output>` tag highlighting to colour ":html" and ":markdown" in red
 
-### [22.7.7] - July 8, 2022
+### [22.7.7] - Jul 8, 2022
 - Cosmetic changes to the CSV table within the `data.csv` pane
 - Added support for highlighting `<output>` tags in `template.j2`
 
-### [22.7.6] - July 7, 2022
+### [22.7.6] - Jul 7, 2022
 - Fix syntax highlighting of `template.j2` that I broke with the previous release
 - Add CDNJS link to `output.html` for "Fira Code"
 
-### [22.7.4] - July 7, 2022
+### [22.7.4] - Jul 7, 2022
 - Disable ligatures on everything except `template.j2`
 
-### [22.7.3] - July 7, 2022
+### [22.7.3] - Jul 7, 2022
 - Disable ligatures for Output window and print view
 
-### [22.7.2] - July 7, 2022
+### [22.7.2] - Jul 7, 2022
 - Add missing `content-security-policy` for `font-src`
 - Update Output window and print view to use "Fira Code" font
 
-### [22.7.1] - July 7, 2022
+### [22.7.1] - Jul 7, 2022
 - Align font sizes across all panes
 
-### [22.7.0] - July 7, 2022
+### [22.7.0] - Jul 7, 2022
 - Change CodeMirror font to "Fira Code" and enable ligatures
 - Add `update_cdnjs_links.py` script to automatically update CDNJS links
 
-### [22.6.2] - June 21, 2022
+### [22.6.2] - Jun 21, 2022
 - More cosmetic changes to information pane
 
-### [22.6.1] - June 20, 2022
+### [22.6.1] - Jun 20, 2022
 - Cosmetic changes to information pane
 
-### [22.6.0] - June 14, 2022
+### [22.6.0] - Jun 14, 2022
 - Fix CodeQL issue - exception text reinterpreted as HTML
 
 ### [22.5.9] - May 31, 2022
