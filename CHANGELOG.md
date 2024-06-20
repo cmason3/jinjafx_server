@@ -1,7 +1,7 @@
 ## CHANGELOG
 
-### [24.6.2] - In Development
-- The ETag hash is now across `Content-Type`, `Content-Security-Policy` and content body
+### [24.6.2] - Jun 20, 2024
+- The ETag hash is now across all additional headers including `Content-Type` and `Content-Security-Policy` as well as the content itself
 
 ### [24.6.1] - Jun 20, 2024
 - Updated `Content-Security-Policy` to explicitly allow `data:` scheme for `img-src` as `*` doesn't permit it
