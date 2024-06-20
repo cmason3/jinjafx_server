@@ -392,7 +392,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
       headers = {
         'X-Content-Type-Options': 'nosniff',
-        'Content-Security-Policy': "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src 'self' https://cdnjs.cloudflare.com; img-src data: *; frame-ancestors 'none'",
+        'Content-Security-Policy': "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src 'self' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src data: *; frame-ancestors 'none'",
         'Referrer-Policy': 'strict-origin-when-cross-origin'
       }
       etag = '"' + hashlib.sha224(repr(headers).encode('utf-8') + b'|' + r[0].encode('utf-8') + b'; ' + r[2]).hexdigest() + '"'
