@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [24.6.2] - In Development
+- The ETag hash is now across `Content-Type`, `Content-Security-Policy` and content body
+
 ### [24.6.1] - Jun 20, 2024
 - Updated `Content-Security-Policy` to explicitly allow `data:` scheme for `img-src` as `*` doesn't permit it
 
@@ -312,6 +315,7 @@
 ### 21.11.0 - Nov 29, 2021
 - Initial release
 
+[24.6.2]: https://github.com/cmason3/jinjafx_server/compare/24.6.1...24.6.2
 [24.6.1]: https://github.com/cmason3/jinjafx_server/compare/24.6.0...24.6.1
 [24.6.0]: https://github.com/cmason3/jinjafx_server/compare/24.5.0...24.6.0
 [24.5.0]: https://github.com/cmason3/jinjafx_server/compare/24.3.0...24.5.0
