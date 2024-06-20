@@ -1,0 +1,13 @@
+body {
+  color: white;
+  background: #000040;
+}
+pre {
+  height: 100%;
+  font-family: 'Fira Code', monospace;
+  font-size: 14px;
+  font-variant-ligatures: none;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-y: hidden;
+}

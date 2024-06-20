@@ -1,5 +1,7 @@
 ## CHANGELOG
 
+### [24.6.3] - In Development
+
 ### [24.6.2] - Jun 20, 2024
 - The ETag hash is now across all additional headers including `Content-Type` and `Content-Security-Policy` as well as the content itself
 
@@ -315,6 +317,7 @@
 ### 21.11.0 - Nov 29, 2021
 - Initial release
 
+[24.6.3]: https://github.com/cmason3/jinjafx_server/compare/24.6.2...24.6.3
 [24.6.2]: https://github.com/cmason3/jinjafx_server/compare/24.6.1...24.6.2
 [24.6.1]: https://github.com/cmason3/jinjafx_server/compare/24.6.0...24.6.1
 [24.6.0]: https://github.com/cmason3/jinjafx_server/compare/24.5.0...24.6.0
