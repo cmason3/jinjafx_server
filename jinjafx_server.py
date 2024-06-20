@@ -390,7 +390,13 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         else:
           r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
-      etag = '"' + hashlib.sha256(r[2]).hexdigest() + '"'
+      headers = {
+        'X-Content-Type-Options': 'nosniff',
+        'Content-Security-Policy': "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src 'self' https://cdnjs.cloudflare.com; img-src data: *; frame-ancestors 'none'",
+        'Referrer-Policy': 'strict-origin-when-cross-origin'
+      }
+      etag = '"' + hashlib.sha224(repr(headers).encode('utf-8') + b'|' + r[0].encode('utf-8') + b'; ' + r[2]).hexdigest() + '"'
+
       if 'If-None-Match' in self.headers:
         if self.headers['If-None-Match'] == etag:
           head = True
@@ -415,9 +421,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
       elif r[1] == 200 or r[1] == 304:
         if r[1] == 200:
-          self.send_header('X-Content-Type-Options', 'nosniff')
-          self.send_header('Content-Security-Policy', "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src 'self' https://cdnjs.cloudflare.com; img-src data: *; frame-ancestors 'none'")
-          self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
+          for h in headers:
+            self.send_header(h, headers[h])
 
         self.send_header('Cache-Control', 'max-age=0, must-revalidate')
         self.send_header('ETag', etag)
