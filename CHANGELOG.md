@@ -1,6 +1,8 @@
 ## CHANGELOG
 
 ### [24.6.3] - In Development
+- Fixed an issue with `/logs` as it didn't adhere to the default `Content-Security-Policy`
+- Updated instructions for deploying JinjaFx Server as a Container using Kubernetes
 
 ### [24.6.2] - Jun 20, 2024
 - The ETag hash is now across all additional headers including `Content-Type` and `Content-Security-Policy` as well as the content itself

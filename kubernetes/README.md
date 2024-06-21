@@ -1,6 +1,19 @@
-## Rootless Podman for JinjaFx Server
+## JinjaFx Server as a Container in Kubernetes
 
 JinjaFx Server will always be available in Docker Hub at [https://hub.docker.com/repository/docker/cmason3/jinjafx_server](https://hub.docker.com/repository/docker/cmason3/jinjafx_server) - the `latest` tag will always refer to the latest released version.
+
+
+
+
+```
+openssl req -nodes -newkey rsa:2048 -keyout ingress.key -out ingress.csr -subj "/CN={CN}/emailAddress={emailAddress}/O={O}/L={L}/ST={ST}/C={C}" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:*.{CLUSTER}.{DOMAIN}"))
+```
+
+```
+kubectl create secret generic jinjafx --from-literal=jfx-weblog-key={KEY}
+```
+
+
 
 The following commands will launch a container for JinjaFx Server which listens on localhost on port 8080.
 
