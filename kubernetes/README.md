@@ -8,7 +8,7 @@ The following steps will run JinjaFx Server in a container using Kubernetes Ingr
 *.{CLUSTER}.{DOMAIN}. 28800   IN      A       {HOST IP}
 ```
 
-This approach also allows us to use a single wildcard TLS certificate, which covers all containers under the cluster sub-domain. The example Kubernetes Manifest (`kubernetes.yml`) assumes we will be activating the Web Log as well as using a GitHub backed repository to store JinjaFx DataTemplates. Once you have updated `kubernetes.yml` with your deployment specific values you would typically perform the following steps:
+This approach also allows us to use a single wildcard TLS certificate, which covers all containers under the cluster sub-domain. The example Kubernetes manifest (`kubernetes.yml`) assumes we will be activating the Web Log as well as using a GitHub backed repository to store JinjaFx DataTemplates. Once you have updated `kubernetes.yml` with your deployment specific values you would typically perform the following steps:
 
 ### Generate Certificate Signing Request
 
