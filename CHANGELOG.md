@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [24.6.4] - In Development
+- The selected DataSet is now saved when you save the DataTemplate
+
 ### [24.6.3] - Jun 24, 2024
 - Fixed an issue with `/logs` as it didn't adhere to the default `Content-Security-Policy`
 - Updated instructions for deploying JinjaFx Server as a Container using Kubernetes
@@ -319,6 +322,7 @@
 ### 21.11.0 - Nov 29, 2021
 - Initial release
 
+[24.6.4]: https://github.com/cmason3/jinjafx_server/compare/24.6.3...24.6.4
 [24.6.3]: https://github.com/cmason3/jinjafx_server/compare/24.6.2...24.6.3
 [24.6.2]: https://github.com/cmason3/jinjafx_server/compare/24.6.1...24.6.2
 [24.6.1]: https://github.com/cmason3/jinjafx_server/compare/24.6.0...24.6.1
