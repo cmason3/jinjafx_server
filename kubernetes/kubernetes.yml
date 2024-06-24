@@ -5,8 +5,12 @@ metadata:
   name: jinjafx-ingress
 spec:
   ingressClassName: public
+  tls:
+  - hosts:
+    - "*.{CLUSTER}.{DOMAIN}"
+    secretName: ingress-tls
   rules:
-  - host: jinjafx.<domain>
+  - host: "jinjafx.{CLUSTER}.{DOMAIN}"
     http:
       paths:
       - path: /
@@ -51,8 +55,8 @@ spec:
     spec:
       containers:
       - name: jinjafx
-        image: docker.io/cmason3/jinjafx_server:24.6.2-1
-        args: ["-pandoc", "-weblog"]
+        image: docker.io/cmason3/jinjafx_server:latest
+        args: ["-pandoc", "-github", "{OWNER}/{REPO}", "-weblog"]
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -67,6 +71,11 @@ spec:
         env:
         - name: TZ
           value: "Europe/London"
+        - name: GITHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: jinjafx
+              key: github-token
         - name: JFX_WEBLOG_KEY
           valueFrom:
             secretKeyRef:
