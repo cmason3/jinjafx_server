@@ -8,65 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" integrity="sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/fira_code.min.css" integrity="sha512-MbysAYimH1hH2xYzkkMHB6MqxBqfP0megxsCLknbYqHVwXTCg9IqHbk+ZP/vnhO8UEW6PaXAkKe2vQ+SWACxxA==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="/f8555653/jinjafx.css">
-    <style>
-      body {
-        color: white;
-        background: #000040;
-      }
-      pre {
-        height: 100%;
-        font-family: 'Fira Code', monospace;
-        font-size: 14px;
-        font-variant-ligatures: none;
-        white-space: pre-wrap;
-        word-break: break-all;
-        overflow-y: hidden;
-      }
-    </style>
-    <script>
-      (function() {
-        let interval = 60;
-
-        function scroll() {
-          let e = document.getElementById('container');
-          e.scrollTop = e.scrollHeight;
-        }
-
-        function update() {
-          var xHR = new XMLHttpRequest();
-          xHR.open("GET", '/logs?raw', true);
-
-          xHR.onload = function() {
-            if (this.status == 200) {
-              document.getElementById('container').innerHTML = xHR.responseText;
-              scroll();
-              setTimeout(update, interval * 1000);
-            }
-            else {
-              document.getElementById('container').innerHTML = 'HTTP ERROR ' + this.status;
-            }
-          };
-
-          xHR.onerror = function() {
-            document.getElementById('container').innerHTML = 'XMLHttpRequest ERROR';
-            setTimeout(update, interval * 1000);
-          };
-
-          xHR.ontimeout = function() {
-            document.getElementById('container').innerHTML = 'XMLHttpRequest TIMEOUT';
-            setTimeout(update, interval * 1000);
-          };
-
-          xHR.timeout = 3000;
-          xHR.send();
-        }
-
-        window.onresize = scroll;
-        window.onload = function() {
-          update();
-        };
-      })();
-    </script>
+    <link rel="stylesheet" href="/4d93d065/logs.css">
+    <script src="/4f5b7922/logs.js"></script>
   </head>
   <body>
     <pre id="container" class="p-3"></pre>
