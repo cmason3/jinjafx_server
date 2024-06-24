@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [24.6.3] - In Development
+### [24.6.3] - Jun 24, 2024
 - Fixed an issue with `/logs` as it didn't adhere to the default `Content-Security-Policy`
 - Updated instructions for deploying JinjaFx Server as a Container using Kubernetes
 
