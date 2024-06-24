@@ -123,10 +123,10 @@ function getStatusText(code) {
   };
 
   function select_dataset(e) {
-    switch_dataset(e.currentTarget.ds_name, true);
+    switch_dataset(e.currentTarget.ds_name, true, false);
   }
 
-  function switch_dataset(ds, sflag) {
+  function switch_dataset(ds, sflag, dflag) {
     if (sflag) {
       datasets[current_ds][0] = window.cmData.swapDoc(datasets[ds][0]);
       datasets[current_ds][1] = window.cmVars.swapDoc(datasets[ds][1]);
@@ -136,9 +136,11 @@ function getStatusText(code) {
       window.cmVars.swapDoc(datasets[ds][1]);
     }
     if (ds != current_ds) {
-      window.addEventListener('beforeunload', onBeforeUnload);
-      if (document.getElementById('get_link').value != 'false') {
-        document.title = 'JinjaFx [unsaved]';
+      if (dflag) {
+        window.addEventListener('beforeunload', onBeforeUnload);
+        if (document.getElementById('get_link').value != 'false') {
+          document.title = 'JinjaFx [unsaved]';
+        }
       }
       dirty = true;
       document.getElementById('selected_ds').innerHTML = ds;
@@ -210,7 +212,7 @@ function getStatusText(code) {
     //dirty = true;
 
     rebuild_datasets();
-    switch_dataset(Object.keys(datasets)[0], false);
+    switch_dataset(Object.keys(datasets)[0], false, true);
     fe.focus();
   }
 
@@ -559,7 +561,7 @@ function getStatusText(code) {
             dt.global = e(window.cmgVars.getValue().replace(/\t/g, "  "));
           }
 
-          switch_dataset(current_ds, true);
+          switch_dataset(current_ds, true, false);
           Object.keys(datasets).forEach(function(ds) {
             dt.datasets[ds] = {};
             dt.datasets[ds].data = e(datasets[ds][0].getValue());
@@ -1410,7 +1412,7 @@ function getStatusText(code) {
             //}
             //dirty = true;
           }
-          switch_dataset(new_ds, true);
+          switch_dataset(new_ds, true, true);
         }
         else {
           set_status("darkred", "ERROR", "Invalid Data Set Name");
