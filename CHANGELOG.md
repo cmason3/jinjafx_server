@@ -2,6 +2,7 @@
 
 ### [24.6.4] - In Development
 - The selected DataSet is now saved when you save the DataTemplate
+- Updated Pandoc to 3.2.1 in Dockerfile
 
 ### [24.6.3] - Jun 24, 2024
 - Fixed an issue with `/logs` as it didn't adhere to the default `Content-Security-Policy`
