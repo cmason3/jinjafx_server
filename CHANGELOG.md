@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [24.6.4] - In Development
+### [24.6.4] - Jun 26, 2024
 - The selected DataSet is now saved when you save the DataTemplate
 - Updated Pandoc to 3.2.1 in Dockerfile
 
