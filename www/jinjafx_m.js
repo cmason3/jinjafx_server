@@ -123,10 +123,10 @@ function getStatusText(code) {
   };
 
   function select_dataset(e) {
-    switch_dataset(e.currentTarget.ds_name, true);
+    switch_dataset(e.currentTarget.ds_name, true, false);
   }
 
-  function switch_dataset(ds, sflag) {
+  function switch_dataset(ds, sflag, dflag) {
     if (sflag) {
       datasets[current_ds][0] = window.cmData.swapDoc(datasets[ds][0]);
       datasets[current_ds][1] = window.cmVars.swapDoc(datasets[ds][1]);
@@ -136,6 +136,13 @@ function getStatusText(code) {
       window.cmVars.swapDoc(datasets[ds][1]);
     }
     if (ds != current_ds) {
+      if (dflag) {
+        window.addEventListener('beforeunload', onBeforeUnload);
+        if (document.getElementById('get_link').value != 'false') {
+          document.title = 'JinjaFx [unsaved]';
+        }
+      }
+      dirty = true;
       document.getElementById('selected_ds').innerHTML = ds;
       current_ds = ds;
       onDataBlur();
@@ -198,14 +205,14 @@ function getStatusText(code) {
 
   function delete_dataset(ds) {
     delete datasets[ds];
-    window.addEventListener('beforeunload', onBeforeUnload);
-    if (document.getElementById('get_link').value != 'false') {
-      document.title = 'JinjaFx [unsaved]';
-    }
-    dirty = true;
+    //window.addEventListener('beforeunload', onBeforeUnload);
+    //if (document.getElementById('get_link').value != 'false') {
+    //  document.title = 'JinjaFx [unsaved]';
+    //}
+    //dirty = true;
 
     rebuild_datasets();
-    switch_dataset(Object.keys(datasets)[0], false);
+    switch_dataset(Object.keys(datasets)[0], false, true);
     fe.focus();
   }
 
@@ -540,6 +547,7 @@ function getStatusText(code) {
           return false;
         }
 
+        dt.dataset = current_ds;
         dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
 
         if ((current_ds === 'Default') && (Object.keys(datasets).length === 1)) {
@@ -553,7 +561,7 @@ function getStatusText(code) {
             dt.global = e(window.cmgVars.getValue().replace(/\t/g, "  "));
           }
 
-          switch_dataset(current_ds, true);
+          switch_dataset(current_ds, true, false);
           Object.keys(datasets).forEach(function(ds) {
             dt.datasets[ds] = {};
             dt.datasets[ds].data = e(datasets[ds][0].getValue());
@@ -711,7 +719,12 @@ function getStatusText(code) {
             try {
               var dt = jsyaml.load(d(JSON.parse(this.responseText)['dt']), jsyaml_schema);
 
-              load_datatemplate(dt['dt'], qs);
+              if (dt.hasOwnProperty('dataset')) {
+                load_datatemplate(dt['dt'], qs, dt['dataset']);
+              }
+              else {
+                load_datatemplate(dt['dt'], qs, null);
+              }
               dt_id = qs.dt;
 
               document.getElementById('update').classList.remove('d-none');
@@ -1393,13 +1406,13 @@ function getStatusText(code) {
           if (!datasets.hasOwnProperty(new_ds)) {
             datasets[new_ds] = [CodeMirror.Doc('', 'data'), CodeMirror.Doc('', 'yaml')];
             rebuild_datasets();
-            window.addEventListener('beforeunload', onBeforeUnload);
-            if (document.getElementById('get_link').value != 'false') {
-              document.title = 'JinjaFx [unsaved]';
-            }
-            dirty = true;
+            //window.addEventListener('beforeunload', onBeforeUnload);
+            //if (document.getElementById('get_link').value != 'false') {
+            //  document.title = 'JinjaFx [unsaved]';
+            //}
+            //dirty = true;
           }
-          switch_dataset(new_ds, true);
+          switch_dataset(new_ds, true, true);
         }
         else {
           set_status("darkred", "ERROR", "Invalid Data Set Name");
@@ -1687,7 +1700,7 @@ function getStatusText(code) {
   }
 
   function apply_dt() {
-    load_datatemplate(pending_dt, null);
+    load_datatemplate(pending_dt, null, null);
     reset_location('');
     dt_id = '';
     dt_password = null;
@@ -1747,7 +1760,7 @@ function getStatusText(code) {
     }
   }
 
-  function load_datatemplate(_dt, _qs) {
+  function load_datatemplate(_dt, _qs, _ds) {
     try {
       current_ds = 'Default';
 
@@ -1762,7 +1775,12 @@ function getStatusText(code) {
           datasets[ds] = [CodeMirror.Doc(data, 'data'), CodeMirror.Doc(vars, 'yaml')];
         });
 
-        current_ds = Object.keys(datasets)[0];
+        if ((_ds == null) || !datasets.hasOwnProperty(_ds)) {
+          current_ds = Object.keys(datasets)[0];
+        }
+        else {
+          current_ds = _ds;
+        }
         window.cmData.swapDoc(datasets[current_ds][0]);
         window.cmVars.swapDoc(datasets[current_ds][1]);
 

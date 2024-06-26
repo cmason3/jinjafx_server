@@ -28,7 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '24.6.3'
+__version__ = '24.6.4'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -702,6 +702,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                       dt_yml += re.sub('^', ' ' * 4, vdt['template'], flags=re.MULTILINE) + '\n'
 
                     dt_yml += '\nrevision: ' + str(dt_revision) + '\n'
+                    dt_yml += 'dataset: "' + dt['dataset'] + '"\n'
 
                     dt_hash = hashlib.sha256(dt_yml.encode('utf-8')).hexdigest()
                     dt_yml += 'dt_hash: "' + dt_hash + '"\n'
