@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [24.7.0] - In Development
+- TBC
+
 ### [24.6.4] - Jun 26, 2024
 - The selected DataSet is now saved when you save the DataTemplate
 - Updated Pandoc to 3.2.1 in Dockerfile
@@ -323,6 +326,7 @@
 ### 21.11.0 - Nov 29, 2021
 - Initial release
 
+[24.7.0]: https://github.com/cmason3/jinjafx_server/compare/24.6.4...24.7.0
 [24.6.4]: https://github.com/cmason3/jinjafx_server/compare/24.6.3...24.6.4
 [24.6.3]: https://github.com/cmason3/jinjafx_server/compare/24.6.2...24.6.3
 [24.6.2]: https://github.com/cmason3/jinjafx_server/compare/24.6.1...24.6.2
