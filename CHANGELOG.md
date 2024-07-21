@@ -1,7 +1,7 @@
 ## CHANGELOG
 
 ### [24.7.0] - In Development
-- TBC
+- Removed 'Fira Code' font from `/logs` as it adds no value over 'Consolas'
 
 ### [24.6.4] - Jun 26, 2024
 - The selected DataSet is now saved when you save the DataTemplate
