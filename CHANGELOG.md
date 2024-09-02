@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [24.7.0] - In Development
+### [24.9.0] - In Development
 - Removed 'Fira Code' font from `/logs` as it adds no value over 'Consolas'
 
 ### [24.6.4] - Jun 26, 2024
