@@ -205,12 +205,6 @@ function getStatusText(code) {
 
   function delete_dataset(ds) {
     delete datasets[ds];
-    //window.addEventListener('beforeunload', onBeforeUnload);
-    //if (document.getElementById('get_link').value != 'false') {
-    //  document.title = 'JinjaFx [unsaved]';
-    //}
-    //dirty = true;
-
     rebuild_datasets();
     switch_dataset(Object.keys(datasets)[0], false, true);
     fe.focus();
@@ -1406,11 +1400,6 @@ function getStatusText(code) {
           if (!datasets.hasOwnProperty(new_ds)) {
             datasets[new_ds] = [CodeMirror.Doc('', 'data'), CodeMirror.Doc('', 'yaml')];
             rebuild_datasets();
-            //window.addEventListener('beforeunload', onBeforeUnload);
-            //if (document.getElementById('get_link').value != 'false') {
-            //  document.title = 'JinjaFx [unsaved]';
-            //}
-            //dirty = true;
           }
           switch_dataset(new_ds, true, true);
         }

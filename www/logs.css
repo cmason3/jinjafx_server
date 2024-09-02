@@ -4,7 +4,7 @@ body {
 }
 pre {
   height: 100%;
-  font-family: 'Fira Code', monospace;
+  font-family: Consolas, monaco, monospace;
   font-size: 14px;
   font-variant-ligatures: none;
   white-space: pre-wrap;

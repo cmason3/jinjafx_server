@@ -4,11 +4,10 @@ import sys, os, re, requests
 
 libraries = {
   'bootstrap': '5.3.3',
-  'codemirror': '5.65.16',
-  'firacode': '6.2.0',
+  'codemirror': '5.65.17',
   'split.js': '1.6.5',
   'js-yaml': '4.1.0',
-  'dayjs': '1.11.11',
+  'dayjs': '1.11.13',
   'pako': '2.1.0',
   'jszip': '3.10.1',
   'github-markdown-css': '5.6.1'
