@@ -1,5 +1,10 @@
 ## CHANGELOG
 
+### [24.9.1] - In Development
+- Updated `/logs` so it can scroll back through the history
+- Increased the size of `logring` from 128 to 1024
+- Updated Pandoc to 3.4 in Dockerfile
+
 ### [24.9.0] - Sep 2, 2024
 - Removed 'Fira Code' font from `/logs` as it adds no value over 'Consolas'
 - Updated `codemirror` JavaScript library to 5.65.17
@@ -329,6 +334,7 @@
 ### 21.11.0 - Nov 29, 2021
 - Initial release
 
+[24.9.1]: https://github.com/cmason3/jinjafx_server/compare/24.9.0...24.9.1
 [24.9.0]: https://github.com/cmason3/jinjafx_server/compare/24.6.4...24.9.0
 [24.6.4]: https://github.com/cmason3/jinjafx_server/compare/24.6.3...24.6.4
 [24.6.3]: https://github.com/cmason3/jinjafx_server/compare/24.6.2...24.6.3
