@@ -87,6 +87,8 @@ JinjaFx Server supports the ability to use "output" tags to create different out
 </output>
 ```
 
+You can also paste in an image and it will convert it to a Base64 encoded Data URI that is formatted as Markdown.
+
 ### Ansible Vault
 
 JinjaFx Server supports the ability to perform Ansible Vault encryption of strings from within the browser using client side JavaScript. By clicking on the padlock it will prompt you for your string and the password to use which you can then use within `vars.yml`. JinjaFx doesn't support the ability to use different passwords for different strings within the same DataTemplate so it is important that all vaulted strings are using the same password within the same DataTemplate.
