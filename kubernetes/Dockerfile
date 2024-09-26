@@ -20,4 +20,7 @@ FROM docker.io/library/python:3.12-slim
 COPY --from=BUILD /opt/jinjafx /opt/jinjafx
 COPY --from=BUILD /usr/bin/pandoc /usr/bin/pandoc
 
-ENTRYPOINT [ "/opt/jinjafx/bin/python3", "-u", "-m", "jinjafx_server", "-s", "-l", "0.0.0.0", "-p", "8080" ]
+ENV VIRTUAL_ENV /opt/jinjafx
+ENV PATH /opt/jinjafx/bin:${PATH}
+
+ENTRYPOINT [ "python3", "-u", "-m", "jinjafx_server", "-s", "-l", "0.0.0.0", "-p", "8080" ]

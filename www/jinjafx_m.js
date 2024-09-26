@@ -1708,6 +1708,11 @@ function getStatusText(code) {
     document.getElementById('protect').innerHTML = 'Protect Link';
   }
 
+  function onDrop(cm, e, target) {
+
+
+  }
+
   function onPaste(cm, e, target) {
     var clipboardData = (e.originalEvent || e).clipboardData;
 
