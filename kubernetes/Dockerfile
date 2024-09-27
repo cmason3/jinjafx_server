@@ -1,6 +1,6 @@
 FROM docker.io/library/python:3.12-slim AS BUILD
 
-ARG BRANCH="main"
+ARG BRANCH main
 
 RUN set -eux; \
 
