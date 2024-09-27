@@ -1108,15 +1108,15 @@ function getStatusText(code) {
         csv_on = false;
       };
   
-      //window.cmData.on("beforeChange", beforeChange);
-      //window.cmVars.on("beforeChange", beforeChange);
-      //window.cmgVars.on("beforeChange", beforeChange);
-      //window.cmTemplate.on("beforeChange", beforeChange);
+      window.cmData.on("paste", onPaste);
+      window.cmVars.on("paste", onPaste);
+      window.cmgVars.on("paste", onPaste);
+      window.cmTemplate.on("paste", onPaste);
 
-      window.cmData.on("paste", (cm, e) => onPaste(cm, e, window.cmData));
-      window.cmVars.on("paste", (cm, e) => onPaste(cm, e, window.cmVars));
-      window.cmgVars.on("paste", (cm, e) => onPaste(cm, e, window.cmgVars));
-      window.cmTemplate.on("paste", (cm, e) => onPaste(cm, e, window.cmTemplate));
+      window.cmData.on("drop", onDrop);
+      window.cmVars.on("drop", onDrop);
+      window.cmgVars.on("drop", onDrop);
+      window.cmTemplate.on("drop", onDrop);
 
       window.cmData.on("change", onChange);
       window.cmVars.on("change", onChange);
@@ -1708,15 +1708,8 @@ function getStatusText(code) {
     document.getElementById('protect').innerHTML = 'Protect Link';
   }
 
-  function onDrop(cm, e, target) {
-
-
-  }
-
-  function onPaste(cm, e, target) {
-    var clipboardData = (e.originalEvent || e).clipboardData;
-
-    if (clipboardData.items[0].type.indexOf("image") === 0) {
+  function onPasteOrDrop(e, obj, target) {
+    if (obj.items[0].type.indexOf("image") === 0) {
       e.preventDefault();
 
       var r = new FileReader();
@@ -1727,54 +1720,56 @@ function getStatusText(code) {
         var x = '![](' + e.target.result + ')';
         d.replaceRange(x, { line: c.line, ch: c.ch });
       };
-      r.readAsDataURL(clipboardData.items[0].getAsFile());
+      r.readAsDataURL(obj.files[0]);
     }
-    else {
-      var t = clipboardData.getData('text/plain');
+    else if (obj.items[0].type.indexOf("text") === 0) {
+      e.preventDefault();
 
-      if (t.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
-        var obj = jsyaml.load(t, jsyaml_schema);
-        if (obj != null) {
-          e.preventDefault();
-          pending_dt = obj['dt'];
+      var process_text = function(t) {
+        if (t.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
+          var obj = jsyaml.load(t, jsyaml_schema);
+          if (obj != null) {
+            pending_dt = obj['dt'];
 
-          if (dirty) {
-            if (confirm("Are You Sure?") === true) {
+            if (dirty) {
+              if (confirm("Are You Sure?") === true) {
+                apply_dt();
+              }
+            }
+            else {
               apply_dt();
             }
           }
-          else {
-            apply_dt();
-          }
         }
+        else {
+          var d = target.getDoc();
+          var c = d.getCursor();
+          d.replaceRange(t, { line: c.line, ch: c.ch });
+        }
+      };
+
+      if (typeof obj.files[0] !== "undefined") {
+        var r = new FileReader();
+        r.onload = function(re) {
+          process_text(re.target.result);
+        };
+        r.readAsText(obj.files[0]);
+      }
+      else {
+        process_text(obj.getData("text"));
       }
     }
   }
 
-  /*
-  function beforeChange(cm, change) {
-    if (change.origin === "paste") {
-      var t = change.text.join('\n');
-
-      if (t.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
-        var obj = jsyaml.load(t, jsyaml_schema);
-        if (obj != null) {
-          change.cancel();
-          pending_dt = obj['dt'];
-
-          if (dirty) {
-            if (confirm("Are You Sure?") === true) {
-              apply_dt();
-            }
-          }
-          else {
-            apply_dt();
-          }
-        }
-      }
-    }
+  function onDrop(cm, e) {
+    var dataTransfer = (e.originalEvent || e).dataTransfer;
+    onPasteOrDrop(e, dataTransfer, cm);
   }
-  */
+
+  function onPaste(cm, e) {
+    var clipboardData = (e.originalEvent || e).clipboardData;
+    onPasteOrDrop(e, clipboardData, cm);
+  }
 
   function onBeforeUnload(e) {
     e.returnValue = 'Are you sure?';
