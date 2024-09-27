@@ -932,7 +932,7 @@ function getStatusText(code) {
         scrollbarStyle: "null",
         styleSelectedText: false,
         extraKeys: gExtraKeys,
-//        mode: "data",
+        mode: "data",
         viewportMargin: 80,
         smartIndent: false
       });
@@ -942,7 +942,7 @@ function getStatusText(code) {
         scrollbarStyle: "null",
         styleSelectedText: false,
         extraKeys: gExtraKeys,
-//        mode: "yaml",
+        mode: "yaml",
         viewportMargin: 80,
         smartIndent: false,
         showTrailingSpace: true
@@ -953,7 +953,7 @@ function getStatusText(code) {
         scrollbarStyle: "null",
         styleSelectedText: false,
         extraKeys: gExtraKeys,
-//        mode: "yaml",
+        mode: "yaml",
         viewportMargin: 80,
         smartIndent: false,
         showTrailingSpace: true
@@ -1072,7 +1072,7 @@ function getStatusText(code) {
         scrollbarStyle: "null",
         styleSelectedText: false,
         extraKeys: gExtraKeys,
-//        mode: "template",
+        mode: "template",
         viewportMargin: 80,
         smartIndent: false,
         showTrailingSpace: true,
