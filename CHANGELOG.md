@@ -5,6 +5,7 @@
 - Updated `/logs` so it can scroll back through the history
 - Increased the size of `logring` from 128 to 1024
 - Updated Dockerfile so it sets `VIRTUAL_ENV` and `PATH` correctly
+- Updated Dockerfile to Python 3.13
 - Updated DataTemplate Export so it wraps long lines
 - Updated Pandoc to 3.4 in Dockerfile
 
