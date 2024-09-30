@@ -4,7 +4,6 @@ body {
 }
 pre {
   height: 100%;
-  font-size: unset;
   font-variant-ligatures: none;
   white-space: pre-wrap;
   word-break: break-all;
