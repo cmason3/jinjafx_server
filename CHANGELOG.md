@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [24.9.1] - In Development
+### [24.10.0] - In Development
 - Updated `/logs` so it can scroll back through the history
 - Increased the size of `logring` from 128 to 1024
 - Updated Pandoc to 3.4 in Dockerfile

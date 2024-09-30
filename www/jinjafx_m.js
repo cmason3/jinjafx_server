@@ -1709,9 +1709,36 @@ function getStatusText(code) {
   }
 
   function onPasteOrDrop(e, obj, target) {
-    if (obj.items[0].type.indexOf("image") === 0) {
-      e.preventDefault();
+    var process_text = function(t) {
+      if (t.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
+        var obj = jsyaml.load(t, jsyaml_schema);
+        if (obj != null) {
+          pending_dt = obj['dt'];
 
+          if (dirty) {
+            if (confirm("Are You Sure?") === true) {
+              apply_dt();
+            }
+          }
+          else {
+            apply_dt();
+          }
+        }
+      }
+      else {
+        var d = target.getDoc();
+        var c = d.getCursor();
+        d.replaceRange(t, { line: c.line, ch: c.ch });
+      }
+    };
+
+    e.preventDefault();
+
+    var t = obj.getData("text");
+    if (t.length) {
+      process_text(t);
+    }
+    else if (obj.items[0].type.indexOf("image") === 0) {
       var r = new FileReader();
       r.onload = function(e) {
         var d = target.getDoc();
@@ -1723,41 +1750,11 @@ function getStatusText(code) {
       r.readAsDataURL(obj.files[0]);
     }
     else {
-      e.preventDefault();
-
-      var process_text = function(t) {
-        if (t.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
-          var obj = jsyaml.load(t, jsyaml_schema);
-          if (obj != null) {
-            pending_dt = obj['dt'];
-
-            if (dirty) {
-              if (confirm("Are You Sure?") === true) {
-                apply_dt();
-              }
-            }
-            else {
-              apply_dt();
-            }
-          }
-        }
-        else {
-          var d = target.getDoc();
-          var c = d.getCursor();
-          d.replaceRange(t, { line: c.line, ch: c.ch });
-        }
+      var r = new FileReader();
+      r.onload = function(e) {
+        process_text(e.target.result);
       };
-
-      if (typeof obj.files[0] !== "undefined") {
-        var r = new FileReader();
-        r.onload = function(re) {
-          process_text(re.target.result);
-        };
-        r.readAsText(obj.files[0]);
-      }
-      else {
-        process_text(obj.getData("text"));
-      }
+      r.readAsText(obj.files[0]);
     }
   }
 
