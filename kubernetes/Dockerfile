@@ -1,4 +1,4 @@
-FROM docker.io/library/python:3.13-slim AS BUILD
+FROM docker.io/library/python:3.13-rc-slim AS BUILD
 
 ARG BRANCH main
 
@@ -15,7 +15,7 @@ python3 -m venv /opt/jinjafx; \
 /opt/jinjafx/bin/python3 -m pip uninstall -y pip
 
 
-FROM docker.io/library/python:3.13-slim
+FROM docker.io/library/python:3.13-rc-slim
 
 COPY --from=BUILD /opt/jinjafx /opt/jinjafx
 COPY --from=BUILD /usr/bin/pandoc /usr/bin/pandoc
