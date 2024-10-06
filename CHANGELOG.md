@@ -7,7 +7,7 @@
 - Updated Dockerfile so it sets `VIRTUAL_ENV` and `PATH` correctly
 - Updated Dockerfile to Python 3.13
 - Updated DataTemplate Export so it wraps long lines
-- Updated Pandoc to 3.4 in Dockerfile
+- Updated Pandoc to 3.5 in Dockerfile
 
 ### [24.9.0] - Sep 2, 2024
 - Removed 'Fira Code' font from `/logs` as it adds no value over 'Consolas'
