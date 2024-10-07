@@ -1,11 +1,11 @@
 ## CHANGELOG
 
 ### [24.10.0] - In Development
-- Rewrote how Drop and Paste is handled - we now support dropping or pasting in images and they are converted to Markdown Data URIs - however, there is a performance issue with large images - this won't get fixed until I migrate to CodeMirror 6
+- Rewrote how Drop and Paste is handled - we now support dropping or pasting images and they are converted to Markdown Data URIs - however, there is a performance issue with large images - this won't get fixed until I migrate to CodeMirror 6
 - Updated `/logs` so it can scroll back through the history
-- Increased the size of `logring` from 128 to 1024
+- Increased the size of the `logring` from 128 to 1024
 - Updated Dockerfile so it sets `VIRTUAL_ENV` and `PATH` correctly
-- Updated Dockerfile to Python 3.13
+- Updated Dockerfile to use Python 3.13
 - Updated DataTemplate Export so it wraps long lines
 - Updated Pandoc to 3.5 in Dockerfile
 
