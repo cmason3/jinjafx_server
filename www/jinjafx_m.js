@@ -1738,23 +1738,29 @@ function getStatusText(code) {
     if (t.length) {
       process_text(t);
     }
-    else if (obj.items[0].type.indexOf("image") === 0) {
-      var r = new FileReader();
-      r.onload = function(e) {
-        var d = target.getDoc();
-        var c = d.getCursor();
-
-        var x = '![](' + e.target.result + ')';
-        d.replaceRange(x, { line: c.line, ch: c.ch });
-      };
-      r.readAsDataURL(obj.files[0]);
-    }
     else {
+      for (var i in obj.items) {
+        if ((typeof obj.items[i].type !== 'undefined') && (obj.items[i].type.indexOf("image") === 0)) {
+          var b = obj.items[i].getAsFile();
+          var r = new FileReader();
+          r.onload = function(e) {
+            var d = target.getDoc();
+            var c = d.getCursor();
+
+            var x = '![](' + e.target.result + ')';
+            d.replaceRange(x, { line: c.line, ch: c.ch });
+          };
+          r.readAsDataURL(b);
+          return;
+        }
+      }
+
+      var b = obj.items[0].getAsFile();
       var r = new FileReader();
       r.onload = function(e) {
         process_text(e.target.result);
       };
-      r.readAsText(obj.files[0]);
+      r.readAsText(b);
     }
   }
 
