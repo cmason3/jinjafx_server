@@ -1726,9 +1726,7 @@ function getStatusText(code) {
         }
       }
       else {
-        var d = target.getDoc();
-        var c = d.getCursor();
-        d.replaceRange(t, { line: c.line, ch: c.ch });
+        target.getDoc().replaceSelection(t);
       }
     };
 
@@ -1744,11 +1742,8 @@ function getStatusText(code) {
           var b = obj.items[i].getAsFile();
           var r = new FileReader();
           r.onload = function(e) {
-            var d = target.getDoc();
-            var c = d.getCursor();
-
             var x = '![](' + e.target.result + ')';
-            d.replaceRange(x, { line: c.line, ch: c.ch });
+            target.getDoc().replaceSelection(x);
           };
           r.readAsDataURL(b);
           return;
