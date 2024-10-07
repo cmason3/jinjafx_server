@@ -4,10 +4,14 @@ body {
 }
 pre {
   height: 100%;
-  font-family: Consolas, monaco, monospace;
-  font-size: 14px;
   font-variant-ligatures: none;
   white-space: pre-wrap;
   word-break: break-all;
-  overflow-y: hidden;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+pre::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
