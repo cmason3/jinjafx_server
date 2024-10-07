@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [24.10.0] - In Development
+### [24.10.0] - Oct 7, 2024
 - Rewrote how Drop and Paste is handled - we now support dropping or pasting images and they are converted to Markdown Data URIs - however, there is a performance issue with large images - this won't get fixed until I migrate to CodeMirror 6
 - Updated `/logs` so it can scroll back through the history
 - Increased the size of the `logring` from 128 to 1024
