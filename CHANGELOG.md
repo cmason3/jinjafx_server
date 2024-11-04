@@ -1,5 +1,10 @@
 ## CHANGELOG
 
+### [24.10.1] - Nov 4, 2024
+- Don't call `socket.shutdown()` before `socket.close()` else it raises an error on MacOS
+- Updated `github-markdown-css` to 5.7.0
+- Updated `codemirror` to 5.65.18
+
 ### [24.10.0] - Oct 7, 2024
 - Rewrote how Drop and Paste is handled - we now support dropping or pasting images and they are converted to Markdown Data URIs - however, there is a performance issue with large images - this won't get fixed until I migrate to CodeMirror 6
 - Updated `/logs` so it can scroll back through the history
@@ -338,6 +343,7 @@
 ### 21.11.0 - Nov 29, 2021
 - Initial release
 
+[24.10.1]: https://github.com/cmason3/jinjafx_server/compare/24.10.0...24.10.1
 [24.10.0]: https://github.com/cmason3/jinjafx_server/compare/24.9.0...24.10.0
 [24.9.0]: https://github.com/cmason3/jinjafx_server/compare/24.6.4...24.9.0
 [24.6.4]: https://github.com/cmason3/jinjafx_server/compare/24.6.3...24.6.4
