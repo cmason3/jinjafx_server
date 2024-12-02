@@ -1,5 +1,10 @@
 ## CHANGELOG
 
+### [24.12.0] - Dec 2, 2024
+- Updated `data.csv` pane so it handles escaped commas as per JinjaFx 1.22.1
+- Updated `github-markdown-css` to 5.8.1
+- Updated copyright notices in preparation for 2025
+
 ### [24.10.1] - Nov 4, 2024
 - Don't call `socket.shutdown()` before `socket.close()` else it raises an error on MacOS
 - Updated `github-markdown-css` to 5.7.0
