@@ -1645,7 +1645,7 @@ function getStatusText(code) {
   function get_csv_astable(datarows) {
     var tc = (datarows[0].match(/\t/g) || []).length;
     var cc = (datarows[0].match(/,/g) || []).length;
-    var delim = new RegExp(cc > tc ? '[ \\t]*,[ \\t]*' : ' *\\t *');
+    var delim = new RegExp(cc > tc ? '[ \\t]*(?<!\\\\),[ \\t]*' : ' *\\t *');
     var hrow = datarows[0].split(delim);
 
     var table = '<table class="table table-responsive table-hover table-sm">';
@@ -1666,7 +1666,7 @@ function getStatusText(code) {
       }
 
       for (var col = 0; col < hrow.length; col++) {
-        var value = ((col < rowdata.length) ? quote(rowdata[col]) : '');
+        var value = ((col < rowdata.length) ? quote(rowdata[col]) : '').replace(/\\,/g, ',');
         table += '<td>' + (!value.match(/\S/) ? '&nbsp;' : value) + '</td>';
       }
       table += '</tr>';
