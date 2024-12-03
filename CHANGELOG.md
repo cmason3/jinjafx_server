@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [24.12.1] - Dec 3, 2024
+- Fixed an issue where rows with an incorrect number of fields in `data.csv` weren't being coloured red
+
 ### [24.12.0] - Dec 2, 2024
 - Updated `data.csv` pane so it handles escaped commas as per JinjaFx 1.22.1
 - Updated `github-markdown-css` to 5.8.1
@@ -348,6 +351,7 @@
 ### 21.11.0 - Nov 29, 2021
 - Initial release
 
+[24.12.1]: https://github.com/cmason3/jinjafx_server/compare/24.12.0...24.12.1
 [24.12.0]: https://github.com/cmason3/jinjafx_server/compare/24.10.1...24.12.0
 [24.10.1]: https://github.com/cmason3/jinjafx_server/compare/24.10.0...24.10.1
 [24.10.0]: https://github.com/cmason3/jinjafx_server/compare/24.9.0...24.10.0

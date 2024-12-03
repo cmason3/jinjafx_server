@@ -1659,7 +1659,7 @@ function getStatusText(code) {
       var rowdata = datarows[row].split(delim);
 
       if (rowdata.length != hrow.length) {
-        table += '<tr class="bg-danger">';
+        table += '<tr class="table-danger">';
       }
       else {
         table += '<tr>';
