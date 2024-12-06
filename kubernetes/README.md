@@ -17,7 +17,7 @@ Once you have updated `kubernetes.yml` with your deployment specific values you 
 The following step is used to generate a CSR for your TLS certificiate. The Common Name (CN) isn't actually used as we will be using the "subjectAltName" field as it allows multiple values (you could also use something like Let's Encrypt here, but this is out of scope of this document):
 
 ```
-openssl req -nodes -newkey rsa:2048 -keyout ingress.key -out ingress.csr -subj "/CN={CN}/emailAddress={emailAddress}/O={O}/L={L}/ST={ST}/C={C}" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:*.{CLUSTER}.{DOMAIN}"))
+openssl req -nodes -newkey rsa:2048 -keyout ingress.key -out ingress.csr -subj "/CN={CN}/emailAddress={emailAddress}/O={O}/L={L}/ST={ST}/C={C}" -addext "subjectAltName=DNS:*.{CLUSTER}.{DOMAIN}"
 ```
 
 ### Generate TLS Secret with Signed Certificate
