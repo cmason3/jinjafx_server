@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.1.0] - In Development
+- Updated Pandoc to 3.6 in Dockerfile
+
 ### [24.12.1] - Dec 3, 2024
 - Fixed an issue where rows with an incorrect number of fields in `data.csv` weren't being coloured red
 
@@ -351,6 +354,8 @@
 ### 21.11.0 - Nov 29, 2021
 - Initial release
 
+
+[25.1.0]: https://github.com/cmason3/jinjafx_server/compare/24.12.1...25.1.0
 [24.12.1]: https://github.com/cmason3/jinjafx_server/compare/24.12.0...24.12.1
 [24.12.0]: https://github.com/cmason3/jinjafx_server/compare/24.10.1...24.12.0
 [24.10.1]: https://github.com/cmason3/jinjafx_server/compare/24.10.0...24.10.1
