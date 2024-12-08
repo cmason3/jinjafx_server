@@ -1,6 +1,7 @@
 ## CHANGELOG
 
 ### [25.1.0] - In Development
+- Don't update modify time of local repository files on access
 - Updated Pandoc to 3.6 in Dockerfile
 
 ### [24.12.1] - Dec 3, 2024

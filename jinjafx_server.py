@@ -329,7 +329,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   
                     r = [ 'application/json', 200, json.dumps({ 'dt': self.e(rr).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
   
-                  os.utime(fpath, None)
+                  # os.utime(fpath, None)
   
                 else:
                   r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
