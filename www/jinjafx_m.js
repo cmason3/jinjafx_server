@@ -1554,6 +1554,7 @@ function getStatusText(code) {
         else {
           set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
           reset_location('');
+          document.getElementById('templates').style.visibility = 'visible';
           loaded = true;
         }
       }
@@ -1578,11 +1579,13 @@ function getStatusText(code) {
           else {
             set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
             reset_location('');
+            document.getElementById('templates').style.visibility = 'visible';
             loaded = true;
           }
         }
         else {
           reset_location('');
+          document.getElementById('templates').style.visibility = 'visible';
           loaded = true;
         }
       }
@@ -1607,6 +1610,7 @@ function getStatusText(code) {
   function remove_info() {
     document.getElementById('template_info').classList.add('fade-out');
     document.getElementById('template_info').style.zIndex = -1000;
+    document.getElementById('templates').style.visibility = 'visible';
   }
 
   function set_wait() {
@@ -1786,6 +1790,7 @@ function getStatusText(code) {
         if (editor == window.cmTemplate) {
           document.getElementById('template_info').classList.add('fade-out');
           document.getElementById('template_info').style.zIndex = -1000;
+          document.getElementById('templates').style.visibility = 'visible';
           tinfo = false;
         }
       }

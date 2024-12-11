@@ -71,6 +71,13 @@ textarea {
   border-radius: 0.5rem;
   padding: 10px;
 }
+.templates {
+  position: absolute;
+  z-index: 2;
+  right: 5px;
+  top: 5px;
+  visibility: hidden;
+}
 .info {
   position: absolute;
   z-index: 2;
