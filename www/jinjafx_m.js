@@ -142,13 +142,14 @@ function getStatusText(code) {
 
   function switch_dataset(ds, sflag, dflag) {
     if (sflag) {
-      datasets[current_ds][0] = window.cmData.getDoc(); //swapDoc(datasets[ds][0]);
-      datasets[current_ds][1] = window.cmVars.getDoc(); //swapDoc(datasets[ds][1]);
+      datasets[current_ds][0] = window.cmData.getDoc();
+      datasets[current_ds][1] = window.cmVars.getDoc();
     }
-    window.cmData.swapDoc(datasets[ds][0]);
-    window.cmVars.swapDoc(datasets[ds][1]);
    
     if (ds != current_ds) {
+      window.cmData.swapDoc(datasets[ds][0]);
+      window.cmVars.swapDoc(datasets[ds][1]);
+
       if (dflag) {
         window.addEventListener('beforeunload', onBeforeUnload);
         if (document.getElementById('get_link').value != 'false') {
@@ -164,22 +165,16 @@ function getStatusText(code) {
   }
 
   function select_template(e) {
-    switch_template(e.currentTarget.t_name, true, false);
+    switch_template(e.currentTarget.t_name, true);
   }
 
-  function switch_template(t, sflag, dflag) {
+  function switch_template(t, sflag) {
     if (sflag) {
       templates[current_t] = window.cmTemplate.getDoc();
     }
-    window.cmTemplate.swapDoc(templates[t]);
    
     if (t != current_t) {
-      if (dflag) {
-        window.addEventListener('beforeunload', onBeforeUnload);
-        if (document.getElementById('get_link').value != 'false') {
-          document.title = 'JinjaFx [unsaved]';
-        }
-      }
+      window.cmTemplate.swapDoc(templates[t]);
       document.getElementById('delete_t').disabled = (t == 'Default');
       document.getElementById('selected_t').innerHTML = t;
       current_t = t;
@@ -275,7 +270,7 @@ function getStatusText(code) {
   function delete_template(t) {
     delete templates[t];
     rebuild_templates();
-    switch_template(Object.keys(templates).sort(default_on_top)[0], false, true);
+    switch_template(Object.keys(templates).sort(default_on_top)[0], false);
     fe.focus();
   }
 
@@ -404,7 +399,7 @@ function getStatusText(code) {
       return false;
     }
 
-    switch_template(current_t, true, false);
+    switch_template(current_t, true);
     if (templates['Default'].getValue().length === 0) {
       window.cmTemplate.focus();
       set_status("darkred", "ERROR", "No Template");
@@ -1536,7 +1531,7 @@ function getStatusText(code) {
             templates[new_t] = CodeMirror.Doc('', 'template');
             rebuild_templates();
           }
-          switch_template(new_t, true, true);
+          switch_template(new_t, true);
         }
         else {
           set_status("darkred", "ERROR", "Invalid Template Name");
