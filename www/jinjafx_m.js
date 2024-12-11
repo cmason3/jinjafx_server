@@ -259,7 +259,7 @@ function getStatusText(code) {
 
     if (Object.keys(templates).length > 1) {
       document.getElementById('select_t').disabled = false;
-      document.getElementById('delete_t').disabled = false;
+      document.getElementById('delete_t').disabled = (current_t == 'Default');
     }
     else {
       document.getElementById('select_t').disabled = true;

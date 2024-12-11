@@ -51,7 +51,6 @@ a:link {
 a:hover {
   text-decoration: underline;
 }
-
 .btn-primary {
   --bs-btn-color: #fff;
   --bs-btn-disabled-color: #fff;
