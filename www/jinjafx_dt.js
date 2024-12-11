@@ -33,7 +33,7 @@
 
         dtx += '  datasets:\n';
 
-        Object.keys(dt.datasets).forEach(function(ds) {
+        Object.keys(dt.datasets).sort(window.opener.default_on_top).forEach(function(ds) {
           var data = dt.datasets[ds].data.match(/\S/) ? window.opener.d(dt.datasets[ds].data).replace(/\s+$/g, '') : "";
           var vars = dt.datasets[ds].vars.match(/\S/) ? window.opener.d(dt.datasets[ds].vars).replace(/\s+$/g, '') : "";
 

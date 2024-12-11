@@ -16,6 +16,16 @@ function rot47(data) {
   });
 }
 
+function default_on_top(a, b) {
+  if (a == 'Default') {
+    return -1;
+  }
+  else if (b == 'Default') {
+    return 1;
+  }
+  return a.localeCompare(b);
+}
+
 var _fromCC = String.fromCharCode.bind(String);
 
 function _utob(c) {
@@ -153,7 +163,7 @@ function getStatusText(code) {
   function rebuild_datasets() {
     document.getElementById('datasets').innerHTML = '';
 
-    Object.keys(datasets).forEach(function(ds) {
+    Object.keys(datasets).sort(default_on_top).forEach(function(ds) {
       var a = document.createElement('a');
       a.classList.add('dropdown-item', 'text-decoration-none');
       a.addEventListener('click', select_dataset, false);
