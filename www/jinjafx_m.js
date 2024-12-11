@@ -180,7 +180,6 @@ function getStatusText(code) {
           document.title = 'JinjaFx [unsaved]';
         }
       }
-      dirty = true;
       document.getElementById('delete_t').disabled = (t == 'Default');
       document.getElementById('selected_t').innerHTML = t;
       current_t = t;
