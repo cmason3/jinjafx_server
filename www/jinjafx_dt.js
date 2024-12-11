@@ -40,7 +40,7 @@
           dtx += '    "' + ds + '":\n';
 
           if (data == '') {
-            dtx += '      data: ""\n\n';
+            dtx += '      data: ""\n';
           }
           else {
             dtx += '      data: |2\n';
@@ -61,7 +61,7 @@
         var vars = dt.vars.match(/\S/) ? window.opener.d(dt.vars).replace(/\s+$/g, '') : "";
 
         if (data == '') {
-          dtx += '  data: ""\n\n';
+          dtx += '  data: ""\n';
         }
         else {
           dtx += '  data: |2\n';
@@ -84,7 +84,7 @@
           var template = dt.template[t].match(/\S/) ? window.opener.d(dt.template[t]).replace(/\s+$/g, '') : "";
 
           if (template == '') {
-            dtx += '    "' + t + '": ""\n\n';
+            dtx += '    "' + t + '": ""\n';
           }
           else {
             dtx += '    "' + t + '": |2\n';

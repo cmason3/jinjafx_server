@@ -329,8 +329,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   
                     r = [ 'application/json', 200, json.dumps({ 'dt': self.e(rr).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
   
-                  # os.utime(fpath, None)
-  
                 else:
                   r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
   
@@ -483,8 +481,16 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               gvars = {}
 
               dt = json.loads(postdata.decode('utf-8'))
-              template = self.d(dt['template']) if 'template' in dt and len(dt['template'].strip()) > 0 else b''
               data = self.d(dt['data']) if 'data' in dt and len(dt['data'].strip()) > 0 else b''
+
+              if isinstance(dt['template'], dict):
+                for t in dt['template']:
+                  dt['template'][t] = self.d(dt['template'][t]).decode('utf-8') if len(dt['template'][t].strip()) > 0 else ''
+
+              else:
+                dt['template'] = self.d(dt['template']).decode('utf-8') if len(dt['template'].strip()) > 0 else ''
+
+              template = dt['template']
 
               if 'vars' in dt and len(dt['vars'].strip()) > 0:
                 gyaml = self.d(dt['vars']).decode('utf-8')
@@ -511,7 +517,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               ocount = 0
               ret = [0, None]
 
-              t = StoppableJinjaFx(jinjafx.JinjaFx().jinjafx, template.decode('utf-8'), data.decode('utf-8'), gvars, ret)
+              t = StoppableJinjaFx(jinjafx.JinjaFx().jinjafx, template, data.decode('utf-8'), gvars, ret)
 
               if timelimit > 0:
                 while t.is_alive() and ((time.time() * 1000) - st) <= (timelimit * 1000):
@@ -666,7 +672,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                         dt_yml += '    "' + ds + '":\n'
 
                         if vdt['data'] == '':
-                          dt_yml += '      data: ""\n\n'
+                          dt_yml += '      data: ""\n'
                         else:
                           dt_yml += '      data: |2\n'
                           dt_yml += re.sub('^', ' ' * 8, vdt['data'].rstrip(), flags=re.MULTILINE) + '\n\n'
@@ -682,7 +688,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                       vdt['vars'] = self.d(dt['vars']).decode('utf-8') if 'vars' in dt and len(dt['vars'].strip()) > 0 else ''
 
                       if vdt['data'] == '':
-                        dt_yml += '  data: ""\n\n'
+                        dt_yml += '  data: ""\n'
                       else:
                         dt_yml += '  data: |2\n'
                         dt_yml += re.sub('^', ' ' * 4, vdt['data'].rstrip(), flags=re.MULTILINE) + '\n\n'
@@ -693,15 +699,31 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                         dt_yml += '  vars: |2\n'
                         dt_yml += re.sub('^', ' ' * 4, vdt['vars'].rstrip(), flags=re.MULTILINE) + '\n\n'
 
-                    vdt['template'] = self.d(dt['template']).decode('utf-8') if 'template' in dt and len(dt['template'].strip()) > 0 else ''
+                    if isinstance(dt['template'], dict):
+                      dt_yml += '  template:\n'
 
-                    if vdt['template'] == '':
-                      dt_yml += '  template: ""\n'
+                      for t in dt['template']:
+                        te = self.d(dt['template'][t]).decode('utf-8') if len(dt['template'][t].strip()) > 0 else ''
+
+                        if te == '':
+                          dt_yml += '    "' + t + '": ""\n'
+                        else:
+                          dt_yml += '    "' + t + '": |2\n'
+                          dt_yml += re.sub('^', ' ' * 6, te, flags=re.MULTILINE) + '\n\n'
+                          
                     else:
-                      dt_yml += '  template: |2\n'
-                      dt_yml += re.sub('^', ' ' * 4, vdt['template'], flags=re.MULTILINE) + '\n'
+                      te = self.d(dt['template']).decode('utf-8') if len(dt['template'].strip()) > 0 else ''
 
-                    dt_yml += '\nrevision: ' + str(dt_revision) + '\n'
+                      if te == '':
+                        dt_yml += '  template: ""\n'
+                      else:
+                        dt_yml += '  template: |2\n'
+                        dt_yml += re.sub('^', ' ' * 4, te, flags=re.MULTILINE) + '\n\n'
+
+                    if not dt_yml.endswith('\n\n'):
+                      dt_yml += '\n'
+
+                    dt_yml += 'revision: ' + str(dt_revision) + '\n'
                     dt_yml += 'dataset: "' + dt['dataset'] + '"\n'
 
                     dt_hash = hashlib.sha256(dt_yml.encode('utf-8')).hexdigest()
@@ -1035,7 +1057,6 @@ def main(rflag=[0]):
 
   finally:
     if rflag[0] > 0:
-#      s.shutdown(1)
       s.close()
 
 

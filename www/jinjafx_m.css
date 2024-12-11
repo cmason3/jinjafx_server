@@ -76,7 +76,6 @@ textarea {
   z-index: 2;
   right: 5px;
   top: 5px;
-  visibility: hidden;
 }
 .info {
   position: absolute;

@@ -318,8 +318,18 @@ function getStatusText(code) {
   function jinjafx_generate() {
     var vaulted_vars = dt.vars.indexOf('$ANSIBLE_VAULT;') > -1;
     dt.vars = e(dt.vars);
-    // FIXME - NEED SOME WORK!
-    dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
+
+    if (Object.keys(templates).length === 1) {
+      dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
+    }
+    else {
+      dt.template = {};
+
+      Object.keys(templates).sort(default_on_top).forEach(function(t) {
+        dt.template[t] = e(templates[t].getValue().replace(/\t/g, "  "));
+      });
+    }
+
     dt.id = dt_id;
     dt.dataset = current_ds;
 
@@ -640,7 +650,7 @@ function getStatusText(code) {
           dt.template = {};
 
           Object.keys(templates).sort(default_on_top).forEach(function(t) {
-            dt.template[t] = e(templates[t].getValue());
+            dt.template[t] = e(templates[t].getValue().replace(/\t/g, "  "));
           });
         }
 
@@ -1681,7 +1691,6 @@ function getStatusText(code) {
         else {
           set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
           reset_location('');
-          document.getElementById('stemplates').style.visibility = 'visible';
           loaded = true;
         }
       }
@@ -1706,13 +1715,11 @@ function getStatusText(code) {
           else {
             set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
             reset_location('');
-            document.getElementById('stemplates').style.visibility = 'visible';
             loaded = true;
           }
         }
         else {
           reset_location('');
-          document.getElementById('stemplates').style.visibility = 'visible';
           loaded = true;
         }
       }
@@ -1720,6 +1727,7 @@ function getStatusText(code) {
         if (document.getElementById('get_link').value != 'false') {
           document.getElementById('lbuttons').classList.remove('d-none');
         }
+        document.getElementById('stemplates').style.visibility = 'hidden';
         document.getElementById('template_info').style.visibility = 'visible';
         loaded = true;
       }
@@ -1964,8 +1972,27 @@ function getStatusText(code) {
         window.cmVars.swapDoc(datasets['Default'][1]);
       }
 
-      // FIXME: NEED SOME WORK HERE!
-      window.cmTemplate.setValue(_dt.hasOwnProperty("template") ? _dt.template : "");
+      if (_dt.hasOwnProperty("template")) {
+        if (typeof _dt['template'] == "object") {
+          templates = {};
+
+          Object.keys(_dt['template']).forEach(function(t) {
+            templates[t] = CodeMirror.Doc(_dt['template'][t], 'template');
+          });
+        }
+        else {
+          templates = {
+            'Default': CodeMirror.Doc(_dt['template'], 'template')
+          };
+        }
+      }
+      else {
+        templates = {
+          'Default': CodeMirror.Doc('', 'template')
+        };
+      }
+
+      window.cmTemplate.swapDoc(templates[current_t]);
 
       window.cmData.getDoc().clearHistory();
       window.cmVars.getDoc().clearHistory();
@@ -1973,6 +2000,7 @@ function getStatusText(code) {
       window.cmTemplate.getDoc().clearHistory();
 
       rebuild_datasets();
+      rebuild_templates();
       loaded = true;
     }
     catch (ex) {
