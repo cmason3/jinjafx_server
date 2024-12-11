@@ -107,7 +107,11 @@ function getStatusText(code) {
   var datasets = {
     'Default': [CodeMirror.Doc('', 'data'), CodeMirror.Doc('', 'yaml')]
   };
+  var templates = {
+    'Default': CodeMirror.Doc('', 'template')
+  };
   var current_ds = 'Default';
+  var current_t = 'Default';
   var pending_dt = '';
   var dt_password = null;
   var dt_opassword = null;
@@ -160,6 +164,32 @@ function getStatusText(code) {
     fe.focus();
   }
 
+  function select_template(e) {
+    switch_template(e.currentTarget.t_name, true, false);
+  }
+
+  function switch_template(t, sflag, dflag) {
+    if (sflag) {
+      templates[current_t] = window.cmTemplate.swapDoc(templates[t]);
+    }
+    else {
+      window.cmTemplate.swapDoc(templates[t]);
+    }
+    if (t != current_t) {
+      if (dflag) {
+        window.addEventListener('beforeunload', onBeforeUnload);
+        if (document.getElementById('get_link').value != 'false') {
+          document.title = 'JinjaFx [unsaved]';
+        }
+      }
+      dirty = true;
+      document.getElementById('selected_t').innerHTML = t;
+      current_t = t;
+      onDataBlur();
+    }
+    fe.focus();
+  }
+
   function rebuild_datasets() {
     document.getElementById('datasets').innerHTML = '';
 
@@ -202,7 +232,7 @@ function getStatusText(code) {
         xsplit = null;
 
         if (window.cmgVars.getValue().match(/\S/)) {
-          var ds = Object.keys(datasets)[0];
+          var ds = Object.keys(datasets).sort(default_on_top)[0];
           datasets[ds][1].setValue(window.cmgVars.getValue().trimEnd() + "\n\n" + datasets[ds][1].getValue());
         }
 
@@ -213,10 +243,41 @@ function getStatusText(code) {
     document.getElementById('selected_ds').innerHTML = current_ds;
   }
 
+  function rebuild_templates() {
+    document.getElementById('templates').innerHTML = '';
+
+    Object.keys(templates).sort(default_on_top).forEach(function(t) {
+      var a = document.createElement('a');
+      a.classList.add('dropdown-item', 'text-decoration-none');
+      a.addEventListener('click', select_template, false);
+      a.href = '#';
+      a.t_name = t;
+      a.innerHTML = t;
+      document.getElementById('templates').appendChild(a);
+    });
+
+    if (Object.keys(templates).length > 1) {
+      document.getElementById('select_t').disabled = false;
+      document.getElementById('delete_t').disabled = false;
+    }
+    else {
+      document.getElementById('select_t').disabled = true;
+      document.getElementById('delete_t').disabled = true;
+    }
+    document.getElementById('selected_t').innerHTML = current_t;
+  }
+
   function delete_dataset(ds) {
     delete datasets[ds];
     rebuild_datasets();
-    switch_dataset(Object.keys(datasets)[0], false, true);
+    switch_dataset(Object.keys(datasets).sort(default_on_top)[0], false, true);
+    fe.focus();
+  }
+
+  function delete_template(t) {
+    delete templates[t];
+    rebuild_templates();
+    switch_template(Object.keys(templates).sort(default_on_top)[0], false, true);
     fe.focus();
   }
 
@@ -300,6 +361,24 @@ function getStatusText(code) {
     else if (method == "add_dataset") {
       document.getElementById("ds_name").value = '';
       new bootstrap.Modal(document.getElementById('dataset_input'), {
+        keyboard: true
+      }).show();
+      return false;
+    }
+    else if (method == "delete_dataset") {
+      if (window.cmTemplate.getValue().match(/\S/) {
+        if (confirm("Are You Sure?") === true) {
+          delete_template(current_t);
+        }
+      }
+      else {
+        delete_template(current_t);
+      }
+      return false;
+    }
+    else if (method == "add_template") {
+      document.getElementById("t_name").value = '';
+      new bootstrap.Modal(document.getElementById('template_input'), {
         keyboard: true
       }).show();
       return false;
@@ -812,6 +891,8 @@ function getStatusText(code) {
   
       document.getElementById('delete_ds').onclick = function() { jinjafx('delete_dataset'); };
       document.getElementById('add_ds').onclick = function() { jinjafx('add_dataset'); };
+      document.getElementById('delete_t').onclick = function() { jinjafx('delete_template'); };
+      document.getElementById('add_t').onclick = function() { jinjafx('add_template'); };
       document.getElementById('get').onclick = function() { jinjafx('get_link'); };
       document.getElementById('get2').onclick = function() { jinjafx('get_link'); };
       document.getElementById('update').onclick = function() { jinjafx('update_link'); };
@@ -1810,6 +1891,7 @@ function getStatusText(code) {
   function load_datatemplate(_dt, _qs, _ds) {
     try {
       current_ds = 'Default';
+      current_t = 'Default';
 
       window.cmgVars.setValue("");
 
@@ -1823,7 +1905,7 @@ function getStatusText(code) {
         });
 
         if ((_ds == null) || !datasets.hasOwnProperty(_ds)) {
-          current_ds = Object.keys(datasets)[0];
+          current_ds = Object.keys(datasets).sort(default_on_top)[0];
         }
         else {
           current_ds = _ds;
@@ -1845,6 +1927,8 @@ function getStatusText(code) {
         datasets['Default'][1].setValue(_dt.hasOwnProperty("vars") ? _dt.vars : "");
         window.cmVars.swapDoc(datasets['Default'][1]);
       }
+
+      // FIXME: NEED SOME WORK HERE!
       window.cmTemplate.setValue(_dt.hasOwnProperty("template") ? _dt.template : "");
 
       window.cmData.getDoc().clearHistory();
