@@ -142,13 +142,12 @@ function getStatusText(code) {
 
   function switch_dataset(ds, sflag, dflag) {
     if (sflag) {
-      datasets[current_ds][0] = window.cmData.swapDoc(datasets[ds][0]);
-      datasets[current_ds][1] = window.cmVars.swapDoc(datasets[ds][1]);
+      datasets[current_ds][0] = window.cmData.getDoc(); //swapDoc(datasets[ds][0]);
+      datasets[current_ds][1] = window.cmVars.getDoc(); //swapDoc(datasets[ds][1]);
     }
-    else {
-      window.cmData.swapDoc(datasets[ds][0]);
-      window.cmVars.swapDoc(datasets[ds][1]);
-    }
+    window.cmData.swapDoc(datasets[ds][0]);
+    window.cmVars.swapDoc(datasets[ds][1]);
+   
     if (ds != current_ds) {
       if (dflag) {
         window.addEventListener('beforeunload', onBeforeUnload);
@@ -170,11 +169,10 @@ function getStatusText(code) {
 
   function switch_template(t, sflag, dflag) {
     if (sflag) {
-      templates[current_t] = window.cmTemplate.swapDoc(templates[t]);
+      templates[current_t] = window.cmTemplate.getDoc();
     }
-    else {
-      window.cmTemplate.swapDoc(templates[t]);
-    }
+    window.cmTemplate.swapDoc(templates[t]);
+   
     if (t != current_t) {
       if (dflag) {
         window.addEventListener('beforeunload', onBeforeUnload);
@@ -183,6 +181,7 @@ function getStatusText(code) {
         }
       }
       dirty = true;
+      document.getElementById('delete_t').disabled = (t == 'Default');
       document.getElementById('selected_t').innerHTML = t;
       current_t = t;
       onDataBlur();
@@ -319,6 +318,7 @@ function getStatusText(code) {
   function jinjafx_generate() {
     var vaulted_vars = dt.vars.indexOf('$ANSIBLE_VAULT;') > -1;
     dt.vars = e(dt.vars);
+    // FIXME - NEED SOME WORK!
     dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
     dt.id = dt_id;
     dt.dataset = current_ds;
@@ -365,8 +365,8 @@ function getStatusText(code) {
       }).show();
       return false;
     }
-    else if (method == "delete_dataset") {
-      if (window.cmTemplate.getValue().match(/\S/) {
+    else if (method == "delete_template") {
+      if (window.cmTemplate.getValue().match(/\S/)) {
         if (confirm("Are You Sure?") === true) {
           delete_template(current_t);
         }
@@ -395,7 +395,8 @@ function getStatusText(code) {
       return false;
     }
 
-    if (window.cmTemplate.getValue().length === 0) {
+    switch_template(current_t, true, false);
+    if (templates['Default'].getValue().length === 0) {
       window.cmTemplate.focus();
       set_status("darkred", "ERROR", "No Template");
       return false;
@@ -631,7 +632,17 @@ function getStatusText(code) {
         }
 
         dt.dataset = current_ds;
-        dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
+
+        if (Object.keys(templates).length === 1) {
+          dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
+        }
+        else {
+          dt.template = {};
+
+          Object.keys(templates).sort(default_on_top).forEach(function(t) {
+            dt.template[t] = e(templates[t].getValue());
+          });
+        }
 
         if ((current_ds === 'Default') && (Object.keys(datasets).length === 1)) {
           dt.vars = e(window.cmVars.getValue().replace(/\t/g, "  "));
@@ -645,7 +656,7 @@ function getStatusText(code) {
           }
 
           switch_dataset(current_ds, true, false);
-          Object.keys(datasets).forEach(function(ds) {
+          Object.keys(datasets).sort(default_on_top).forEach(function(ds) {
             dt.datasets[ds] = {};
             dt.datasets[ds].data = e(datasets[ds][0].getValue());
             dt.datasets[ds].vars = e(datasets[ds][1].getValue().replace(/\t/g, "  "));
@@ -1488,6 +1499,10 @@ function getStatusText(code) {
       document.getElementById('dataset_input').addEventListener('shown.bs.modal', function (e) {
         document.getElementById("ds_name").focus();
       });
+
+      document.getElementById('template_input').addEventListener('shown.bs.modal', function (e) {
+        document.getElementById("t_name").focus();
+      });
   
       document.getElementById('ml-dataset-ok').onclick = function() {
         var new_ds = document.getElementById("ds_name").value;
@@ -1504,9 +1519,30 @@ function getStatusText(code) {
         }
       };
   
+      document.getElementById('ml-template-ok').onclick = function() {
+        var new_t = document.getElementById("t_name").value;
+  
+        if (new_t.match(/^[A-Z][A-Z0-9_ -]*$/i)) {
+          if (!templates.hasOwnProperty(new_t)) {
+            templates[new_t] = CodeMirror.Doc('', 'template');
+            rebuild_templates();
+          }
+          switch_template(new_t, true, true);
+        }
+        else {
+          set_status("darkred", "ERROR", "Invalid Template Name");
+        }
+      };
+
       document.getElementById('ds_name').onkeyup = function(e) {
         if (e.which == 13) {
           document.getElementById('ml-dataset-ok').click();
+        }
+      };
+
+      document.getElementById('t_name').onkeyup = function(e) {
+        if (e.which == 13) {
+          document.getElementById('ml-template-ok').click();
         }
       };
   
@@ -1645,7 +1681,7 @@ function getStatusText(code) {
         else {
           set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
           reset_location('');
-          document.getElementById('templates').style.visibility = 'visible';
+          document.getElementById('stemplates').style.visibility = 'visible';
           loaded = true;
         }
       }
@@ -1670,13 +1706,13 @@ function getStatusText(code) {
           else {
             set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
             reset_location('');
-            document.getElementById('templates').style.visibility = 'visible';
+            document.getElementById('stemplates').style.visibility = 'visible';
             loaded = true;
           }
         }
         else {
           reset_location('');
-          document.getElementById('templates').style.visibility = 'visible';
+          document.getElementById('stemplates').style.visibility = 'visible';
           loaded = true;
         }
       }
@@ -1701,7 +1737,7 @@ function getStatusText(code) {
   function remove_info() {
     document.getElementById('template_info').classList.add('fade-out');
     document.getElementById('template_info').style.zIndex = -1000;
-    document.getElementById('templates').style.visibility = 'visible';
+    document.getElementById('stemplates').style.visibility = 'visible';
   }
 
   function set_wait() {
@@ -1881,7 +1917,7 @@ function getStatusText(code) {
         if (editor == window.cmTemplate) {
           document.getElementById('template_info').classList.add('fade-out');
           document.getElementById('template_info').style.zIndex = -1000;
-          document.getElementById('templates').style.visibility = 'visible';
+          document.getElementById('stemplates').style.visibility = 'visible';
           tinfo = false;
         }
       }
