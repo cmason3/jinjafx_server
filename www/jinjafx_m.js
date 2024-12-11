@@ -165,16 +165,24 @@ function getStatusText(code) {
   }
 
   function select_template(e) {
-    switch_template(e.currentTarget.t_name, true);
+    switch_template(e.currentTarget.t_name, true, false);
   }
 
-  function switch_template(t, sflag) {
+  function switch_template(t, sflag, dflag) {
     if (sflag) {
       templates[current_t] = window.cmTemplate.getDoc();
     }
    
     if (t != current_t) {
       window.cmTemplate.swapDoc(templates[t]);
+
+      if (dflag) {
+        window.addEventListener('beforeunload', onBeforeUnload);
+        if (document.getElementById('get_link').value != 'false') {
+          document.title = 'JinjaFx [unsaved]';
+        }
+        dirty = true;
+      }
       document.getElementById('delete_t').disabled = (t == 'Default');
       document.getElementById('selected_t').innerHTML = t;
       current_t = t;
@@ -270,7 +278,7 @@ function getStatusText(code) {
   function delete_template(t) {
     delete templates[t];
     rebuild_templates();
-    switch_template(Object.keys(templates).sort(default_on_top)[0], false);
+    switch_template(Object.keys(templates).sort(default_on_top)[0], false, true);
     fe.focus();
   }
 
@@ -399,7 +407,7 @@ function getStatusText(code) {
       return false;
     }
 
-    switch_template(current_t, true);
+    switch_template(current_t, true, false);
     if (templates['Default'].getValue().length === 0) {
       window.cmTemplate.focus();
       set_status("darkred", "ERROR", "No Template");
@@ -1531,7 +1539,7 @@ function getStatusText(code) {
             templates[new_t] = CodeMirror.Doc('', 'template');
             rebuild_templates();
           }
-          switch_template(new_t, true);
+          switch_template(new_t, true, true);
         }
         else {
           set_status("darkred", "ERROR", "Invalid Template Name");
