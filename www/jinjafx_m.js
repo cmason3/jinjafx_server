@@ -1525,6 +1525,7 @@ function getStatusText(code) {
             }
             loaded = true;
             document.getElementById('lbuttons').classList.remove('d-none');
+            document.getElementById('buttons').classList.remove('d-none');
             set_status("darkred", "ERROR", "Invalid Password");
           }
         }
@@ -1532,6 +1533,7 @@ function getStatusText(code) {
           if (protect_action == 1) {
             reset_location('');
             document.getElementById('lbuttons').classList.remove('d-none');
+            document.getElementById('buttons').classList.remove('d-none');
             dt_password = null;
             loaded = true;
           }
