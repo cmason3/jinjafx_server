@@ -80,9 +80,9 @@ textarea {
 .info {
   position: absolute;
   z-index: 2;
-  right: 30px;
-  top: 30px;
-  bottom: 30px;
+  right: 15px;
+  top: 15px;
+  bottom: 15px;
   width: 50%;
   visibility: hidden;
 }

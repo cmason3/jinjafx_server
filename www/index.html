@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/display/fullscreen.min.css" integrity="sha512-T8xB3MmwpA77VK9lUH3UkdUTnkmpqOxHF8OceOKaHrvpcXMSNX0xtpa9FoLTDAVO1JnB2UiMdVeI2V0HTHjTWA==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/fold/foldgutter.min.css" integrity="sha512-YwkMTlTHn8dBnwa47IF+cKsS00HPiiVhQ4DpwT1KF2gUftfFR7aefepabSPLAs6zrMyD89M3w0Ow6mQ5XJEUCw==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="/bb176715/jinjafx.css">
-    <link rel="stylesheet" href="/666998ca/jinjafx_m.css">
+    <link rel="stylesheet" href="/9eb5fb3c/jinjafx_m.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js" integrity="sha512-7Pi/otdlbbCR+LnW+F7PwFcSDJOuUJB3OxtEHbg4vSMvzvJjde4Po1v4BR9Gdc9aXNUNFVUY+SK51wWT8WF0Gg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.js" integrity="sha512-6cPYokihlrofMNApz7OXVQNObWjLiKGIBBb7+UB+AuMiRCLKmFKgrwms21sHq3bdFFZWpfHYRJBJvMFMPj1S9g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/selection/mark-selection.min.js" integrity="sha512-XaS0JPIY5yDTDaYIMjkoXz+LF/DEVhRn1eq9QOhJPhMuJGGPOKZTulF+LY8/uwd18k00CIaSe4f8fCyp/5U7IQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -172,9 +172,10 @@
                 <div class="btn-group">
                   <button id="select_t" type="button" class="btn btn-warning btn-sm text-start mw-150" data-bs-toggle="dropdown" title="Select Template" disabled>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <polygon points="12 2 2 7 12 12 22 7 12 2" />
-                      <polyline points="2 17 12 22 22 17" />
-                      <polyline points="2 12 12 17 22 12" />
+                      <rect x="3" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="14" width="7" height="7"></rect>
+                      <rect x="3" y="14" width="7" height="7"></rect>
                     </svg>&nbsp;<span id="selected_t">Default</span>
                   </button>
                   <div id="templates" class="dropdown-menu"></div>
@@ -194,7 +195,7 @@
 &lt;output "Output 2"&gt;
 ...
 &lt;/output&gt;</pre>
-                <p>By default an output is rendered as text, but you can also tell JinjaFx to render it as HTML or Markdown (GFM), e.g:</p>
+                <p>By default an output is rendered as text, but you can also tell JinjaFx to render it as HTML or Markdown, e.g:</p>
 <pre class="code-block">&lt;output<span class="cm-jfx-tag">:html</span> "Output 1"&gt;
 ...
 &lt;/output&gt;
@@ -202,6 +203,8 @@
 &lt;output<span class="cm-jfx-tag">:markdown</span> "Output 2"&gt;
 ...
 &lt;/output&gt;</pre>
+                <p>JinjaFx supports nested templates - if you click on the "+" at the top right of the "template.j2" pane then you can create multiple templates and import them into the "Default" template via the following syntax:</p>
+<pre class="code-block">{% include "&lt;template&gt;" %}</pre>
                 <br /><h3>Dynamic CSV</h3><hr>
                 <p>Within the "data.csv" pane you can specify regular CSV where each row will be treated as a data set using the header row for variable names. However, it also supports something which I call Dynamic CSV where you can use regular expression based static character classes or static groups as values within the data rows using <span class="cm-jfx-tag">(value1|value2|value3)</span> or <span class="cm-jfx-tag">[a-f]</span>. These will then be expanded into multiple rows, e.g:</p>
 <pre class="code-block">DEVICE, TYPE
