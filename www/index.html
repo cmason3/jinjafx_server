@@ -32,7 +32,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js" integrity="sha512-CSBhVREyzHAjAFfBlIBakjoRUKp5h7VSweP0InR/pAJyptH7peuhCsqAI/snV+TwZmXZqoUklpXp6R6wMnYf5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/dayjs.min.js" integrity="sha512-FwNWaxyfy2XlEINoSnZh1JQ5TRRtGow0D6XcmAWmYCRgvqOUTnzCxPc9uF35u5ZEpirk1uhlPVA19tflhvnW1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/plugin/relativeTime.min.js" integrity="sha512-MVzDPmm7QZ8PhEiqJXKz/zw2HJuv61waxb8XXuZMMs9b+an3LoqOqhOEt5Nq3LY1e4Ipbbd/e+AWgERdHlVgaA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="/780b76d8/jinjafx_m.js"></script>
+    <script src="/859d92e4/jinjafx_m.js"></script>
   </head>
   <body>
     <div id="overlay"></div>
@@ -54,7 +54,7 @@
           </a>
         </h5>
         <!-- https://github.com/feathericons/feather/tree/master/icons -->
-        <div class="btn-toolbar ms-auto d-flex" role="group">
+        <div id="buttons" class="btn-toolbar ms-auto d-flex d-none" role="group">
           <div class="btn-group me-2">
             <div class="btn-group">
               <button id="select_ds" type="button" class="btn btn-warning text-black text-start mw-150" data-bs-toggle="dropdown" title="Select DataSet" disabled>
@@ -360,6 +360,10 @@ et-0/0/<span class="cm-jfx-tag">{0-9:1}</span></pre>
             </div>
           </div>
           <div class="modal-footer">
+            <div class="form-check form-switch me-auto">
+              <input class="form-check-input" type="checkbox" role="switch" id="encrypt_dt" disabled>
+              <label class="form-check-label" for="encrypt_dt" title="Encrypt DataTemplate with Vaulty">Encrypt DataTemplate</label>
+            </div>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             <button id="ml-protect-dt-ok" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
           </div>

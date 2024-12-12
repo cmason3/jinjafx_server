@@ -864,6 +864,7 @@ function getStatusText(code) {
             reset_location('');
           }
           document.getElementById('lbuttons').classList.remove('d-none');
+          document.getElementById('buttons').classList.remove('d-none');
           loaded = true;
           clear_wait();
         };
@@ -872,6 +873,7 @@ function getStatusText(code) {
           set_status("darkred", "ERROR", "XMLHttpRequest.onError()");
           reset_location('');
           document.getElementById('lbuttons').classList.remove('d-none');
+          document.getElementById('buttons').classList.remove('d-none');
           loaded = true;
           clear_wait();
         };
@@ -879,6 +881,7 @@ function getStatusText(code) {
           set_status("darkred", "ERROR", "XMLHttpRequest.onTimeout()");
           reset_location('');
           document.getElementById('lbuttons').classList.remove('d-none');
+          document.getElementById('buttons').classList.remove('d-none');
           loaded = true;
           clear_wait();
         };
@@ -891,6 +894,7 @@ function getStatusText(code) {
       }
       else {
         document.getElementById('lbuttons').classList.remove('d-none');
+        document.getElementById('buttons').classList.remove('d-none');
         loaded = true;
       }
     }
@@ -898,6 +902,7 @@ function getStatusText(code) {
       console.log(ex);
       set_status("darkred", "ERROR", ex);
       document.getElementById('lbuttons').classList.remove('d-none');
+      document.getElementById('buttons').classList.remove('d-none');
       loaded = true; onChange(null, true);
     }
   }
@@ -1454,6 +1459,8 @@ function getStatusText(code) {
         document.getElementById("password_modify1").value = '';
         document.getElementById("password_modify2").value = '';
         document.getElementById("password_modify2").disabled = true;
+        document.getElementById('encrypt_dt').disabled = true;
+        document.getElementById('encrypt_dt').checked = false;
         fe.focus();
       });
   
@@ -1562,10 +1569,12 @@ function getStatusText(code) {
         if (document.getElementById('password_open1').value == document.getElementById('password_open2').value) {
           document.getElementById('password_open2').classList.remove('is-invalid');
           document.getElementById('password_open2').classList.add('is-valid');
+          document.getElementById('encrypt_dt').disabled = false;
         }
         else {
           document.getElementById('password_open2').classList.remove('is-valid');
           document.getElementById('password_open2').classList.add('is-invalid');
+          document.getElementById('encrypt_dt').disabled = true;
         }
       };
   
@@ -1607,6 +1616,7 @@ function getStatusText(code) {
           if (document.getElementById('password_open2').disabled == true) {
             document.getElementById('password_open2').disabled = false;
             document.getElementById('password_open2').classList.add('is-invalid');
+            document.getElementById('encrypt_dt').disabled = true;
           }
           else {
             check_open();
@@ -1617,6 +1627,8 @@ function getStatusText(code) {
           document.getElementById('password_open2').value = '';
           document.getElementById('password_open2').classList.remove('is-valid');
           document.getElementById('password_open2').classList.remove('is-invalid');
+          document.getElementById('encrypt_dt').disabled = true;
+          document.getElementById('encrypt_dt').checked = false;
         }
       };
   
@@ -1693,6 +1705,7 @@ function getStatusText(code) {
         else {
           set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
           reset_location('');
+          document.getElementById('buttons').classList.remove('d-none');
           loaded = true;
         }
       }
@@ -1717,11 +1730,13 @@ function getStatusText(code) {
           else {
             set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
             reset_location('');
+            document.getElementById('buttons').classList.remove('d-none');
             loaded = true;
           }
         }
         else {
           reset_location('');
+          document.getElementById('buttons').classList.remove('d-none');
           loaded = true;
         }
       }
@@ -1731,6 +1746,7 @@ function getStatusText(code) {
         }
         document.getElementById('stemplates').style.visibility = 'hidden';
         document.getElementById('template_info').style.visibility = 'visible';
+        document.getElementById('buttons').classList.remove('d-none');
         loaded = true;
       }
     }
