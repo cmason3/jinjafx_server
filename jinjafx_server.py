@@ -333,7 +333,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
   
               if r[1] == 200:
-                if dt.startswith('$VAULTY;'):
+                if dt.lstrip().startswith('$VAULTY;'):
                   if 'X-Dt-Password' in self.headers:
                     try:
                       dt = jinjafx.Vaulty().decrypt(dt, self.headers['X-Dt-Password'])
@@ -857,7 +857,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                         with open(dt_filename, 'rb') as f:
                           rr = f.read().decode('utf-8')
 
-                        if rr.startswith('$VAULTY'):
+                        if rr.lstrip().startswith('$VAULTY'):
                           try:
                             rr = jinjafx.Vaulty().decrypt(rr, dt_password)
 
