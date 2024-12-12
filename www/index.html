@@ -32,7 +32,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js" integrity="sha512-CSBhVREyzHAjAFfBlIBakjoRUKp5h7VSweP0InR/pAJyptH7peuhCsqAI/snV+TwZmXZqoUklpXp6R6wMnYf5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/dayjs.min.js" integrity="sha512-FwNWaxyfy2XlEINoSnZh1JQ5TRRtGow0D6XcmAWmYCRgvqOUTnzCxPc9uF35u5ZEpirk1uhlPVA19tflhvnW1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/plugin/relativeTime.min.js" integrity="sha512-MVzDPmm7QZ8PhEiqJXKz/zw2HJuv61waxb8XXuZMMs9b+an3LoqOqhOEt5Nq3LY1e4Ipbbd/e+AWgERdHlVgaA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="/859d92e4/jinjafx_m.js"></script>
+    <script src="/9ee3cc95/jinjafx_m.js"></script>
   </head>
   <body>
     <div id="overlay"></div>
@@ -251,6 +251,7 @@ et-0/0/<span class="cm-jfx-tag">{0-9:1}</span></pre>
       </div>
     </div>
     <input id="get_link" type="hidden" value="{{ get_link }}">
+    <input id="repository" type="hidden" value="{{ repository }}">
     <div id="jinjafx_input" class="modal fade" role="dialog">
       <div id="input_modal" class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -360,7 +361,7 @@ et-0/0/<span class="cm-jfx-tag">{0-9:1}</span></pre>
             </div>
           </div>
           <div class="modal-footer">
-            <div class="form-check form-switch me-auto">
+            <div id="encrypt_datatemplate" class="form-check form-switch me-auto d-none">
               <input class="form-check-input" type="checkbox" role="switch" id="encrypt_dt" disabled>
               <label class="form-check-label" for="encrypt_dt" title="Encrypt DataTemplate with Vaulty">Encrypt DataTemplate</label>
             </div>

@@ -116,6 +116,7 @@ function getStatusText(code) {
   var dt_password = null;
   var dt_opassword = null;
   var dt_mpassword = null;
+  var dt_encrypt = false;
   var input_form = null;
   var r_input_form = null;
   var jinput = null;
@@ -401,6 +402,12 @@ function getStatusText(code) {
       document.getElementById('password_open2').classList.remove('is-valid');
       document.getElementById('password_modify2').classList.remove('is-invalid');
       document.getElementById('password_modify2').classList.remove('is-valid');
+
+      if (dt_encrypt) {
+        document.getElementById('encrypt_dt').disabled = true;
+        document.getElementById('encrypt_dt').checked = true;
+      }
+
       new bootstrap.Modal(document.getElementById('protect_dt'), {
         keyboard: false
       }).show();
@@ -713,6 +720,9 @@ function getStatusText(code) {
       if (dt_opassword != null) {
         xHR.setRequestHeader("X-Dt-Open-Password", dt_opassword);
       }
+      if (dt_encrypt) {
+        xHR.setRequestHeader("X-Dt-Encrypt", 1);
+      }
       if (dt_mpassword != null) {
         xHR.setRequestHeader("X-Dt-Modify-Password", dt_mpassword);
       }
@@ -825,6 +835,15 @@ function getStatusText(code) {
             try {
               var dt = jsyaml.load(d(JSON.parse(this.responseText)['dt']), jsyaml_schema);
 
+              if (dt.hasOwnProperty('encrypted')) {
+                dt_encrypt = dt['encrypted'];
+              }
+              else {
+                dt_encrypt = false;
+              }
+
+              alert(dt_encrypt);
+
               if (dt.hasOwnProperty('dataset')) {
                 load_datatemplate(dt['dt'], qs, dt['dataset']);
               }
@@ -889,6 +908,9 @@ function getStatusText(code) {
         xHR.timeout = 10000;
         if (dt_password != null) {
           xHR.setRequestHeader("X-Dt-Password", dt_password);
+          if (encrypt_dt) {
+            xHR.setRequestHeader("X-Dt-Encrypt", 1);
+          }
         }
         xHR.send(null);
       }
@@ -993,6 +1015,10 @@ function getStatusText(code) {
           keyboard: false
         }).show();
       };
+
+      if (document.getElementById('repository').value != 'false') {
+        document.getElementById('encrypt_datatemplate').classList.remove('d-none');
+      }
   
       sobj = document.getElementById("status");
   
@@ -1414,10 +1440,12 @@ function getStatusText(code) {
       document.getElementById('ml-protect-dt-ok').onclick = function() {
         dt_opassword = null;
         dt_mpassword = null;
-  
+//        dt_encrypt = false;
+
         if (document.getElementById('password_open1').value.match(/\S/)) {
           if (document.getElementById('password_open1').value == document.getElementById('password_open2').value) {
             dt_opassword = document.getElementById('password_open2').value;
+            dt_encrypt = document.getElementById('encrypt_dt').checked;
           }
           else {
             set_status("darkred", "ERROR", "Password Verification Failed");
@@ -1569,7 +1597,9 @@ function getStatusText(code) {
         if (document.getElementById('password_open1').value == document.getElementById('password_open2').value) {
           document.getElementById('password_open2').classList.remove('is-invalid');
           document.getElementById('password_open2').classList.add('is-valid');
-          document.getElementById('encrypt_dt').disabled = false;
+          if (!dt_encrypt) {
+            document.getElementById('encrypt_dt').disabled = false;
+          }
         }
         else {
           document.getElementById('password_open2').classList.remove('is-valid');
@@ -1616,7 +1646,9 @@ function getStatusText(code) {
           if (document.getElementById('password_open2').disabled == true) {
             document.getElementById('password_open2').disabled = false;
             document.getElementById('password_open2').classList.add('is-invalid');
-            document.getElementById('encrypt_dt').disabled = true;
+            if (!dt_encrypt) {
+              document.getElementById('encrypt_dt').disabled = true;
+            }
           }
           else {
             check_open();
@@ -1627,8 +1659,10 @@ function getStatusText(code) {
           document.getElementById('password_open2').value = '';
           document.getElementById('password_open2').classList.remove('is-valid');
           document.getElementById('password_open2').classList.remove('is-invalid');
-          document.getElementById('encrypt_dt').disabled = true;
-          document.getElementById('encrypt_dt').checked = false;
+          if (!dt_encrypt) {
+            document.getElementById('encrypt_dt').disabled = true;
+            document.getElementById('encrypt_dt').checked = false;
+          }
         }
       };
   
