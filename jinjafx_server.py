@@ -519,10 +519,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   vpw = self.d(dt['vpw']).decode('utf-8')
 
                   if gyaml.lstrip().startswith('$ANSIBLE_VAULT;'):
-                    gyaml = jinjafx.Vault().decrypt(gyaml.encode('utf-8'), vpw).decode('utf-8')
+                    gyaml = jinjafx.AnsibleVault().decrypt(gyaml.encode('utf-8'), vpw).decode('utf-8')
 
                   def yaml_vault_tag(loader, node):
-                    return jinjafx.Vault().decrypt(node.value.encode('utf-8'), vpw).decode('utf-8')
+                    return jinjafx.AnsibleVault().decrypt(node.value.encode('utf-8'), vpw).decode('utf-8')
 
                   yaml.add_constructor('!vault', yaml_vault_tag, yaml.SafeLoader)
 
@@ -850,7 +850,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
                         if r[1] != 400:
                           if dt_encrypted:
-                            rr = aws_s3_put(aws_s3_url, dt_filename, dt_yml, 'application/base64')
+                            rr = aws_s3_put(aws_s3_url, dt_filename, dt_yml, 'application/vaulty')
 
                           else:
                             rr = aws_s3_put(aws_s3_url, dt_filename, dt_yml, 'application/yaml')
