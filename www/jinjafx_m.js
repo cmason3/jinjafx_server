@@ -403,10 +403,8 @@ function getStatusText(code) {
       document.getElementById('password_modify2').classList.remove('is-invalid');
       document.getElementById('password_modify2').classList.remove('is-valid');
 
-      if (dt_encrypt) {
-        document.getElementById('encrypt_dt').disabled = true;
-        document.getElementById('encrypt_dt').checked = true;
-      }
+      // document.getElementById('encrypt_dt').disabled = true;
+      // document.getElementById('encrypt_dt').checked = true;
 
       new bootstrap.Modal(document.getElementById('protect_dt'), {
         keyboard: false
@@ -720,11 +718,11 @@ function getStatusText(code) {
       if (dt_opassword != null) {
         xHR.setRequestHeader("X-Dt-Open-Password", dt_opassword);
       }
-      if (dt_encrypt) {
-        xHR.setRequestHeader("X-Dt-Encrypt", 1);
-      }
       if (dt_mpassword != null) {
         xHR.setRequestHeader("X-Dt-Modify-Password", dt_mpassword);
+      }
+      if (dt_encrypt) {
+        xHR.setRequestHeader("X-Dt-Encrypt", 1);
       }
       xHR.setRequestHeader("X-Dt-Revision", revision + 1);
     }
@@ -1440,7 +1438,7 @@ function getStatusText(code) {
       document.getElementById('ml-protect-dt-ok').onclick = function() {
         dt_opassword = null;
         dt_mpassword = null;
-//        dt_encrypt = false;
+        dt_encrypt = false;
 
         if (document.getElementById('password_open1').value.match(/\S/)) {
           if (document.getElementById('password_open1').value == document.getElementById('password_open2').value) {
@@ -1557,11 +1555,23 @@ function getStatusText(code) {
         var new_ds = document.getElementById("ds_name").value;
   
         if (new_ds.match(/^[A-Z][A-Z0-9_ -]*$/i)) {
-          if (!datasets.hasOwnProperty(new_ds)) {
+          var existing = '';
+          for (var p in datasets) {
+            if (datasets.hasOwnProperty(p)) {
+              if (new_ds.toLowerCase() === p.toLowerCase()) {
+                existing = p;
+                break;
+              }
+            }
+          }
+          if (existing == '') {
             datasets[new_ds] = [CodeMirror.Doc('', 'data'), CodeMirror.Doc('', 'yaml')];
             rebuild_datasets();
+            switch_dataset(new_ds, true, true);
           }
-          switch_dataset(new_ds, true, true);
+          else {
+            switch_dataset(existing, true, true);
+          }
         }
         else {
           set_status("darkred", "ERROR", "Invalid Data Set Name");
@@ -1572,11 +1582,23 @@ function getStatusText(code) {
         var new_t = document.getElementById("t_name").value;
   
         if (new_t.match(/^[A-Z][A-Z0-9_ -]*$/i)) {
-          if (!templates.hasOwnProperty(new_t)) {
+          var existing = '';
+          for (var p in templates) {
+            if (templates.hasOwnProperty(p)) {
+              if (new_t.toLowerCase() === p.toLowerCase()) {
+                existing = p;
+                break;
+              }
+            }
+          }
+          if (existing == '') {
             templates[new_t] = CodeMirror.Doc('', 'template');
             rebuild_templates();
+            switch_template(new_t, true, true);
           }
-          switch_template(new_t, true, true);
+          else {
+            switch_template(existing, true, true);
+          }
         }
         else {
           set_status("darkred", "ERROR", "Invalid Template Name");
@@ -1596,17 +1618,19 @@ function getStatusText(code) {
       };
   
       function check_open() {
+        if (document.getElementById('password_open1').value.match(/\S/)) {
+          document.getElementById('encrypt_dt').disabled = false;
+        }
+        else {
+          document.getElementById('encrypt_dt').disabled = true;
+        }
         if (document.getElementById('password_open1').value == document.getElementById('password_open2').value) {
           document.getElementById('password_open2').classList.remove('is-invalid');
           document.getElementById('password_open2').classList.add('is-valid');
-          if (!dt_encrypt) {
-            document.getElementById('encrypt_dt').disabled = false;
-          }
         }
         else {
           document.getElementById('password_open2').classList.remove('is-valid');
           document.getElementById('password_open2').classList.add('is-invalid');
-          document.getElementById('encrypt_dt').disabled = true;
         }
       };
   
@@ -1648,9 +1672,7 @@ function getStatusText(code) {
           if (document.getElementById('password_open2').disabled == true) {
             document.getElementById('password_open2').disabled = false;
             document.getElementById('password_open2').classList.add('is-invalid');
-            if (!dt_encrypt) {
-              document.getElementById('encrypt_dt').disabled = true;
-            }
+            document.getElementById('encrypt_dt').disabled = false;
           }
           else {
             check_open();
@@ -1661,10 +1683,8 @@ function getStatusText(code) {
           document.getElementById('password_open2').value = '';
           document.getElementById('password_open2').classList.remove('is-valid');
           document.getElementById('password_open2').classList.remove('is-invalid');
-          if (!dt_encrypt) {
-            document.getElementById('encrypt_dt').disabled = true;
-            document.getElementById('encrypt_dt').checked = false;
-          }
+          document.getElementById('encrypt_dt').disabled = true;
+          document.getElementById('encrypt_dt').checked = false;
         }
       };
   
