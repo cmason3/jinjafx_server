@@ -366,7 +366,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                         r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
   
                   else:
-                    cheaders['X-Dt-Authentication'] = 'FIXME - Unsure'
+                    cheaders['X-Dt-Authentication'] = 'Open'
                     r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
             else:
@@ -477,6 +477,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     self.hide = False
     self.elapsed = None
     self.error = None
+
+    cheaders = {}
 
     uc = self.path.split('?', 1)
     params = { x[0]: x[1] for x in [x.split('=') for x in uc[1].split('&') ] } if len(uc) > 1 else { }
@@ -783,11 +785,11 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                           rpassword = mm.group(1) if mm != None else mo.group(1)
                           t = binascii.unhexlify(rpassword.encode('utf-8'))
                           if t != self.derive_key(dt_password, t[2:int(t[1]) + 2], t[0]):
-                            cheaders['X-Dt-Authentication'] = 'FIXME - Unsure'
+                            cheaders['X-Dt-Authentication'] = 'Modify' if (mm != None) else 'Open'
                             r = [ 'text/plain', 401, '401 Unauthorized\r\n', sys._getframe().f_lineno ]
 
                         else:
-                          cheaders['X-Dt-Authentication'] = 'FIXME - Unsure'
+                          cheaders['X-Dt-Authentication'] = 'Modify' if (mm != None) else 'Open'
                           r = [ 'text/plain', 401, '401 Unauthorized\r\n', sys._getframe().f_lineno ]
 
                       if r[1] != 401:
@@ -952,6 +954,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     self.send_header('Content-Type', r[0])
     self.send_header('Content-Length', str(len(r[2])))
     self.send_header('X-Content-Type-Options', 'nosniff')
+   
+    for k in cheaders:
+      self.send_header(k, cheaders[k])
+
     self.end_headers()
     self.wfile.write(r[2])
 

@@ -755,7 +755,7 @@ function getStatusText(code) {
       }
       else if (this.status == 401) {
         protect_action = 2;
-        document.getElementById('lb_protect').innerHTML = 'DataTemplate Passsword (' + this.getResponseHeader('X-Dt-Authentication') + ')';
+        document.getElementById('lb_protect').innerHTML = 'DataTemplate ' + this.getResponseHeader('X-Dt-Authentication') + ' Passsword';
         new bootstrap.Modal(document.getElementById('protect_input'), {
           keyboard: false
         }).show();
@@ -826,7 +826,7 @@ function getStatusText(code) {
         xHR.onload = function() {
           if (this.status === 401) {
             protect_action = 1;
-            document.getElementById('lb_protect').innerHTML = 'DataTemplate Passsword (' + this.getResponseHeader('X-Dt-Authentication') + ')';
+            document.getElementById('lb_protect').innerHTML = 'DataTemplate ' + this.getResponseHeader('X-Dt-Authentication') + ' Passsword';
             new bootstrap.Modal(document.getElementById('protect_input'), {
               keyboard: false
             }).show();
