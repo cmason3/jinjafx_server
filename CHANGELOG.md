@@ -5,9 +5,10 @@
 - Added support for encrypted DataTemplates using Vaulty (ChaCha20-Poly1305 encryption)
 - Fixed a cosmetic issue where the button bar would visibily change size when loading a DataTemplate
 - With password protected DataTemplates the prompt will now specify whether it needs the "Open" or "Modify" password
-- Removed the `dt_hash` field within saved DataTemplates as it wasn't actually being used for anything
+- Removed the `dt_hash` field within saved DataTemplates as it wasn't being used for anything
 - You can no longer add the same DataSet using differences between uppercase and lowercase characters
 - The DataSet dropdown is now sorted alphabetically with "Default" always on top
+- Added the ability to remove protection from a DataTemplate after it has been added
 - We no longer update the modify time of local repository files on access
 - Updated Pandoc to 3.6 in Dockerfile
 
