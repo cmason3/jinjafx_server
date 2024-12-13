@@ -336,7 +336,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 if dt.lstrip().startswith('$VAULTY;'):
                   if 'X-Dt-Password' in self.headers:
                     try:
-                      print("Decrypting with :" + self.headers['X-Dt-Password'] + ": (opassword)")
                       dt = jinjafx.Vaulty().decrypt(dt, self.headers['X-Dt-Password'])
                       r = [ 'application/json', 200, json.dumps({ 'dt': self.e(dt.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
 
@@ -391,15 +390,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               r = [ ctype, 200, f.read(), sys._getframe().f_lineno ]
 
               if fpath == '/index.html':
-                local_repository = 'false'
                 if repository or aws_s3_url or github_url:
                   get_link = 'true'
-                  if repository:
-                    local_repository = 'true'
                 else:
                   get_link = 'false'
 
-                r[2] = r[2].decode('utf-8').replace('{{ jinjafx.version }}', jinjafx.__version__ + ' / Jinja2 v' + jinja2_version).replace('{{ get_link }}', get_link).replace('{{ repository }}', local_repository).encode('utf-8')
+                r[2] = r[2].decode('utf-8').replace('{{ jinjafx.version }}', jinjafx.__version__ + ' / Jinja2 v' + jinja2_version).replace('{{ get_link }}', get_link).encode('utf-8')
 
               elif fpath == '/output.html':
                 if pandoc:
@@ -665,22 +661,16 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   if hasattr(self, 'headers'):
                     if 'X-Dt-Protected' in self.headers:
                       dt_protected = int(self.headers['X-Dt-Protected'])
-                      print("Got X-Dt-Protected of " + str(dt_protected))
                     if 'X-Dt-Password' in self.headers:
                       dt_password = self.headers['X-Dt-Password']
-                      print("Got X-Dt-Password of " + dt_password)
                     if 'X-Dt-Open-Password' in self.headers:
                       dt_opassword = self.headers['X-Dt-Open-Password']
-                      print("Got X-Dt-Open-Password of " + dt_opassword)
                     if 'X-Dt-Encrypted' in self.headers:
                       dt_encrypted = int(self.headers['X-Dt-Encrypted'])
-                      print("Got X-Dt-Encrypted of " + str(dt_encrypted))
                     if 'X-Dt-Modify-Password' in self.headers:
                       dt_mpassword = self.headers['X-Dt-Modify-Password']
-                      print("Got X-Dt-Modify-Password of " + dt_mpassword)
                     if 'X-Dt-Encrypt-Password' in self.headers:
                       dt_epassword = self.headers['X-Dt-Encrypt-Password']
-                      print("Got X-Dt-Encrypt-Password of " + dt_epassword)
                     if 'X-Dt-Revision' in self.headers:
                       dt_revision = int(self.headers['X-Dt-Revision'])
 
@@ -822,23 +812,54 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     if aws_s3_url:
                       rr = aws_s3_get(aws_s3_url, dt_filename)
                       if rr.status_code == 200:
-                        m = re.search(r'revision: (\d+)', rr.text)
-                        if m != None:
-                          if dt_revision <= int(m.group(1)):
-                            r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
+                        if rr.text.lstrip().startswith('$VAULTY;'):
+                          if dt_epassword != '':
+                            try:
+                              content = jinjafx.Vaulty().decrypt(rr.text, dt_epassword)
 
-                        if r[1] != 409:
-                          dt_yml, r = update_dt(rr.text, dt_yml, r)
+                            except Exception:
+                              r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+
+                          else:
+                            r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+
+                        else:
+                          content = rr.text
+
+                        if r[1] != 403:
+                          m = re.search(r'revision: (\d+)', rr.text)
+                          if m != None:
+                            if dt_revision <= int(m.group(1)):
+                              r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
+
+                          if r[1] != 409:
+                            dt_yml, r = update_dt(rr.text, dt_yml, r)
 
                       if r[1] == 500 or r[1] == 200:
                         dt_yml = add_client_fields(dt_yml, remote_addr)
-                        rr = aws_s3_put(aws_s3_url, dt_filename, dt_yml, 'application/yaml')
 
-                        if rr.status_code == 200:
-                          r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
+                        if dt_encrypted:
+                          if dt_opassword != '':
+                            dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_opassword) + '\n'
 
-                        elif rr.status_code == 403:
-                          r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+                          elif dt_epassword != '':
+                            dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_epassword) + '\n'
+
+                          else:
+                            r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
+
+                        if r[1] != 400:
+                          if dt_encrypted:
+                            rr = aws_s3_put(aws_s3_url, dt_filename, dt_yml, 'application/base64')
+
+                          else:
+                            rr = aws_s3_put(aws_s3_url, dt_filename, dt_yml, 'application/yaml')
+
+                          if rr.status_code == 200:
+                            r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
+
+                          elif rr.status_code == 403:
+                            r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
 
                     elif github_url:
                       sha = None
@@ -852,26 +873,50 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                         if jobj.get('encoding') and jobj.get('encoding') == 'base64':
                           content = base64.b64decode(content).decode('utf-8')
 
-                        m = re.search(r'revision: (\d+)', content)
-                        if m != None:
-                          if dt_revision <= int(m.group(1)):
-                            r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
+                        if content.lstrip().startswith('$VAULTY;'):
+                          if dt_epassword != '':
+                            try:
+                              content = jinjafx.Vaulty().decrypt(content, dt_epassword)
 
-                        if r[1] != 409:
-                          dt_yml, r = update_dt(content, dt_yml, r)
+                            except Exception:
+                              r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+
+                          else:
+                            r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+
+                        if r[1] != 403:
+                          m = re.search(r'revision: (\d+)', content)
+                          if m != None:
+                            if dt_revision <= int(m.group(1)):
+                              r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
+
+                          if r[1] != 409:
+                            dt_yml, r = update_dt(content, dt_yml, r)
 
                       if r[1] == 500 or r[1] == 200:
                         dt_yml = add_client_fields(dt_yml, remote_addr)
-                        rr = github_put(github_url, dt_filename, dt_yml, sha)
 
-                        if str(rr.status_code).startswith('2'):
-                          r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
+                        if dt_encrypted:
+                          if dt_opassword != '':
+                            dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_opassword) + '\n'
 
-                        elif rr.status_code == 401:
-                          r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+                          elif dt_epassword != '':
+                            dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_epassword) + '\n'
 
-                        else:
-                          print(rr.text)
+                          else:
+                            r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
+
+                        if r[1] != 400:
+                          rr = github_put(github_url, dt_filename, dt_yml, sha)
+
+                          if str(rr.status_code).startswith('2'):
+                            r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
+
+                          elif rr.status_code == 401:
+                            r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+
+                          else:
+                            print(rr.text)
 
                     else:
                       dt_filename = os.path.normpath(repository + '/' + dt_filename)
@@ -883,7 +928,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                         if rr.lstrip().startswith('$VAULTY'):
                           if dt_epassword != '':
                             try:
-                              print("Decrypting with :" + dt_epassword + ": (epassword)")
                               rr = jinjafx.Vaulty().decrypt(rr, dt_epassword)
 
                             except Exception:
@@ -892,7 +936,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                           else:
                             r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
 
-                        if r[1] != 401:
+                        if r[1] != 403:
                           m = re.search(r'revision: (\d+)', rr)
                           if m != None:
                             if dt_revision <= int(m.group(1)):
@@ -906,11 +950,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
                         if dt_encrypted:
                           if dt_opassword != '':
-                            print("Encrypting with :" + dt_opassword + ": (opassword)")
                             dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_opassword) + '\n'
 
                           elif dt_epassword != '':
-                            print("Encrypting with :" + dt_epassword + ": (epassword)")
                             dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_epassword) + '\n'
 
                           else:
