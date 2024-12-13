@@ -659,18 +659,22 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   dt_mpassword = ''
                   dt_epassword = ''
                   dt_revision = 1
-                  dt_encrypt = 0
+                  dt_protected = 0
+                  dt_encrypted = 0
 
                   if hasattr(self, 'headers'):
+                    if 'X-Dt-Protected' in self.headers:
+                      dt_protected = int(self.headers['X-Dt-Protected'])
+                      print("Got X-Dt-Protected of " + str(dt_protected))
                     if 'X-Dt-Password' in self.headers:
                       dt_password = self.headers['X-Dt-Password']
                       print("Got X-Dt-Password of " + dt_password)
                     if 'X-Dt-Open-Password' in self.headers:
                       dt_opassword = self.headers['X-Dt-Open-Password']
                       print("Got X-Dt-Open-Password of " + dt_opassword)
-                    if 'X-Dt-Encrypt' in self.headers:
-                      dt_encrypt = int(self.headers['X-Dt-Encrypt'])
-                      print("Got X-Dt-Encrypt of " + str(dt_encrypt))
+                    if 'X-Dt-Encrypted' in self.headers:
+                      dt_encrypted = int(self.headers['X-Dt-Encrypted'])
+                      print("Got X-Dt-Encrypted of " + str(dt_encrypted))
                     if 'X-Dt-Modify-Password' in self.headers:
                       dt_mpassword = self.headers['X-Dt-Modify-Password']
                       print("Got X-Dt-Modify-Password of " + dt_mpassword)
@@ -761,7 +765,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     dt_yml += 'revision: ' + str(dt_revision) + '\n'
                     dt_yml += 'dataset: "' + dt['dataset'] + '"\n'
                     
-                    if dt_encrypt:
+                    if dt_encrypted:
                       dt_yml += 'encrypted: 1\n'
 
                     if 'id' in params:
@@ -793,19 +797,20 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                           r = [ 'text/plain', 401, '401 Unauthorized\r\n', sys._getframe().f_lineno ]
 
                       if r[1] != 401:
-                        if dt_opassword != '' or dt_mpassword != '':
-                          if dt_opassword != '':
-                            dt_yml += 'dt_password: "' + binascii.hexlify(self.derive_key(dt_opassword)).decode('utf-8') + '"\n'
+                        if dt_protected:
+                          if dt_opassword != '' or dt_mpassword != '':
+                            if dt_opassword != '':
+                              dt_yml += 'dt_password: "' + binascii.hexlify(self.derive_key(dt_opassword)).decode('utf-8') + '"\n'
 
-                          if dt_mpassword != '':
-                            dt_yml += 'dt_mpassword: "' + binascii.hexlify(self.derive_key(dt_mpassword)).decode('utf-8') + '"\n'
+                            if dt_mpassword != '':
+                              dt_yml += 'dt_mpassword: "' + binascii.hexlify(self.derive_key(dt_mpassword)).decode('utf-8') + '"\n'
 
-                        else:
-                          if mo != None:
-                            dt_yml += 'dt_password: "' + mo.group(1) + '"\n'
+                          else:
+                            if mo != None:
+                              dt_yml += 'dt_password: "' + mo.group(1) + '"\n'
 
-                          if mm != None:
-                            dt_yml += 'dt_mpassword: "' + mm.group(1) + '"\n'
+                            if mm != None:
+                              dt_yml += 'dt_mpassword: "' + mm.group(1) + '"\n'
 
                       return dt_yml, r
 
@@ -899,7 +904,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                       if r[1] == 500 or r[1] == 200:
                         dt_yml = add_client_fields(dt_yml, remote_addr)
 
-                        if dt_encrypt:
+                        if dt_encrypted:
                           if dt_opassword != '':
                             print("Encrypting with :" + dt_opassword + ": (opassword)")
                             dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_opassword) + '\n'

@@ -113,11 +113,12 @@ function getStatusText(code) {
   var current_ds = 'Default';
   var current_t = 'Default';
   var pending_dt = '';
+  var dt_protected = false;
+  var dt_encrypted = false;
   var dt_password = null;
   var dt_opassword = null;
   var dt_mpassword = null;
   var dt_epassword = null;
-  var dt_encrypt = false;
   var input_form = null;
   var r_input_form = null;
   var jinput = null;
@@ -403,6 +404,14 @@ function getStatusText(code) {
       document.getElementById('password_open2').classList.remove('is-valid');
       document.getElementById('password_modify2').classList.remove('is-invalid');
       document.getElementById('password_modify2').classList.remove('is-valid');
+
+      if (dt_protected) {
+        document.getElementById('ml-protect-dt-ok').innerText = 'Update';
+      }
+      else {
+        document.getElementById('ml-protect-dt-ok').innerText = 'OK';
+      }
+
       new bootstrap.Modal(document.getElementById('protect_dt'), {
         keyboard: false
       }).show();
@@ -709,6 +718,7 @@ function getStatusText(code) {
 
     if (v_dt_id !== null) {
       xHR.open("POST", "/get_link?id=" + v_dt_id, true);
+      xHR.setRequestHeader("X-Dt-Protected", dt_protected ? 1 : 0);
       if (dt_password !== null) {
         xHR.setRequestHeader("X-Dt-Password", dt_password);
       }
@@ -721,7 +731,7 @@ function getStatusText(code) {
       if (dt_epassword != null) {
         xHR.setRequestHeader("X-Dt-Encrypt-Password", dt_epassword);
       }
-      xHR.setRequestHeader("X-Dt-Encrypt", dt_encrypt ? 1 : 0);
+      xHR.setRequestHeader("X-Dt-Encrypted", dt_encrypted ? 1 : 0);
       xHR.setRequestHeader("X-Dt-Revision", revision + 1);
     }
     else {
@@ -732,14 +742,20 @@ function getStatusText(code) {
       if (this.status === 200) {
         if (v_dt_id !== null) {
           revision += 1;
-          if (dt_mpassword != null) {
-            dt_password = dt_mpassword;
+          if (dt_protected) {
+            if (dt_mpassword != null) {
+              dt_password = dt_mpassword;
+            }
+            else if (dt_opassword != null) {
+              dt_password = dt_opassword;
+            }
+            if (dt_opassword != null) {
+              dt_epassword = dt_opassword;
+            }
           }
-          else if (dt_opassword != null) {
-            dt_password = dt_opassword;
-          }
-          if (dt_opassword != null) {
-            dt_epassword = dt_opassword;
+          else {
+            dt_epassword = null;
+            dt_password = null;
           }
           dt_opassword = null;
           dt_mpassword = null;
@@ -837,11 +853,11 @@ function getStatusText(code) {
               var dt = jsyaml.load(d(JSON.parse(this.responseText)['dt']), jsyaml_schema);
 
               if (dt.hasOwnProperty('encrypted')) {
-                dt_encrypt = (dt['encrypted'] === 1);
+                dt_encrypted = (dt['encrypted'] === 1);
                 dt_epassword = dt_password;
               }
               else {
-                dt_encrypt = false;
+                dt_encrypted = false;
               }
 
               if (dt.hasOwnProperty('dataset')) {
@@ -859,6 +875,10 @@ function getStatusText(code) {
               document.getElementById('protect').classList.remove('disabled');
               if (dt.hasOwnProperty('dt_password') || dt.hasOwnProperty('dt_mpassword')) {
                 document.getElementById('protect_text').innerHTML = 'Update Protection';
+                dt_protected = true;
+              }
+              else {
+                dt_protected = false;
               }
 
               if (dt.hasOwnProperty('updated')) {
@@ -1437,12 +1457,12 @@ function getStatusText(code) {
       document.getElementById('ml-protect-dt-ok').onclick = function() {
         dt_opassword = null;
         dt_mpassword = null;
-        dt_encrypt = false;
+        dt_encrypted = false;
 
         if (document.getElementById('password_open1').value.match(/\S/)) {
           if (document.getElementById('password_open1').value == document.getElementById('password_open2').value) {
             dt_opassword = document.getElementById('password_open2').value;
-            dt_encrypt = document.getElementById('encrypt_dt').checked;
+            dt_encrypted = document.getElementById('encrypt_dt').checked;
           }
           else {
             set_status("darkred", "ERROR", "Password Verification Failed");
@@ -1465,11 +1485,21 @@ function getStatusText(code) {
           if (dt_opassword === dt_mpassword) {
             dt_mpassword = null;
           }
+          dt_protected = true;
           document.getElementById('protect_text').innerHTML = 'Update Protection';
           window.addEventListener('beforeunload', onBeforeUnload);
           document.title = 'JinjaFx [unsaved]';
           dirty = true;
           set_status("green", "OK", "Protection Set - Update Required", 10000);
+          dt_password = null;
+        }
+        else if (dt_protected) {
+          document.getElementById('protect_text').innerHTML = 'Protect Link';
+          window.addEventListener('beforeunload', onBeforeUnload);
+          document.title = 'JinjaFx [unsaved]';
+          dirty = true;
+          set_status("green", "OK", "Protection Removed - Update Required", 10000);
+          dt_protected = false;
           dt_password = null;
         }
         else {
