@@ -1,7 +1,14 @@
 ## CHANGELOG
 
 ### [25.1.0] - In Development
-- Don't update modify time of local repository files on access
+- Added support for nested templates within `template.j2` using Jinja2 include syntax
+- Added support for encrypted DataTemplates using Vaulty (ChaCha20-Poly1305 encryption)
+- Fixed a cosmetic issue where the button bar would visibily change size when loading a DataTemplate
+- With password protected DataTemplates the prompt will now specify whether it needs the "Open" or "Modify" password
+- Removed the `dt_hash` field within saved DataTemplates as it wasn't actually being used for anything
+- You can no longer add the same DataSet using differences between uppercase and lowercase characters
+- The DataSet dropdown is now sorted alphabetically with "Default" always on top
+- We no longer update the modify time of local repository files on access
 - Updated Pandoc to 3.6 in Dockerfile
 
 ### [24.12.1] - Dec 3, 2024
