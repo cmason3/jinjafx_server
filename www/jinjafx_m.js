@@ -1033,12 +1033,6 @@ function getStatusText(code) {
         }).show();
       };
 
-      /*
-      if (document.getElementById('repository').value != 'false') {
-        document.getElementById('encrypt_datatemplate').classList.remove('d-none');
-      }
-      */
-  
       sobj = document.getElementById("status");
   
       window.onresize = function() {
