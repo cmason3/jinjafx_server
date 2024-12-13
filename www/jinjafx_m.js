@@ -116,6 +116,7 @@ function getStatusText(code) {
   var dt_password = null;
   var dt_opassword = null;
   var dt_mpassword = null;
+  var dt_epassword = null;
   var dt_encrypt = false;
   var input_form = null;
   var r_input_form = null;
@@ -402,10 +403,6 @@ function getStatusText(code) {
       document.getElementById('password_open2').classList.remove('is-valid');
       document.getElementById('password_modify2').classList.remove('is-invalid');
       document.getElementById('password_modify2').classList.remove('is-valid');
-
-      // document.getElementById('encrypt_dt').disabled = true;
-      // document.getElementById('encrypt_dt').checked = true;
-
       new bootstrap.Modal(document.getElementById('protect_dt'), {
         keyboard: false
       }).show();
@@ -721,9 +718,10 @@ function getStatusText(code) {
       if (dt_mpassword != null) {
         xHR.setRequestHeader("X-Dt-Modify-Password", dt_mpassword);
       }
-      if (dt_encrypt) {
-        xHR.setRequestHeader("X-Dt-Encrypt", 1);
+      if (dt_epassword != null) {
+        xHR.setRequestHeader("X-Dt-Encrypt-Password", dt_epassword);
       }
+      xHR.setRequestHeader("X-Dt-Encrypt", dt_encrypt ? 1 : 0);
       xHR.setRequestHeader("X-Dt-Revision", revision + 1);
     }
     else {
@@ -740,6 +738,9 @@ function getStatusText(code) {
           else if (dt_opassword != null) {
             dt_password = dt_opassword;
           }
+          if (dt_opassword != null) {
+            dt_epassword = dt_opassword;
+          }
           dt_opassword = null;
           dt_mpassword = null;
           set_status("green", "OK", "Link Updated");
@@ -754,6 +755,7 @@ function getStatusText(code) {
       }
       else if (this.status == 401) {
         protect_action = 2;
+        document.getElementById('lb_protect').innerHTML = 'DataTemplate Passsword (' + this.getResponseHeader('X-Dt-Authentication') + ')';
         new bootstrap.Modal(document.getElementById('protect_input'), {
           keyboard: false
         }).show();
@@ -824,6 +826,7 @@ function getStatusText(code) {
         xHR.onload = function() {
           if (this.status === 401) {
             protect_action = 1;
+            document.getElementById('lb_protect').innerHTML = 'DataTemplate Passsword (' + this.getResponseHeader('X-Dt-Authentication') + ')';
             new bootstrap.Modal(document.getElementById('protect_input'), {
               keyboard: false
             }).show();
@@ -834,13 +837,12 @@ function getStatusText(code) {
               var dt = jsyaml.load(d(JSON.parse(this.responseText)['dt']), jsyaml_schema);
 
               if (dt.hasOwnProperty('encrypted')) {
-                dt_encrypt = dt['encrypted'];
+                dt_encrypt = (dt['encrypted'] === 1);
+                dt_epassword = dt_password;
               }
               else {
                 dt_encrypt = false;
               }
-
-              alert(dt_encrypt);
 
               if (dt.hasOwnProperty('dataset')) {
                 load_datatemplate(dt['dt'], qs, dt['dataset']);
@@ -906,9 +908,6 @@ function getStatusText(code) {
         xHR.timeout = 10000;
         if (dt_password != null) {
           xHR.setRequestHeader("X-Dt-Password", dt_password);
-          if (encrypt_dt) {
-            xHR.setRequestHeader("X-Dt-Encrypt", 1);
-          }
         }
         xHR.send(null);
       }
@@ -1913,6 +1912,7 @@ function getStatusText(code) {
     dt_password = null;
     dt_opassword = null;
     dt_mpassword = null;
+    dt_epassword = null;
     input_form = null;
     document.getElementById('update').classList.add('d-none');
     document.getElementById('get').classList.remove('d-none');

@@ -336,13 +336,16 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 if dt.lstrip().startswith('$VAULTY;'):
                   if 'X-Dt-Password' in self.headers:
                     try:
+                      print("Decrypting with :" + self.headers['X-Dt-Password'] + ": (opassword)")
                       dt = jinjafx.Vaulty().decrypt(dt, self.headers['X-Dt-Password'])
                       r = [ 'application/json', 200, json.dumps({ 'dt': self.e(dt.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
 
                     except Exception:
+                      cheaders['X-Dt-Authentication'] = 'Open'
                       r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
                    
                   else:
+                    cheaders['X-Dt-Authentication'] = 'Open'
                     r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
               if r[1] == 200:
@@ -355,12 +358,15 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                       if mm != None:
                         t = binascii.unhexlify(mm.group(1).encode('utf-8'))
                         if t != self.derive_key(self.headers['X-Dt-Password'], t[2:int(t[1]) + 2], t[0]):
+                          cheaders['X-Dt-Authentication'] = 'Modify'
                           r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
   
                       else:
+                        cheaders['X-Dt-Authentication'] = 'Open'
                         r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
   
                   else:
+                    cheaders['X-Dt-Authentication'] = 'FIXME - Unsure'
                     r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
             else:
@@ -649,18 +655,26 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   dt_password = ''
                   dt_opassword = ''
                   dt_mpassword = ''
+                  dt_epassword = ''
                   dt_revision = 1
                   dt_encrypt = 0
 
                   if hasattr(self, 'headers'):
                     if 'X-Dt-Password' in self.headers:
                       dt_password = self.headers['X-Dt-Password']
+                      print("Got X-Dt-Password of " + dt_password)
                     if 'X-Dt-Open-Password' in self.headers:
                       dt_opassword = self.headers['X-Dt-Open-Password']
+                      print("Got X-Dt-Open-Password of " + dt_opassword)
                     if 'X-Dt-Encrypt' in self.headers:
                       dt_encrypt = int(self.headers['X-Dt-Encrypt'])
+                      print("Got X-Dt-Encrypt of " + str(dt_encrypt))
                     if 'X-Dt-Modify-Password' in self.headers:
                       dt_mpassword = self.headers['X-Dt-Modify-Password']
+                      print("Got X-Dt-Modify-Password of " + dt_mpassword)
+                    if 'X-Dt-Encrypt-Password' in self.headers:
+                      dt_epassword = self.headers['X-Dt-Encrypt-Password']
+                      print("Got X-Dt-Encrypt-Password of " + dt_epassword)
                     if 'X-Dt-Revision' in self.headers:
                       dt_revision = int(self.headers['X-Dt-Revision'])
 
@@ -769,9 +783,11 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                           rpassword = mm.group(1) if mm != None else mo.group(1)
                           t = binascii.unhexlify(rpassword.encode('utf-8'))
                           if t != self.derive_key(dt_password, t[2:int(t[1]) + 2], t[0]):
+                            cheaders['X-Dt-Authentication'] = 'FIXME - Unsure'
                             r = [ 'text/plain', 401, '401 Unauthorized\r\n', sys._getframe().f_lineno ]
 
                         else:
+                          cheaders['X-Dt-Authentication'] = 'FIXME - Unsure'
                           r = [ 'text/plain', 401, '401 Unauthorized\r\n', sys._getframe().f_lineno ]
 
                       if r[1] != 401:
@@ -858,11 +874,16 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                           rr = f.read().decode('utf-8')
 
                         if rr.lstrip().startswith('$VAULTY'):
-                          try:
-                            rr = jinjafx.Vaulty().decrypt(rr, dt_password)
+                          if dt_epassword != '':
+                            try:
+                              print("Decrypting with :" + dt_epassword + ": (epassword)")
+                              rr = jinjafx.Vaulty().decrypt(rr, dt_epassword)
 
-                          except Exception:
-                            r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+                            except Exception:
+                              r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+
+                          else:
+                            r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
 
                         if r[1] != 401:
                           m = re.search(r'revision: (\d+)', rr)
@@ -878,10 +899,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
                         if dt_encrypt:
                           if dt_opassword != '':
+                            print("Encrypting with :" + dt_opassword + ": (opassword)")
                             dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_opassword) + '\n'
 
-                          elif dt_password != '':
-                            dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_password) + '\n'
+                          elif dt_epassword != '':
+                            print("Encrypting with :" + dt_epassword + ": (epassword)")
+                            dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_epassword) + '\n'
 
                           else:
                             r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
