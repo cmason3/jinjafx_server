@@ -1,0 +1,17 @@
+FROM docker.io/library/python:3.13-alpine
+
+ARG BRANCH main
+
+RUN set -eux; \
+
+apk update; \
+apk add pandoc-cli=3.6; \
+
+python3 -m venv /opt/jinjafx; \
+/opt/jinjafx/bin/python3 -m pip install --upgrade git+https://github.com/cmason3/jinjafx_server.git@${BRANCH} lxml; \
+/opt/jinjafx/bin/python3 -m pip uninstall -y pip
+
+ENV VIRTUAL_ENV /opt/jinjafx
+ENV PATH /opt/jinjafx/bin:${PATH}
+
+ENTRYPOINT [ "python3", "-u", "-m", "jinjafx_server", "-s", "-l", "0.0.0.0", "-p", "8080" ]
