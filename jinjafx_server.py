@@ -1184,6 +1184,7 @@ def log(t, ae='', systemd_hide=False):
     if os.getenv('JOURNAL_STREAM'):
       if not systemd_hide:
         print(re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t + ae))
+
     else:
       print('[' + timestamp + '] ' + t + ae)
 
