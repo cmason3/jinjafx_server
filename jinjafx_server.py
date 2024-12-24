@@ -1144,7 +1144,7 @@ def main(rflag=[0]):
       soft, hard = resource.getrlimit(resource.RLIMIT_AS)
       resource.setrlimit(resource.RLIMIT_AS, (args.ml * 1024 * 1024, hard))
 
-    log(f'Starting JinjaFx Server (PID is {os.getpid()}) on http://{args.l}:{args.p}...', systemd_hide=True)
+    log(f'Starting JinjaFx Server (PID is {os.getpid()}) on http://{args.l}:{args.p}...')
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -1161,7 +1161,7 @@ def main(rflag=[0]):
     while rflag[0] < 2:
       time.sleep(0.1)
 
-    log(f'Terminating JinjaFx Server...', systemd_hide=True)
+    log(f'Terminating JinjaFx Server...')
 
 
   except Exception as e:
@@ -1175,15 +1175,14 @@ def main(rflag=[0]):
       s.close()
 
 
-def log(t, ae='', systemd_hide=False):
+def log(t, ae=''):
   global logring
 
   with llock:
     timestamp = datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19]
 
     if os.getenv('JOURNAL_STREAM'):
-      if not systemd_hide:
-        print(re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t + ae))
+      print(re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t + ae))
 
     else:
       print('[' + timestamp + '] ' + t + ae)
