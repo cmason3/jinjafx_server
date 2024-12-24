@@ -60,6 +60,7 @@ sudo tee /etc/systemd/system/jinjafx.service >/dev/null <<-EOF
  [Service]
  Environment="VIRTUAL_ENV=/opt/jinjafx"
  ExecStart=/opt/jinjafx/bin/python3 -u -m jinjafx_server -s -l 127.0.0.1 -p 8080 -logfile /var/log/jinjafx.log
+ SyslogIdentifier=jinjafx_server
  TimeoutStartSec=60
  Restart=always
 
