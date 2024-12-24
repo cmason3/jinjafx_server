@@ -10,7 +10,8 @@
 - The DataSet dropdown is now sorted alphabetically with "Default" always on top
 - Added the ability to remove protection from a DataTemplate after it has been added
 - We no longer update the modify time of local repository files on access
-- Updated Pandoc to 3.6 in Dockerfile
+- Don't output timestamp when running via systemd
+- Updated Pandoc to 3.6.1 in Dockerfile
 
 ### [24.12.1] - Dec 3, 2024
 - Fixed an issue where rows with an incorrect number of fields in `data.csv` weren't being coloured red

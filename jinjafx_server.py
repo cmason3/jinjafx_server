@@ -1063,8 +1063,9 @@ def main(rflag=[0]):
   global pandoc
 
   try:
-    print('JinjaFx Server v' + __version__ + ' - Jinja2 Templating Tool')
-    print('Copyright (c) 2020-2025 Chris Mason <chris@netnix.org>\n')
+    if not os.getenv('JOURNAL_STREAM'):
+      print('JinjaFx Server v' + __version__ + ' - Jinja2 Templating Tool')
+      print('Copyright (c) 2020-2025 Chris Mason <chris@netnix.org>\n')
 
     update_versioned_links(base + '/www')
 
@@ -1143,7 +1144,7 @@ def main(rflag=[0]):
       soft, hard = resource.getrlimit(resource.RLIMIT_AS)
       resource.setrlimit(resource.RLIMIT_AS, (args.ml * 1024 * 1024, hard))
 
-    log('Starting JinjaFx Server (PID is ' + str(os.getpid()) + ') on http://' + args.l + ':' + str(args.p) + '...')
+    log(f'Starting JinjaFx Server (PID is {os.getpid()}) on http://{args.l}:{args.p}...', systemd_hide=True)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -1160,7 +1161,7 @@ def main(rflag=[0]):
     while rflag[0] < 2:
       time.sleep(0.1)
 
-    log('Terminating JinjaFx Server...')
+    log(f'Terminating JinjaFx Server...', systemd_hide=True)
 
 
   except Exception as e:
@@ -1174,12 +1175,17 @@ def main(rflag=[0]):
       s.close()
 
 
-def log(t, ae=''):
+def log(t, ae='', systemd_hide=False):
   global logring
 
   with llock:
     timestamp = datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19]
-    print('[' + timestamp + '] ' + t + ae)
+
+    if os.getenv('JOURNAL_STREAM'):
+      if not systemd_hide:
+        print(re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t + ae))
+    else:
+      print('[' + timestamp + '] ' + t + ae)
 
     logring.append('[' + timestamp + '] ' + t + ae)
     logring = logring[-1024:]
