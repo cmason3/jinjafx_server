@@ -45,7 +45,7 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
 
 For health checking purposes, if you specify the URL `/ping` then you should get an "OK" response if the JinaFx Server is up and working (these requests are omitted from the logs).
 
-The preferred method of running the JinjaFx Server is with HAProxy in front of it as it supports TLS termination and HTTP/2 (and more recently HTTP/3 using QUIC) or using a container orchestration tool like Kubernetes - please see the [/kubernetes](/kubernetes) directory for more information about running JinjaFx using Kubernetes.
+The preferred method of running the JinjaFx Server is with HAProxy in front of it as it supports TLS termination and HTTP/2 (and more recently HTTP/3 using QUIC) or using a container orchestration tool like Kubernetes - please see the [/kubernetes](/kubernetes) directory for more information about running JinjaFx as a container.
 
 If you don't want to go down the container route then you can also install it as a service using systemd - the following commands will install a Python Virtual Environment in `/opt/jinjafx` and start it via systemd:
 
