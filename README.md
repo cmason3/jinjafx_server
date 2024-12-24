@@ -47,6 +47,29 @@ For health checking purposes, if you specify the URL `/ping` then you should get
 
 The preferred method of running the JinjaFx Server is with HAProxy in front of it as it supports TLS termination and HTTP/2 (and more recently HTTP/3 using QUIC) or using a container orchestration tool like Kubernetes - please see the [/kubernetes](/kubernetes) directory for more information about running JinjaFx using Kubernetes.
 
+If you don't want to go down the container route then you can also install it as a service using systemd - the following commands will install a Python Virtual Environment in `/opt/jinjafx` and start it via systemd:
+
+```
+sudo python3 -m venv /opt/jinjafx
+sudo /opt/jinjafx/bin/python3 -m pip install jinjafx_server lxml
+
+sudo tee /etc/systemd/system/jinjafx.service >/dev/null <<-EOF
+[Unit]
+Description=JinjaFx Server
+
+[Service]
+Environment="VIRTUAL_ENV=/opt/jinjafx"
+ExecStart=/opt/jinjafx/bin/python3 -u -m jinjafx_server -s -l 127.0.0.1 -p 8080 -logfile /var/log/jinjafx.log
+TimeoutStartSec=60
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl enable --now jinjafx
+```
+
 The "-r", "-s3" or "-github" arguments (mutually exclusive) allow you to specify a repository ("-r" is a local directory, "-s3" is an AWS S3 URL and "-github" is a GitHub repository) that will be used to store DataTemplates on the server via the "Get Link" and "Update Link" buttons. The generated link is guaranteed to be unique and a different link will be created every time - version 1.3.0 changed the behaviour, where previously the same link was always generated for the same DataTemplate, but this made it difficult to update DataTemplates without the link changing as it was basically a cryptographic hash of your DataTemplate. If you use an AWS S3 bucket then you will also need to provide some credentials via the two environment variables which has read and write permissions to the S3 URL.
 
 The "-rl" argument is used to provide an optional rate limit of the source IP - the "rate" is how many requests are permitted and the "limit" is the interval in which those requests are permitted - it can be specified in "s", "m" or "h" (e.g. "5/30s", "10/1m" or "30/1h"). This is currently only applied to "Get Link" and Web Log authentication.
