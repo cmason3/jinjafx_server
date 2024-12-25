@@ -54,18 +54,18 @@ sudo python3 -m venv /opt/jinjafx
 sudo /opt/jinjafx/bin/python3 -m pip install jinjafx_server lxml
 
 sudo tee /etc/systemd/system/jinjafx.service >/dev/null <<-EOF
- [Unit]
- Description=JinjaFx Server
+[Unit]
+Description=JinjaFx Server
 
- [Service]
- Environment="VIRTUAL_ENV=/opt/jinjafx"
- ExecStart=/opt/jinjafx/bin/python3 -u -m jinjafx_server -s -l 127.0.0.1 -p 8080
- SyslogIdentifier=jinjafx_server
- TimeoutStartSec=60
- Restart=always
+[Service]
+Environment="VIRTUAL_ENV=/opt/jinjafx"
+ExecStart=/opt/jinjafx/bin/python3 -u -m jinjafx_server -s -l 127.0.0.1 -p 8080
+SyslogIdentifier=jinjafx_server
+TimeoutStartSec=60
+Restart=always
 
- [Install]
- WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 EOF
 
 sudo systemctl enable --now jinjafx
