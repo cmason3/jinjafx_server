@@ -2023,9 +2023,10 @@ function getStatusText(code) {
       }
       if (tinfo) {
         if (editor == window.cmTemplate) {
-          document.getElementById('template_info').classList.add('fade-out');
-          document.getElementById('template_info').style.zIndex = -1000;
-          document.getElementById('stemplates').style.visibility = 'visible';
+          remove_info();
+          //document.getElementById('template_info').classList.add('fade-out');
+          //document.getElementById('template_info').style.zIndex = -1000;
+          //document.getElementById('stemplates').style.visibility = 'visible';
           tinfo = false;
         }
       }
@@ -2101,6 +2102,7 @@ function getStatusText(code) {
 
       rebuild_datasets();
       rebuild_templates();
+      remove_info();
       loaded = true;
     }
     catch (ex) {
