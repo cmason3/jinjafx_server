@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [25.1.0] - In Development
+### [25.1.0] - Dec 29, 2024
 - Added support for nested templates within `template.j2` using Jinja2 include syntax
 - Added support for encrypted DataTemplates using Vaulty (ChaCha20-Poly1305 encryption)
 - Fixed a cosmetic issue where the button bar would visibily change size when loading a DataTemplate
