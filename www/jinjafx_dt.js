@@ -33,14 +33,14 @@
 
         dtx += '  datasets:\n';
 
-        Object.keys(dt.datasets).forEach(function(ds) {
+        Object.keys(dt.datasets).sort(window.opener.default_on_top).forEach(function(ds) {
           var data = dt.datasets[ds].data.match(/\S/) ? window.opener.d(dt.datasets[ds].data).replace(/\s+$/g, '') : "";
           var vars = dt.datasets[ds].vars.match(/\S/) ? window.opener.d(dt.datasets[ds].vars).replace(/\s+$/g, '') : "";
 
           dtx += '    "' + ds + '":\n';
 
           if (data == '') {
-            dtx += '      data: ""\n\n';
+            dtx += '      data: ""\n';
           }
           else {
             dtx += '      data: |2\n';
@@ -61,7 +61,7 @@
         var vars = dt.vars.match(/\S/) ? window.opener.d(dt.vars).replace(/\s+$/g, '') : "";
 
         if (data == '') {
-          dtx += '  data: ""\n\n';
+          dtx += '  data: ""\n';
         }
         else {
           dtx += '  data: |2\n';
@@ -77,14 +77,31 @@
         }
       }
 
-      var template = dt.template.match(/\S/) ? window.opener.d(dt.template).replace(/\s+$/g, '') : "";
+      if (typeof dt.template == "object") {
+        dtx += '  template:\n';
 
-      if (template == '') {
-        dtx += '  template: ""\n';
+        Object.keys(dt.template).sort(window.opener.default_on_top).forEach(function(t) {
+          var template = dt.template[t].match(/\S/) ? window.opener.d(dt.template[t]).replace(/\s+$/g, '') : "";
+
+          if (template == '') {
+            dtx += '    "' + t + '": ""\n';
+          }
+          else {
+            dtx += '    "' + t + '": |2\n';
+            dtx += window.opener.quote(template.replace(/^/gm, '      ')) + '\n\n';
+          }
+        });
       }
       else {
-        dtx += '  template: |2\n';
-        dtx += window.opener.quote(template.replace(/^/gm, '    ')) + '\n';
+        var template = dt.template.match(/\S/) ? window.opener.d(dt.template).replace(/\s+$/g, '') : "";
+
+        if (template == '') {
+          dtx += '  template: ""\n';
+        }
+        else {
+          dtx += '  template: |2\n';
+          dtx += window.opener.quote(template.replace(/^/gm, '    ')) + '\n\n';
+        }
       }
 
       document.getElementById('container').innerHTML = dtx;

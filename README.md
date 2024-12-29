@@ -4,7 +4,7 @@
 &nbsp;
 <h1 align="center">JinjaFx Server - Jinja2 Templating Tool</h1>
 
-JinjaFx Server is a lightweight web server that provides a Web UI to JinjaFx. It is a separate Python module which imports the "jinjafx" module to generate outputs from a web interface - it does require the "requests" module which isn't in the base install. Usage instructions are provided below, although it is considered an additional component and not part of the base JinjaFx tool, although it is probably a much easier way to use it.
+JinjaFx Server is a lightweight web server that provides a Web UI to JinjaFx. It is a separate Python module which imports the "jinjafx" module to generate outputs from a web interface. Usage instructions are provided below, although it is considered an additional component and not part of the base JinjaFx tool, although it is probably a much easier way to use it. There is an AWS hosted version available at https://jinjafx.io, which is free to use and will always be running the latest development version.
 
 ### Installation
 
@@ -45,7 +45,31 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
 
 For health checking purposes, if you specify the URL `/ping` then you should get an "OK" response if the JinaFx Server is up and working (these requests are omitted from the logs).
 
-The preferred method of running the JinjaFx Server is with HAProxy in front of it as it supports TLS termination and HTTP/2 (and more recently HTTP/3 using QUIC) or using a container orchestration tool like Kubernetes - please see the [/kubernetes](/kubernetes) directory for more information about running JinjaFx using Kubernetes.
+The preferred method of running the JinjaFx Server is with HAProxy in front of it as it supports TLS termination and HTTP/2 (and more recently HTTP/3 using QUIC) or using a container orchestration tool like Kubernetes - please see the [/kubernetes](/kubernetes) directory for more information about running JinjaFx as a container.
+
+If you don't want to go down the container route then you can also install it as a service using systemd - the following commands will install a Python Virtual Environment in `/opt/jinjafx` and start it via systemd:
+
+```
+sudo python3 -m venv /opt/jinjafx
+sudo /opt/jinjafx/bin/python3 -m pip install jinjafx_server lxml
+
+sudo tee /etc/systemd/system/jinjafx.service >/dev/null <<-EOF
+[Unit]
+Description=JinjaFx Server
+
+[Service]
+Environment="VIRTUAL_ENV=/opt/jinjafx"
+ExecStart=/opt/jinjafx/bin/python3 -u -m jinjafx_server -s -l 127.0.0.1 -p 8080
+SyslogIdentifier=jinjafx_server
+TimeoutStartSec=60
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl enable --now jinjafx
+```
 
 The "-r", "-s3" or "-github" arguments (mutually exclusive) allow you to specify a repository ("-r" is a local directory, "-s3" is an AWS S3 URL and "-github" is a GitHub repository) that will be used to store DataTemplates on the server via the "Get Link" and "Update Link" buttons. The generated link is guaranteed to be unique and a different link will be created every time - version 1.3.0 changed the behaviour, where previously the same link was always generated for the same DataTemplate, but this made it difficult to update DataTemplates without the link changing as it was basically a cryptographic hash of your DataTemplate. If you use an AWS S3 bucket then you will also need to provide some credentials via the two environment variables which has read and write permissions to the S3 URL.
 

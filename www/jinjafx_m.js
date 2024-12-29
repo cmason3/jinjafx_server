@@ -16,6 +16,16 @@ function rot47(data) {
   });
 }
 
+function default_on_top(a, b) {
+  if (a == 'Default') {
+    return -1;
+  }
+  else if (b == 'Default') {
+    return 1;
+  }
+  return a.localeCompare(b);
+}
+
 var _fromCC = String.fromCharCode.bind(String);
 
 function _utob(c) {
@@ -97,11 +107,18 @@ function getStatusText(code) {
   var datasets = {
     'Default': [CodeMirror.Doc('', 'data'), CodeMirror.Doc('', 'yaml')]
   };
+  var templates = {
+    'Default': CodeMirror.Doc('', 'template')
+  };
   var current_ds = 'Default';
+  var current_t = 'Default';
   var pending_dt = '';
+  var dt_protected = false;
+  var dt_encrypted = false;
   var dt_password = null;
   var dt_opassword = null;
   var dt_mpassword = null;
+  var dt_epassword = null;
   var input_form = null;
   var r_input_form = null;
   var jinput = null;
@@ -128,14 +145,14 @@ function getStatusText(code) {
 
   function switch_dataset(ds, sflag, dflag) {
     if (sflag) {
-      datasets[current_ds][0] = window.cmData.swapDoc(datasets[ds][0]);
-      datasets[current_ds][1] = window.cmVars.swapDoc(datasets[ds][1]);
+      datasets[current_ds][0] = window.cmData.getDoc();
+      datasets[current_ds][1] = window.cmVars.getDoc();
     }
-    else {
+   
+    if (ds != current_ds) {
       window.cmData.swapDoc(datasets[ds][0]);
       window.cmVars.swapDoc(datasets[ds][1]);
-    }
-    if (ds != current_ds) {
+
       if (dflag) {
         window.addEventListener('beforeunload', onBeforeUnload);
         if (document.getElementById('get_link').value != 'false') {
@@ -150,10 +167,37 @@ function getStatusText(code) {
     fe.focus();
   }
 
+  function select_template(e) {
+    switch_template(e.currentTarget.t_name, true, false);
+  }
+
+  function switch_template(t, sflag, dflag) {
+    if (sflag) {
+      templates[current_t] = window.cmTemplate.getDoc();
+    }
+   
+    if (t != current_t) {
+      window.cmTemplate.swapDoc(templates[t]);
+
+      if (dflag) {
+        window.addEventListener('beforeunload', onBeforeUnload);
+        if (document.getElementById('get_link').value != 'false') {
+          document.title = 'JinjaFx [unsaved]';
+        }
+        dirty = true;
+      }
+      document.getElementById('delete_t').disabled = (t == 'Default');
+      document.getElementById('selected_t').innerHTML = t;
+      current_t = t;
+      onDataBlur();
+    }
+    fe.focus();
+  }
+
   function rebuild_datasets() {
     document.getElementById('datasets').innerHTML = '';
 
-    Object.keys(datasets).forEach(function(ds) {
+    Object.keys(datasets).sort(default_on_top).forEach(function(ds) {
       var a = document.createElement('a');
       a.classList.add('dropdown-item', 'text-decoration-none');
       a.addEventListener('click', select_dataset, false);
@@ -192,7 +236,7 @@ function getStatusText(code) {
         xsplit = null;
 
         if (window.cmgVars.getValue().match(/\S/)) {
-          var ds = Object.keys(datasets)[0];
+          var ds = Object.keys(datasets).sort(default_on_top)[0];
           datasets[ds][1].setValue(window.cmgVars.getValue().trimEnd() + "\n\n" + datasets[ds][1].getValue());
         }
 
@@ -203,10 +247,41 @@ function getStatusText(code) {
     document.getElementById('selected_ds').innerHTML = current_ds;
   }
 
+  function rebuild_templates() {
+    document.getElementById('templates').innerHTML = '';
+
+    Object.keys(templates).sort(default_on_top).forEach(function(t) {
+      var a = document.createElement('a');
+      a.classList.add('dropdown-item', 'text-decoration-none');
+      a.addEventListener('click', select_template, false);
+      a.href = '#';
+      a.t_name = t;
+      a.innerHTML = t;
+      document.getElementById('templates').appendChild(a);
+    });
+
+    if (Object.keys(templates).length > 1) {
+      document.getElementById('select_t').disabled = false;
+      document.getElementById('delete_t').disabled = (current_t == 'Default');
+    }
+    else {
+      document.getElementById('select_t').disabled = true;
+      document.getElementById('delete_t').disabled = true;
+    }
+    document.getElementById('selected_t').innerHTML = current_t;
+  }
+
   function delete_dataset(ds) {
     delete datasets[ds];
     rebuild_datasets();
-    switch_dataset(Object.keys(datasets)[0], false, true);
+    switch_dataset(Object.keys(datasets).sort(default_on_top)[0], false, true);
+    fe.focus();
+  }
+
+  function delete_template(t) {
+    delete templates[t];
+    rebuild_templates();
+    switch_template(Object.keys(templates).sort(default_on_top)[0], false, true);
     fe.focus();
   }
 
@@ -248,7 +323,18 @@ function getStatusText(code) {
   function jinjafx_generate() {
     var vaulted_vars = dt.vars.indexOf('$ANSIBLE_VAULT;') > -1;
     dt.vars = e(dt.vars);
-    dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
+
+    if (Object.keys(templates).length === 1) {
+      dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
+    }
+    else {
+      dt.template = {};
+
+      Object.keys(templates).sort(default_on_top).forEach(function(t) {
+        dt.template[t] = e(templates[t].getValue().replace(/\t/g, "  "));
+      });
+    }
+
     dt.id = dt_id;
     dt.dataset = current_ds;
 
@@ -294,19 +380,46 @@ function getStatusText(code) {
       }).show();
       return false;
     }
+    else if (method == "delete_template") {
+      if (window.cmTemplate.getValue().match(/\S/)) {
+        if (confirm("Are You Sure?") === true) {
+          delete_template(current_t);
+        }
+      }
+      else {
+        delete_template(current_t);
+      }
+      return false;
+    }
+    else if (method == "add_template") {
+      document.getElementById("t_name").value = '';
+      new bootstrap.Modal(document.getElementById('template_input'), {
+        keyboard: true
+      }).show();
+      return false;
+    }
 
     if (method == "protect") {
       document.getElementById('password_open2').classList.remove('is-invalid');
       document.getElementById('password_open2').classList.remove('is-valid');
       document.getElementById('password_modify2').classList.remove('is-invalid');
       document.getElementById('password_modify2').classList.remove('is-valid');
+
+      if (dt_protected) {
+        document.getElementById('ml-protect-dt-ok').innerText = 'Update';
+      }
+      else {
+        document.getElementById('ml-protect-dt-ok').innerText = 'OK';
+      }
+
       new bootstrap.Modal(document.getElementById('protect_dt'), {
         keyboard: false
       }).show();
       return false;
     }
 
-    if (window.cmTemplate.getValue().length === 0) {
+    switch_template(current_t, true, false);
+    if (templates['Default'].getValue().length === 0) {
       window.cmTemplate.focus();
       set_status("darkred", "ERROR", "No Template");
       return false;
@@ -542,7 +655,17 @@ function getStatusText(code) {
         }
 
         dt.dataset = current_ds;
-        dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
+
+        if (Object.keys(templates).length === 1) {
+          dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
+        }
+        else {
+          dt.template = {};
+
+          Object.keys(templates).sort(default_on_top).forEach(function(t) {
+            dt.template[t] = e(templates[t].getValue().replace(/\t/g, "  "));
+          });
+        }
 
         if ((current_ds === 'Default') && (Object.keys(datasets).length === 1)) {
           dt.vars = e(window.cmVars.getValue().replace(/\t/g, "  "));
@@ -556,7 +679,7 @@ function getStatusText(code) {
           }
 
           switch_dataset(current_ds, true, false);
-          Object.keys(datasets).forEach(function(ds) {
+          Object.keys(datasets).sort(default_on_top).forEach(function(ds) {
             dt.datasets[ds] = {};
             dt.datasets[ds].data = e(datasets[ds][0].getValue());
             dt.datasets[ds].vars = e(datasets[ds][1].getValue().replace(/\t/g, "  "));
@@ -595,6 +718,7 @@ function getStatusText(code) {
 
     if (v_dt_id !== null) {
       xHR.open("POST", "/get_link?id=" + v_dt_id, true);
+      xHR.setRequestHeader("X-Dt-Protected", dt_protected ? 1 : 0);
       if (dt_password !== null) {
         xHR.setRequestHeader("X-Dt-Password", dt_password);
       }
@@ -604,6 +728,10 @@ function getStatusText(code) {
       if (dt_mpassword != null) {
         xHR.setRequestHeader("X-Dt-Modify-Password", dt_mpassword);
       }
+      if (dt_epassword != null) {
+        xHR.setRequestHeader("X-Dt-Encrypt-Password", dt_epassword);
+      }
+      xHR.setRequestHeader("X-Dt-Encrypted", dt_encrypted ? 1 : 0);
       xHR.setRequestHeader("X-Dt-Revision", revision + 1);
     }
     else {
@@ -614,11 +742,20 @@ function getStatusText(code) {
       if (this.status === 200) {
         if (v_dt_id !== null) {
           revision += 1;
-          if (dt_mpassword != null) {
-            dt_password = dt_mpassword;
+          if (dt_protected) {
+            if (dt_mpassword != null) {
+              dt_password = dt_mpassword;
+            }
+            else if (dt_opassword != null) {
+              dt_password = dt_opassword;
+            }
+            if (dt_opassword != null) {
+              dt_epassword = dt_opassword;
+            }
           }
-          else if (dt_opassword != null) {
-            dt_password = dt_opassword;
+          else {
+            dt_epassword = null;
+            dt_password = null;
           }
           dt_opassword = null;
           dt_mpassword = null;
@@ -634,6 +771,7 @@ function getStatusText(code) {
       }
       else if (this.status == 401) {
         protect_action = 2;
+        document.getElementById('lb_protect').innerHTML = 'DataTemplate ' + this.getResponseHeader('X-Dt-Authentication') + ' Passsword';
         new bootstrap.Modal(document.getElementById('protect_input'), {
           keyboard: false
         }).show();
@@ -704,6 +842,7 @@ function getStatusText(code) {
         xHR.onload = function() {
           if (this.status === 401) {
             protect_action = 1;
+            document.getElementById('lb_protect').innerHTML = 'DataTemplate ' + this.getResponseHeader('X-Dt-Authentication') + ' Passsword';
             new bootstrap.Modal(document.getElementById('protect_input'), {
               keyboard: false
             }).show();
@@ -712,6 +851,14 @@ function getStatusText(code) {
           else if (this.status === 200) {
             try {
               var dt = jsyaml.load(d(JSON.parse(this.responseText)['dt']), jsyaml_schema);
+
+              if (dt.hasOwnProperty('encrypted')) {
+                dt_encrypted = (dt['encrypted'] === 1);
+                dt_epassword = dt_password;
+              }
+              else {
+                dt_encrypted = false;
+              }
 
               if (dt.hasOwnProperty('dataset')) {
                 load_datatemplate(dt['dt'], qs, dt['dataset']);
@@ -728,6 +875,10 @@ function getStatusText(code) {
               document.getElementById('protect').classList.remove('disabled');
               if (dt.hasOwnProperty('dt_password') || dt.hasOwnProperty('dt_mpassword')) {
                 document.getElementById('protect_text').innerHTML = 'Update Protection';
+                dt_protected = true;
+              }
+              else {
+                dt_protected = false;
               }
 
               if (dt.hasOwnProperty('updated')) {
@@ -752,6 +903,7 @@ function getStatusText(code) {
             reset_location('');
           }
           document.getElementById('lbuttons').classList.remove('d-none');
+          document.getElementById('buttons').classList.remove('d-none');
           loaded = true;
           clear_wait();
         };
@@ -760,6 +912,7 @@ function getStatusText(code) {
           set_status("darkred", "ERROR", "XMLHttpRequest.onError()");
           reset_location('');
           document.getElementById('lbuttons').classList.remove('d-none');
+          document.getElementById('buttons').classList.remove('d-none');
           loaded = true;
           clear_wait();
         };
@@ -767,6 +920,7 @@ function getStatusText(code) {
           set_status("darkred", "ERROR", "XMLHttpRequest.onTimeout()");
           reset_location('');
           document.getElementById('lbuttons').classList.remove('d-none');
+          document.getElementById('buttons').classList.remove('d-none');
           loaded = true;
           clear_wait();
         };
@@ -779,6 +933,7 @@ function getStatusText(code) {
       }
       else {
         document.getElementById('lbuttons').classList.remove('d-none');
+        document.getElementById('buttons').classList.remove('d-none');
         loaded = true;
       }
     }
@@ -786,6 +941,7 @@ function getStatusText(code) {
       console.log(ex);
       set_status("darkred", "ERROR", ex);
       document.getElementById('lbuttons').classList.remove('d-none');
+      document.getElementById('buttons').classList.remove('d-none');
       loaded = true; onChange(null, true);
     }
   }
@@ -802,6 +958,8 @@ function getStatusText(code) {
   
       document.getElementById('delete_ds').onclick = function() { jinjafx('delete_dataset'); };
       document.getElementById('add_ds').onclick = function() { jinjafx('add_dataset'); };
+      document.getElementById('delete_t').onclick = function() { jinjafx('delete_template'); };
+      document.getElementById('add_t').onclick = function() { jinjafx('add_template'); };
       document.getElementById('get').onclick = function() { jinjafx('get_link'); };
       document.getElementById('get2').onclick = function() { jinjafx('get_link'); };
       document.getElementById('update').onclick = function() { jinjafx('update_link'); };
@@ -874,7 +1032,7 @@ function getStatusText(code) {
           keyboard: false
         }).show();
       };
-  
+
       sobj = document.getElementById("status");
   
       window.onresize = function() {
@@ -1295,10 +1453,12 @@ function getStatusText(code) {
       document.getElementById('ml-protect-dt-ok').onclick = function() {
         dt_opassword = null;
         dt_mpassword = null;
-  
+        dt_encrypted = false;
+
         if (document.getElementById('password_open1').value.match(/\S/)) {
           if (document.getElementById('password_open1').value == document.getElementById('password_open2').value) {
             dt_opassword = document.getElementById('password_open2').value;
+            dt_encrypted = document.getElementById('encrypt_dt').checked;
           }
           else {
             set_status("darkred", "ERROR", "Password Verification Failed");
@@ -1321,11 +1481,21 @@ function getStatusText(code) {
           if (dt_opassword === dt_mpassword) {
             dt_mpassword = null;
           }
+          dt_protected = true;
           document.getElementById('protect_text').innerHTML = 'Update Protection';
           window.addEventListener('beforeunload', onBeforeUnload);
           document.title = 'JinjaFx [unsaved]';
           dirty = true;
           set_status("green", "OK", "Protection Set - Update Required", 10000);
+          dt_password = null;
+        }
+        else if (dt_protected) {
+          document.getElementById('protect_text').innerHTML = 'Protect Link';
+          window.addEventListener('beforeunload', onBeforeUnload);
+          document.title = 'JinjaFx [unsaved]';
+          dirty = true;
+          set_status("green", "OK", "Protection Removed - Update Required", 10000);
+          dt_protected = false;
           dt_password = null;
         }
         else {
@@ -1340,6 +1510,8 @@ function getStatusText(code) {
         document.getElementById("password_modify1").value = '';
         document.getElementById("password_modify2").value = '';
         document.getElementById("password_modify2").disabled = true;
+        document.getElementById('encrypt_dt').disabled = true;
+        document.getElementById('encrypt_dt').checked = false;
         fe.focus();
       });
   
@@ -1376,6 +1548,7 @@ function getStatusText(code) {
             }
             loaded = true;
             document.getElementById('lbuttons').classList.remove('d-none');
+            document.getElementById('buttons').classList.remove('d-none');
             set_status("darkred", "ERROR", "Invalid Password");
           }
         }
@@ -1383,6 +1556,7 @@ function getStatusText(code) {
           if (protect_action == 1) {
             reset_location('');
             document.getElementById('lbuttons').classList.remove('d-none');
+            document.getElementById('buttons').classList.remove('d-none');
             dt_password = null;
             loaded = true;
           }
@@ -1397,29 +1571,84 @@ function getStatusText(code) {
       document.getElementById('dataset_input').addEventListener('shown.bs.modal', function (e) {
         document.getElementById("ds_name").focus();
       });
+
+      document.getElementById('template_input').addEventListener('shown.bs.modal', function (e) {
+        document.getElementById("t_name").focus();
+      });
   
       document.getElementById('ml-dataset-ok').onclick = function() {
         var new_ds = document.getElementById("ds_name").value;
   
         if (new_ds.match(/^[A-Z][A-Z0-9_ -]*$/i)) {
-          if (!datasets.hasOwnProperty(new_ds)) {
+          var existing = '';
+          for (var p in datasets) {
+            if (datasets.hasOwnProperty(p)) {
+              if (new_ds.toLowerCase() === p.toLowerCase()) {
+                existing = p;
+                break;
+              }
+            }
+          }
+          if (existing == '') {
             datasets[new_ds] = [CodeMirror.Doc('', 'data'), CodeMirror.Doc('', 'yaml')];
             rebuild_datasets();
+            switch_dataset(new_ds, true, true);
           }
-          switch_dataset(new_ds, true, true);
+          else {
+            switch_dataset(existing, true, true);
+          }
         }
         else {
           set_status("darkred", "ERROR", "Invalid Data Set Name");
         }
       };
   
+      document.getElementById('ml-template-ok').onclick = function() {
+        var new_t = document.getElementById("t_name").value;
+  
+        if (new_t.match(/^[A-Z][A-Z0-9_ -]*$/i)) {
+          var existing = '';
+          for (var p in templates) {
+            if (templates.hasOwnProperty(p)) {
+              if (new_t.toLowerCase() === p.toLowerCase()) {
+                existing = p;
+                break;
+              }
+            }
+          }
+          if (existing == '') {
+            templates[new_t] = CodeMirror.Doc('', 'template');
+            rebuild_templates();
+            switch_template(new_t, true, true);
+          }
+          else {
+            switch_template(existing, true, true);
+          }
+        }
+        else {
+          set_status("darkred", "ERROR", "Invalid Template Name");
+        }
+      };
+
       document.getElementById('ds_name').onkeyup = function(e) {
         if (e.which == 13) {
           document.getElementById('ml-dataset-ok').click();
         }
       };
+
+      document.getElementById('t_name').onkeyup = function(e) {
+        if (e.which == 13) {
+          document.getElementById('ml-template-ok').click();
+        }
+      };
   
       function check_open() {
+        if (document.getElementById('password_open1').value.match(/\S/)) {
+          document.getElementById('encrypt_dt').disabled = false;
+        }
+        else {
+          document.getElementById('encrypt_dt').disabled = true;
+        }
         if (document.getElementById('password_open1').value == document.getElementById('password_open2').value) {
           document.getElementById('password_open2').classList.remove('is-invalid');
           document.getElementById('password_open2').classList.add('is-valid');
@@ -1468,6 +1697,7 @@ function getStatusText(code) {
           if (document.getElementById('password_open2').disabled == true) {
             document.getElementById('password_open2').disabled = false;
             document.getElementById('password_open2').classList.add('is-invalid');
+            document.getElementById('encrypt_dt').disabled = false;
           }
           else {
             check_open();
@@ -1478,6 +1708,8 @@ function getStatusText(code) {
           document.getElementById('password_open2').value = '';
           document.getElementById('password_open2').classList.remove('is-valid');
           document.getElementById('password_open2').classList.remove('is-invalid');
+          document.getElementById('encrypt_dt').disabled = true;
+          document.getElementById('encrypt_dt').checked = false;
         }
       };
   
@@ -1554,6 +1786,7 @@ function getStatusText(code) {
         else {
           set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
           reset_location('');
+          document.getElementById('buttons').classList.remove('d-none');
           loaded = true;
         }
       }
@@ -1578,11 +1811,13 @@ function getStatusText(code) {
           else {
             set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
             reset_location('');
+            document.getElementById('buttons').classList.remove('d-none');
             loaded = true;
           }
         }
         else {
           reset_location('');
+          document.getElementById('buttons').classList.remove('d-none');
           loaded = true;
         }
       }
@@ -1590,7 +1825,9 @@ function getStatusText(code) {
         if (document.getElementById('get_link').value != 'false') {
           document.getElementById('lbuttons').classList.remove('d-none');
         }
+        document.getElementById('stemplates').style.visibility = 'hidden';
         document.getElementById('template_info').style.visibility = 'visible';
+        document.getElementById('buttons').classList.remove('d-none');
         loaded = true;
       }
     }
@@ -1607,6 +1844,7 @@ function getStatusText(code) {
   function remove_info() {
     document.getElementById('template_info').classList.add('fade-out');
     document.getElementById('template_info').style.zIndex = -1000;
+    document.getElementById('stemplates').style.visibility = 'visible';
   }
 
   function set_wait() {
@@ -1700,6 +1938,7 @@ function getStatusText(code) {
     dt_password = null;
     dt_opassword = null;
     dt_mpassword = null;
+    dt_epassword = null;
     input_form = null;
     document.getElementById('update').classList.add('d-none');
     document.getElementById('get').classList.remove('d-none');
@@ -1784,8 +2023,10 @@ function getStatusText(code) {
       }
       if (tinfo) {
         if (editor == window.cmTemplate) {
-          document.getElementById('template_info').classList.add('fade-out');
-          document.getElementById('template_info').style.zIndex = -1000;
+          remove_info();
+          //document.getElementById('template_info').classList.add('fade-out');
+          //document.getElementById('template_info').style.zIndex = -1000;
+          //document.getElementById('stemplates').style.visibility = 'visible';
           tinfo = false;
         }
       }
@@ -1795,6 +2036,7 @@ function getStatusText(code) {
   function load_datatemplate(_dt, _qs, _ds) {
     try {
       current_ds = 'Default';
+      current_t = 'Default';
 
       window.cmgVars.setValue("");
 
@@ -1808,7 +2050,7 @@ function getStatusText(code) {
         });
 
         if ((_ds == null) || !datasets.hasOwnProperty(_ds)) {
-          current_ds = Object.keys(datasets)[0];
+          current_ds = Object.keys(datasets).sort(default_on_top)[0];
         }
         else {
           current_ds = _ds;
@@ -1830,7 +2072,28 @@ function getStatusText(code) {
         datasets['Default'][1].setValue(_dt.hasOwnProperty("vars") ? _dt.vars : "");
         window.cmVars.swapDoc(datasets['Default'][1]);
       }
-      window.cmTemplate.setValue(_dt.hasOwnProperty("template") ? _dt.template : "");
+
+      if (_dt.hasOwnProperty("template")) {
+        if (typeof _dt['template'] == "object") {
+          templates = {};
+
+          Object.keys(_dt['template']).forEach(function(t) {
+            templates[t] = CodeMirror.Doc(_dt['template'][t], 'template');
+          });
+        }
+        else {
+          templates = {
+            'Default': CodeMirror.Doc(_dt['template'], 'template')
+          };
+        }
+      }
+      else {
+        templates = {
+          'Default': CodeMirror.Doc('', 'template')
+        };
+      }
+
+      window.cmTemplate.swapDoc(templates[current_t]);
 
       window.cmData.getDoc().clearHistory();
       window.cmVars.getDoc().clearHistory();
@@ -1838,6 +2101,8 @@ function getStatusText(code) {
       window.cmTemplate.getDoc().clearHistory();
 
       rebuild_datasets();
+      rebuild_templates();
+      remove_info();
       loaded = true;
     }
     catch (ex) {

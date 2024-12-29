@@ -1,6 +1,6 @@
 ## JinjaFx Server as a Container in Kubernetes
 
-JinjaFx Server will always be available in Docker Hub at [https://hub.docker.com/repository/docker/cmason3/jinjafx_server](https://hub.docker.com/repository/docker/cmason3/jinjafx_server) - the `latest` tag will always refer to the latest released version, although it is recommended to use explicit version tags.
+JinjaFx Server will always be available in Docker Hub at https://hub.docker.com/repository/docker/cmason3/jinjafx_server - the `latest` tag will always refer to the latest released version, although it is recommended to use explicit version tags.
 
 The following steps will run JinjaFx Server in a container using Kubernetes Ingress - Ingress is basically the same concept as Virtual Hosting (the default Ingress uses nginx), which works with HTTP and relies on the "Host" header to direct the request to the correct container. In a Virtual Hosting scenario you would typically point different DNS A records towards the same IP, but in our example we are using a Wildcard DNS entry for our whole Kubernetes cluster, e.g:
 

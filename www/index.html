@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/dialog/dialog.min.css" integrity="sha512-Vogm+Cii1SXP5oxWQyPdkA91rHB776209ZVvX4C/i4ypcfBlWVRXZGodoTDAyyZvO36JlTqDqkMhVKAYc7CMjQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/display/fullscreen.min.css" integrity="sha512-T8xB3MmwpA77VK9lUH3UkdUTnkmpqOxHF8OceOKaHrvpcXMSNX0xtpa9FoLTDAVO1JnB2UiMdVeI2V0HTHjTWA==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/fold/foldgutter.min.css" integrity="sha512-YwkMTlTHn8dBnwa47IF+cKsS00HPiiVhQ4DpwT1KF2gUftfFR7aefepabSPLAs6zrMyD89M3w0Ow6mQ5XJEUCw==" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="/f8555653/jinjafx.css">
-    <link rel="stylesheet" href="/af18a9f8/jinjafx_m.css">
+    <link rel="stylesheet" href="/bb176715/jinjafx.css">
+    <link rel="stylesheet" href="/9eb5fb3c/jinjafx_m.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js" integrity="sha512-7Pi/otdlbbCR+LnW+F7PwFcSDJOuUJB3OxtEHbg4vSMvzvJjde4Po1v4BR9Gdc9aXNUNFVUY+SK51wWT8WF0Gg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.js" integrity="sha512-6cPYokihlrofMNApz7OXVQNObWjLiKGIBBb7+UB+AuMiRCLKmFKgrwms21sHq3bdFFZWpfHYRJBJvMFMPj1S9g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/selection/mark-selection.min.js" integrity="sha512-XaS0JPIY5yDTDaYIMjkoXz+LF/DEVhRn1eq9QOhJPhMuJGGPOKZTulF+LY8/uwd18k00CIaSe4f8fCyp/5U7IQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -32,7 +32,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js" integrity="sha512-CSBhVREyzHAjAFfBlIBakjoRUKp5h7VSweP0InR/pAJyptH7peuhCsqAI/snV+TwZmXZqoUklpXp6R6wMnYf5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/dayjs.min.js" integrity="sha512-FwNWaxyfy2XlEINoSnZh1JQ5TRRtGow0D6XcmAWmYCRgvqOUTnzCxPc9uF35u5ZEpirk1uhlPVA19tflhvnW1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/plugin/relativeTime.min.js" integrity="sha512-MVzDPmm7QZ8PhEiqJXKz/zw2HJuv61waxb8XXuZMMs9b+an3LoqOqhOEt5Nq3LY1e4Ipbbd/e+AWgERdHlVgaA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="/b19f487e/jinjafx_m.js"></script>
+    <script src="/33339c5e/jinjafx_m.js"></script>
   </head>
   <body>
     <div id="overlay"></div>
@@ -54,7 +54,7 @@
           </a>
         </h5>
         <!-- https://github.com/feathericons/feather/tree/master/icons -->
-        <div class="btn-toolbar ms-auto d-flex" role="group">
+        <div id="buttons" class="btn-toolbar ms-auto d-flex d-none" role="group">
           <div class="btn-group me-2">
             <div class="btn-group">
               <button id="select_ds" type="button" class="btn btn-warning text-black text-start mw-150" data-bs-toggle="dropdown" title="Select DataSet" disabled>
@@ -167,6 +167,23 @@
           <div id="ctemplate" class="position-relative">
             <div class="badge lb-template float-start labels">T<br />E<br />M<br />P<br />L<br />A<br />T<br />E<br />.<br />J<br />2<br /></div>
             <textarea id="template"></textarea>
+            <span id="stemplates" class="templates">
+              <div class="btn-group">
+                <div class="btn-group">
+                  <button id="select_t" type="button" class="btn btn-warning btn-sm text-start mw-150" data-bs-toggle="dropdown" title="Select Template" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="14" width="7" height="7"></rect>
+                      <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>&nbsp;<span id="selected_t">Default</span>
+                  </button>
+                  <div id="templates" class="dropdown-menu"></div>
+                </div>
+                <button id="delete_t" type="button" class="btn btn-warning btn-sm" title="Delete Template" disabled>-</button>
+                <button id="add_t" type="button" class="btn btn-warning btn-sm" title="Add Template">+</button>
+              </div>
+            </span>
             <span id="template_info" class="info">
               <div class="info-inner">
                 <h3>Outputs</h3><hr>
@@ -178,7 +195,7 @@
 &lt;output "Output 2"&gt;
 ...
 &lt;/output&gt;</pre>
-                <p>By default an output is rendered as text, but you can also tell JinjaFx to render it as HTML or Markdown (GFM), e.g:</p>
+                <p>By default an output is rendered as text, but you can also tell JinjaFx to render it as HTML or Markdown, e.g:</p>
 <pre class="code-block">&lt;output<span class="cm-jfx-tag">:html</span> "Output 1"&gt;
 ...
 &lt;/output&gt;
@@ -186,6 +203,8 @@
 &lt;output<span class="cm-jfx-tag">:markdown</span> "Output 2"&gt;
 ...
 &lt;/output&gt;</pre>
+                <p>JinjaFx supports nested templates - if you click on the "+" at the top right of the "template.j2" pane then you can create multiple templates and import them into the "Default" template via the following syntax:</p>
+<pre class="code-block">{% include "&lt;template&gt;" %}</pre>
                 <br /><h3>Dynamic CSV</h3><hr>
                 <p>Within the "data.csv" pane you can specify regular CSV where each row will be treated as a data set using the header row for variable names. However, it also supports something which I call Dynamic CSV where you can use regular expression based static character classes or static groups as values within the data rows using <span class="cm-jfx-tag">(value1|value2|value3)</span> or <span class="cm-jfx-tag">[a-f]</span>. These will then be expanded into multiple rows, e.g:</p>
 <pre class="code-block">DEVICE, TYPE
@@ -321,7 +340,7 @@ et-0/0/<span class="cm-jfx-tag">{0-9:1}</span></pre>
           <div class="form-group modal-body">
             <div class="row">
               <div class="col-6">
-                <label for="password_open1" class="col-form-label">Password to Open</label>
+                <label for="password_open1" class="col-form-label">Password to Open/Encrypt</label>
                 <input type="password" class="form-control" id="password_open1">
               </div>
               <div class="col-6">
@@ -341,6 +360,10 @@ et-0/0/<span class="cm-jfx-tag">{0-9:1}</span></pre>
             </div>
           </div>
           <div class="modal-footer">
+            <div class="form-check form-switch me-auto">
+              <input class="form-check-input" type="checkbox" role="switch" id="encrypt_dt" disabled>
+              <label class="form-check-label" for="encrypt_dt" title="Encrypt DataTemplate with Vaulty">Encrypt DataTemplate</label>
+            </div>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             <button id="ml-protect-dt-ok" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
           </div>
@@ -354,7 +377,7 @@ et-0/0/<span class="cm-jfx-tag">{0-9:1}</span></pre>
             <h4 id="ml-title" class="mt-0">Protected DataTemplate</h4>
           </div>
           <div class="form-group row modal-body">
-            <label for="in_protect" class="col-sm-12 col-form-label">DataTemplate Password</label>
+            <label id="lb_protect" for="in_protect" class="col-sm-12 col-form-label">DataTemplate Password</label>
             <div class="col-sm-12">
               <input type="password" class="form-control" id="in_protect">
             </div>
@@ -381,6 +404,25 @@ et-0/0/<span class="cm-jfx-tag">{0-9:1}</span></pre>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             <button id="ml-dataset-ok" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="template_input" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 id="ml-title" class="mt-0">Add Template</h4>
+          </div>
+          <div class="form-group row modal-body">
+            <label for="t_name" class="col-sm-12 col-form-label">Template Name</label>
+            <div class="col-sm-12">
+              <input class="form-control" id="t_name">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button id="ml-template-ok" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
           </div>
         </div>
       </div>

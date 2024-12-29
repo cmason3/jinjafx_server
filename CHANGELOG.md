@@ -1,5 +1,18 @@
 ## CHANGELOG
 
+### [25.1.0] - Dec 29, 2024
+- Added support for nested templates within `template.j2` using Jinja2 include syntax
+- Added support for encrypted DataTemplates using Vaulty (ChaCha20-Poly1305 encryption)
+- Fixed a cosmetic issue where the button bar would visibily change size when loading a DataTemplate
+- With password protected DataTemplates the prompt will now specify whether it needs the "Open" or "Modify" password
+- Removed the `dt_hash` field within saved DataTemplates as it wasn't being used for anything
+- You can no longer add the same DataSet using differences between uppercase and lowercase characters
+- The DataSet dropdown is now sorted alphabetically with "Default" always on top
+- Added the ability to remove protection from a DataTemplate after it has been added
+- We no longer update the modify time of local repository files on access
+- Don't output timestamp when running via systemd
+- Updated Pandoc to 3.6.1 in Dockerfile
+
 ### [24.12.1] - Dec 3, 2024
 - Fixed an issue where rows with an incorrect number of fields in `data.csv` weren't being coloured red
 
@@ -351,6 +364,8 @@
 ### 21.11.0 - Nov 29, 2021
 - Initial release
 
+
+[25.1.0]: https://github.com/cmason3/jinjafx_server/compare/24.12.1...25.1.0
 [24.12.1]: https://github.com/cmason3/jinjafx_server/compare/24.12.0...24.12.1
 [24.12.0]: https://github.com/cmason3/jinjafx_server/compare/24.10.1...24.12.0
 [24.10.1]: https://github.com/cmason3/jinjafx_server/compare/24.10.0...24.10.1
