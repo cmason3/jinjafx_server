@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.1.1] - In Development
+- Prompt for weblog password if it isn't provided
+
 ### [25.1.0] - Dec 29, 2024
 - Added support for nested templates within `template.j2` using Jinja2 include syntax
 - Added support for encrypted DataTemplates using Vaulty (ChaCha20-Poly1305 encryption)
@@ -365,6 +368,7 @@
 - Initial release
 
 
+[25.1.1]: https://github.com/cmason3/jinjafx_server/compare/25.1.0...25.1.1
 [25.1.0]: https://github.com/cmason3/jinjafx_server/compare/24.12.1...25.1.0
 [24.12.1]: https://github.com/cmason3/jinjafx_server/compare/24.12.0...24.12.1
 [24.12.0]: https://github.com/cmason3/jinjafx_server/compare/24.10.1...24.12.0
