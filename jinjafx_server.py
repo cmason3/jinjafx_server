@@ -91,12 +91,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         else:
           ansi = '31'
 
-        if (args[1] != '204' and args[1] != '404' and args[1] != '501' and not path.startswith('/output.html') and not '/dt/' in path and (not path.startswith('/logs') or (args[1] != '200' and args[1] != '304'))) or self.critical or verbose:
+        if (args[1] != '204' and args[1] != '404' and args[1] != '501' and not path.startswith('/output.html') and not '/dt/' in path and (path != '/get_logs' or (args[1] != '200' and args[1] != '304'))) or self.critical or verbose:
           src = str(self.client_address[0])
           proto_ver = ''
           ctype = ''
 
-          if path.startswith('/logs') and args[1] == '302':
+          if path == '/get_logs' and args[1] == '302':
             ansi = '32'
 
           if hasattr(self, 'headers'):
@@ -217,7 +217,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
       elif fpath == '/logs' and jfx_weblog_key is not None:
-        fpath = '/logs.html'
+        with open(base + '/www/logs.html', 'rb') as f:
+          r = [ 'text/html', 200, f.read(), sys._getframe().f_lineno ]
 
       elif fpath == '/get_logs' and jfx_weblog_key is not None:
         if hasattr(self, 'headers') and 'X-WebLog-Password' in self.headers:
