@@ -8,9 +8,29 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" integrity="sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="/bb176715/jinjafx.css">
     <link rel="stylesheet" href="/28fdf760/jinjafx_logs.css">
-    <script src="/4f5b7922/jinjafx_logs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js" integrity="sha512-7Pi/otdlbbCR+LnW+F7PwFcSDJOuUJB3OxtEHbg4vSMvzvJjde4Po1v4BR9Gdc9aXNUNFVUY+SK51wWT8WF0Gg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/ffa2eb43/jinjafx_logs.js"></script>
   </head>
   <body>
     <pre id="container" class="p-3"></pre>
+    <div id="password_input" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 id="ml-title" class="mt-0">JinjaFx Logs</h4>
+          </div>
+          <div class="form-group row modal-body">
+            <label id="lb_password" for="in_password" class="col-sm-12 col-form-label">Enter Password</label>
+            <div class="col-sm-12">
+              <input type="password" class="form-control" id="in_password">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button id="ml-password-ok" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
