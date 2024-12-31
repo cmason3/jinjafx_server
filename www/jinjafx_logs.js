@@ -1,5 +1,6 @@
 (function() {
   let interval = 60;
+  let auth_ok = false;
   let key = '';
 
   function scroll() {
@@ -13,12 +14,13 @@
 
     xHR.onload = function() {
       if (this.status == 200) {
+        auth_ok = true;
         sessionStorage.setItem('jfx_weblog_key', key);
         document.getElementById('container').innerHTML = xHR.responseText;
         scroll();
         setTimeout(update, interval * 1000);
       }
-      else if (this.status == 401) {
+      else if ((this.status == 401) && !auth_ok) {
         new bootstrap.Modal(document.getElementById('password_input'), {
           keyboard: false
         }).show();
@@ -64,7 +66,15 @@
       }
     });
 
-    if (sessionStorage.getItem('jfx_weblog_key')) {
+    let qs = new URLSearchParams(window.location.search);
+
+    if (qs.has('key')) {
+      key = qs.get('key');
+      window.history.replaceState(null, null, window.location.pathname);
+      sessionStorage.removeItem('jfx_weblog_key');
+      update();
+    }
+    else if (sessionStorage.getItem('jfx_weblog_key')) {
       key = sessionStorage.getItem('jfx_weblog_key');
       update();
     }
