@@ -1,7 +1,7 @@
 ## CHANGELOG
 
 ### [25.1.1] - In Development
-- Prompt for weblog password if it isn't provided
+- Rewritten Web Log authentication so it will now prompt you for a password
 
 ### [25.1.0] - Dec 29, 2024
 - Added support for nested templates within `template.j2` using Jinja2 include syntax
