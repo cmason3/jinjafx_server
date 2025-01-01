@@ -1,8 +1,8 @@
 body {
-  color: white;
   background: #000040;
 }
 pre {
+  color: white;
   height: 100%;
   font-variant-ligatures: none;
   white-space: pre-wrap;

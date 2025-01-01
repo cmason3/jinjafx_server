@@ -14,7 +14,7 @@ python3 -m pip install --upgrade --user jinjafx-server
 
 ### JinjaFx Server Usage
 
-Once JinjaFx Server has been started with the `-s` argument then point your web browser at http://localhost:8080 and you will be presented with a web page that allows you to specify `data.csv`, `template.j2` and `vars.yml` and then generate outputs. If you click on "Export" then it will present you with an output that can be pasted back into any pane of JinjaFx to restore the values.
+Once JinjaFx Server has been started with the `-s` argument then point your web browser at http://localhost:8080 and you will be presented with a web page that allows you to specify "data.csv", "template.j2" and "vars.yml" and then generate outputs. If you click on "Export" then it will present you with an output that can be pasted back into any pane of JinjaFx to restore the values.
 
 ```
  jinjafx_server -s [-l <address>] [-p <port>]
@@ -59,7 +59,8 @@ Description=JinjaFx Server
 
 [Service]
 Environment="VIRTUAL_ENV=/opt/jinjafx"
-ExecStart=/opt/jinjafx/bin/python3 -u -m jinjafx_server -s -l 127.0.0.1 -p 8080
+Environment="JFX_WEBLOG_KEY='<KEY>'"
+ExecStart=/opt/jinjafx/bin/python3 -u -m jinjafx_server -s -l 127.0.0.1 -p 8080 -weblog
 SyslogIdentifier=jinjafx_server
 TimeoutStartSec=60
 Restart=always
@@ -71,11 +72,11 @@ EOF
 sudo systemctl enable --now jinjafx
 ```
 
-The "-r", "-s3" or "-github" arguments (mutually exclusive) allow you to specify a repository ("-r" is a local directory, "-s3" is an AWS S3 URL and "-github" is a GitHub repository) that will be used to store DataTemplates on the server via the "Get Link" and "Update Link" buttons. The generated link is guaranteed to be unique and a different link will be created every time - version 1.3.0 changed the behaviour, where previously the same link was always generated for the same DataTemplate, but this made it difficult to update DataTemplates without the link changing as it was basically a cryptographic hash of your DataTemplate. If you use an AWS S3 bucket then you will also need to provide some credentials via the two environment variables which has read and write permissions to the S3 URL.
+The `-r`, `-s3` or `-github` arguments (mutually exclusive) allow you to specify a repository (`-r` is a local directory, `-s3` is an AWS S3 URL and `-github` is a GitHub repository) that will be used to store DataTemplates on the server via the "Get Link" and "Update Link" buttons. The generated link is guaranteed to be unique and a different link will be created every time. If you use an AWS S3 bucket then you will also need to provide some credentials via the two environment variables which has read and write permissions to the S3 URL.
 
-The "-rl" argument is used to provide an optional rate limit of the source IP - the "rate" is how many requests are permitted and the "limit" is the interval in which those requests are permitted - it can be specified in "s", "m" or "h" (e.g. "5/30s", "10/1m" or "30/1h"). This is currently only applied to "Get Link" and Web Log authentication.
+The `-rl` argument is used to provide an optional rate limit of the source IP - the "rate" is how many requests are permitted and the "limit" is the interval in which those requests are permitted - it can be specified in "s", "m" or "h" (e.g. "5/30s", "10/1m" or "30/1h"). This is currently only applied to "Get Link" and Web Log authentication.
 
-The "-weblog" argument in combination with the "JFX_WEBLOG_KEY" environment variable enables the Web Log interface to view the current application logs - this can be accessed from a web browser using the URL `/logs?key=<JFX_WEBLOG_KEY>`.
+The `-weblog` argument in combination with the `JFX_WEBLOG_KEY` environment variable enables the Web Log interface to view the current application logs - this can be accessed from a web browser using the URL `/logs` - the user will be prompted for the key or they can provide it via a query string of `?key=<JFX_WEBLOG_KEY>`.
 
 ### Shortcut Keys
 

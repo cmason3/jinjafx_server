@@ -19,16 +19,14 @@ import sys
 if sys.version_info < (3, 9):
   sys.exit('Requires Python >= 3.9')
 
-from http.cookies import SimpleCookie
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
 from jinja2 import __version__ as jinja2_version
 
 import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, datetime, resource
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.1.0'
+__version__ = '25.1.1'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -91,12 +89,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         else:
           ansi = '31'
 
-        if (args[1] != '204' and args[1] != '404' and args[1] != '501' and not path.startswith('/output.html') and not '/dt/' in path and (not path.startswith('/logs') or (args[1] != '200' and args[1] != '304'))) or self.critical or verbose:
+        if (args[1] != '204' and args[1] != '404' and args[1] != '501' and not path.startswith('/output.html') and not '/dt/' in path and (path != '/get_logs' or (args[1] != '200' and args[1] != '304'))) or self.critical or verbose:
           src = str(self.client_address[0])
           proto_ver = ''
           ctype = ''
 
-          if path.startswith('/logs') and args[1] == '302':
+          if path == '/get_logs' and args[1] == '302':
             ansi = '32'
 
           if hasattr(self, 'headers'):
@@ -217,55 +215,32 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
       elif fpath == '/logs' and jfx_weblog_key is not None:
-        qs = parse_qs(urlparse(self.path).query, keep_blank_values=True)
-        key = None
+        self.path = re.sub(r'key=[^&]*', 'key', self.path, flags=re.IGNORECASE)
 
-        if 'key' in qs:
-          for kv in qs['key']:
-            self.path = self.path.replace('key=' + kv, 'key=*')
+        with open(base + '/www/logs.html', 'rb') as f:
+          r = [ 'text/html', 200, f.read(), sys._getframe().f_lineno ]
 
-          key = qs['key'][-1]
-
-        elif hasattr(self, 'headers'):
-          cookies = SimpleCookie(self.headers.get('Cookie'))
-          if 'jfx_weblog_key' in cookies:
-            key = cookies['jfx_weblog_key'].value
-
-        if key == jfx_weblog_key:
-          if 'key' in qs:
-            cheaders['Set-Cookie'] = 'jfx_weblog_key=' + key + '; path=/logs'
-            if 'raw' in qs:
-              cheaders['Location'] = '/logs?raw'
-            else:
-              cheaders['Location'] = '/logs'
-            r = [ 'text/plain', 302, '302 Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+      elif fpath == '/get_logs' and jfx_weblog_key is not None:
+        if hasattr(self, 'headers') and 'X-WebLog-Password' in self.headers:
+          if self.headers['X-WebLog-Password'] == jfx_weblog_key:
+            with llock:
+              logs = '\r\n'.join(logring)
+  
+            logs = logs.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            logs = logs.replace('\033[1;31m', '<span class="text-danger">')
+            logs = logs.replace('\033[1;32m', '<span class="text-success">')
+            logs = logs.replace('\033[1;33m', '<span class="text-warning">')
+            logs = logs.replace('\033[0m', '</span>')
+            r = [ 'text/plain', 200, logs.encode('utf-8'), sys._getframe().f_lineno ]
 
           else:
-            if not self.ratelimit(remote_addr, 3,  True):
-              if 'raw' in qs:
-                with llock:
-                  logs = '\r\n'.join(logring)
-  
-                logs = logs.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-                logs = logs.replace('\033[1;31m', '<span class="text-danger">')
-                logs = logs.replace('\033[1;32m', '<span class="text-success">')
-                logs = logs.replace('\033[1;33m', '<span class="text-warning">')
-                logs = logs.replace('\033[0m', '</span>')
-                r = [ 'text/plain', 200, logs.encode('utf-8'), sys._getframe().f_lineno ]
-
-              else:
-                with open(base + '/www/logs.html', 'rb') as f:
-                  r = [ 'text/html', 200, f.read(), sys._getframe().f_lineno ]
-
+            if not self.ratelimit(remote_addr, 3, False):
+              r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
             else:
               r = [ 'text/plain', 429, '429 Too Many Requests\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
         else:
-          cheaders['Set-Cookie'] = 'jfx_weblog_key=; path=/logs; max-age=0'
-          if not self.ratelimit(remote_addr, 3, False):
-            r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-          else:
-            r = [ 'text/plain', 429, '429 Too Many Requests\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+          r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
       else:
         if fpath == '/':
