@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### [25.1.2] - In Development
+- Check we specify ?ds=Live for example when selecting a DataTemplate
+- Added a "Delete Link" button to allow DataTemplates to be deleted
+
 ### [25.1.1] - Jan 1, 2025
 - Rewritten Web Log authentication so it will now prompt you for a password
 
@@ -368,6 +372,7 @@
 - Initial release
 
 
+[25.1.2]: https://github.com/cmason3/jinjafx_server/compare/25.1.1...25.1.2
 [25.1.1]: https://github.com/cmason3/jinjafx_server/compare/25.1.0...25.1.1
 [25.1.0]: https://github.com/cmason3/jinjafx_server/compare/24.12.1...25.1.0
 [24.12.1]: https://github.com/cmason3/jinjafx_server/compare/24.12.0...24.12.1
