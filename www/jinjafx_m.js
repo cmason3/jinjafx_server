@@ -825,16 +825,21 @@ function getStatusText(code) {
     xHR.timeout = 10000;
     xHR.setRequestHeader("Content-Type", "application/json");
 
-    var rd = JSON.stringify(dt);
-    if (rd.length > 2048 * 1024) {
-      set_status("darkred", "ERROR", 'Content Too Large');
-    }
-    else if (rd.length > 1024) {
-      xHR.setRequestHeader("Content-Encoding", "gzip");
-      xHR.send(pako.gzip(rd));
+    if (!dflag) {
+      var rd = JSON.stringify(dt);
+      if (rd.length > 2048 * 1024) {
+        set_status("darkred", "ERROR", 'Content Too Large');
+      }
+      else if (rd.length > 1024) {
+        xHR.setRequestHeader("Content-Encoding", "gzip");
+        xHR.send(pako.gzip(rd));
+      }
+      else {
+        xHR.send(rd);
+      }
     }
     else {
-      xHR.send(rd);
+      xHR.send('{}');
     }
   }
 
