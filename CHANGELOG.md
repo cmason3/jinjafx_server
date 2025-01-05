@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [25.1.2] - In Development
+### [25.2.0] - In Development
 - Added support so a specific DataSet can be selected via the DataTemplate URL using `?ds=`
 - Added a "Delete Link" button to allow DataTemplates to be deleted
 
@@ -372,7 +372,7 @@
 - Initial release
 
 
-[25.1.2]: https://github.com/cmason3/jinjafx_server/compare/25.1.1...25.1.2
+[25.2.0]: https://github.com/cmason3/jinjafx_server/compare/25.1.1...25.2.0
 [25.1.1]: https://github.com/cmason3/jinjafx_server/compare/25.1.0...25.1.1
 [25.1.0]: https://github.com/cmason3/jinjafx_server/compare/24.12.1...25.1.0
 [24.12.1]: https://github.com/cmason3/jinjafx_server/compare/24.12.0...24.12.1
