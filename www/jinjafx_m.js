@@ -860,7 +860,10 @@ function getStatusText(code) {
                 dt_encrypted = false;
               }
 
-              if (dt.hasOwnProperty('dataset')) {
+              if (qs.hasOwnProperty('ds')) {
+                load_datatemplate(dt['dt'], qs, qs['ds']);
+              }
+              else if (dt.hasOwnProperty('dataset')) {
                 load_datatemplate(dt['dt'], qs, dt['dataset']);
               }
               else {
@@ -1770,15 +1773,26 @@ function getStatusText(code) {
           }
         };
       });
-  
+
+      if (window.location.search.length > 1) {
+        var v = window.location.search.substr(1).split('&');
+
+        for (var i = 0; i < v.length; i++) {
+          var p = v[i].split('=');
+          qs[p[0].toLowerCase()] = decodeURIComponent(p.length > 1 ? p[1] : '');
+        }
+      }
+
       if (window.location.pathname.startsWith('/dt/') && (window.location.pathname.length > 4)) {
         qs['dt'] = decodeURIComponent(window.location.pathname.substr(4));
-  
+      }
+
+      if (qs.hasOwnProperty('dt')) {
         if (document.getElementById('get_link').value != 'false') {
           try_to_load();
-  
+
           document.getElementById('lbuttons').classList.remove('d-none');
-  
+
           if (fe != window.cmData) {
             onDataBlur();
           }
@@ -1790,44 +1804,11 @@ function getStatusText(code) {
           loaded = true;
         }
       }
-      else if (window.location.href.indexOf('?') > -1) {
-        var v = window.location.href.substr(window.location.href.indexOf('?') + 1).split('&');
-  
-        for (var i = 0; i < v.length; i++) {
-          var p = v[i].split('=');
-          qs[p[0].toLowerCase()] = decodeURIComponent(p.length > 1 ? p[1] : '');
-        }
-  
-        if (qs.hasOwnProperty('dt')) {
-          if (document.getElementById('get_link').value != 'false') {
-            try_to_load();
-  
-            document.getElementById('lbuttons').classList.remove('d-none');
-  
-            if (fe != window.cmData) {
-              onDataBlur();
-            }
-          }
-          else {
-            set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
-            reset_location('');
-            document.getElementById('buttons').classList.remove('d-none');
-            loaded = true;
-          }
-        }
-        else {
-          reset_location('');
-          document.getElementById('buttons').classList.remove('d-none');
-          loaded = true;
-        }
-      }
       else {
-        if (document.getElementById('get_link').value != 'false') {
-          document.getElementById('lbuttons').classList.remove('d-none');
-        }
+        reset_location('');
+        document.getElementById('buttons').classList.remove('d-none');
         document.getElementById('stemplates').style.visibility = 'hidden';
         document.getElementById('template_info').style.visibility = 'visible';
-        document.getElementById('buttons').classList.remove('d-none');
         loaded = true;
       }
     }
@@ -2024,9 +2005,6 @@ function getStatusText(code) {
       if (tinfo) {
         if (editor == window.cmTemplate) {
           remove_info();
-          //document.getElementById('template_info').classList.add('fade-out');
-          //document.getElementById('template_info').style.zIndex = -1000;
-          //document.getElementById('stemplates').style.visibility = 'visible';
           tinfo = false;
         }
       }
@@ -2047,6 +2025,12 @@ function getStatusText(code) {
           var data = _dt.datasets[ds].hasOwnProperty("data") ? _dt.datasets[ds].data : "";
           var vars = _dt.datasets[ds].hasOwnProperty("vars") ? _dt.datasets[ds].vars : "";
           datasets[ds] = [CodeMirror.Doc(data, 'data'), CodeMirror.Doc(vars, 'yaml')];
+
+          if (_ds != null) {
+            if (ds.toLowerCase() == _ds.toLowerCase()) {
+              _ds = ds;
+            }
+          }
         });
 
         if ((_ds == null) || !datasets.hasOwnProperty(_ds)) {
