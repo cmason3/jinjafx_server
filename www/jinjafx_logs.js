@@ -70,7 +70,7 @@
 
     if (qs.has('key')) {
       key = qs.get('key');
-      window.history.replaceState(null, null, window.location.pathname);
+      window.history.replaceState({}, document.title, window.location.pathname);
       sessionStorage.removeItem('jfx_weblog_key');
       update();
     }

@@ -418,6 +418,17 @@ function getStatusText(code) {
       return false;
     }
 
+    if (method == "delete") {
+      if (confirm("Are You Sure?") === true) {
+        apply_dt(true);
+        window.addEventListener('beforeunload', onBeforeUnload);
+        document.title = 'JinjaFx [unsaved]';
+        dirty = true;
+        set_status("green", "OK", "Link Deleted", 10000);
+      }
+      return false;
+    }
+
     switch_template(current_t, true, false);
     if (templates['Default'].getValue().length === 0) {
       window.cmTemplate.focus();
@@ -875,7 +886,8 @@ function getStatusText(code) {
               document.getElementById('get').classList.add('d-none');
               document.getElementById('mdd').disabled = false;
 
-              document.getElementById('protect').classList.remove('disabled');
+              // document.getElementById('protect').classList.remove('disabled');
+              // document.getElementById('delete').classList.remove('disabled');
               if (dt.hasOwnProperty('dt_password') || dt.hasOwnProperty('dt_mpassword')) {
                 document.getElementById('protect_text').innerHTML = 'Update Protection';
                 dt_protected = true;
@@ -967,6 +979,7 @@ function getStatusText(code) {
       document.getElementById('get2').onclick = function() { jinjafx('get_link'); };
       document.getElementById('update').onclick = function() { jinjafx('update_link'); };
       document.getElementById('protect').onclick = function() { jinjafx('protect'); };
+      document.getElementById('delete').onclick = function() { jinjafx('delete'); };
 
       if (window.crypto.subtle) {
         document.getElementById('encrypt').classList.remove('d-none');
@@ -992,7 +1005,7 @@ function getStatusText(code) {
               var obj = jsyaml.load(contents, jsyaml_schema);
               if (obj != null) {
                 pending_dt = obj['dt'];
-                apply_dt();
+                apply_dt(false);
                 return true;
               }
             }
@@ -1017,7 +1030,7 @@ function getStatusText(code) {
               var obj = jsyaml.load(e2.target.result, jsyaml_schema);
               if (obj != null) {
                 pending_dt = obj['dt'];
-                apply_dt();
+                apply_dt(false);
                 return true;
               }
             }
@@ -1809,6 +1822,10 @@ function getStatusText(code) {
         document.getElementById('buttons').classList.remove('d-none');
         document.getElementById('stemplates').style.visibility = 'hidden';
         document.getElementById('template_info').style.visibility = 'visible';
+
+        if (document.getElementById('get_link').value != 'false') {
+          document.getElementById('lbuttons').classList.remove('d-none');
+        }
         loaded = true;
       }
     }
@@ -1912,8 +1929,10 @@ function getStatusText(code) {
     }
   }
 
-  function apply_dt() {
-    load_datatemplate(pending_dt, null, null);
+  function apply_dt(dflag) {
+    if (!dflag) {
+      load_datatemplate(pending_dt, null, null);
+    }
     reset_location('');
     dt_id = '';
     dt_password = null;
@@ -1923,9 +1942,10 @@ function getStatusText(code) {
     input_form = null;
     document.getElementById('update').classList.add('d-none');
     document.getElementById('get').classList.remove('d-none');
-    document.getElementById('mdd').disabled = true;
-    document.getElementById('protect').classList.add('disabled');
-    document.getElementById('protect').innerHTML = 'Protect Link';
+    document.getElementById('protect_text').innerHTML = 'Protect Link';
+    setTimeout(function() {
+      document.getElementById('mdd').disabled = true;
+    }, 50);
   }
 
   function onPasteOrDrop(e, obj, target) {
@@ -1937,11 +1957,11 @@ function getStatusText(code) {
 
           if (dirty) {
             if (confirm("Are You Sure?") === true) {
-              apply_dt();
+              apply_dt(false);
             }
           }
           else {
-            apply_dt();
+            apply_dt(false);
           }
         }
       }
