@@ -40,7 +40,6 @@ function _utob(c) {
 }
 
 function utob(u) {
-  // Borrowed from Dan Kogai (https://github.com/dankogai/js-base64)
   return u.replace(/[\uD800-\uDBFF][\uDC00-\uDFFFF]|[^\x00-\x7F]/g, _utob);
 }
 
@@ -57,7 +56,6 @@ function _btou(cccc) {
 }
 
 function btou(b) {
-  // Borrowed from Dan Kogai (https://github.com/dankogai/js-base64)
   return b.replace(/[\xC0-\xDF][\x80-\xBF]|[\xE0-\xEF][\x80-\xBF]{2}|[\xF0-\xF7][\x80-\xBF]{3}/g, _btou);
 }
 
@@ -119,6 +117,7 @@ function getStatusText(code) {
   var dt_opassword = null;
   var dt_mpassword = null;
   var dt_epassword = null;
+  var delete_pending = false;
   var input_form = null;
   var r_input_form = null;
   var jinput = null;
@@ -420,11 +419,8 @@ function getStatusText(code) {
 
     if (method == "delete") {
       if (confirm("Are You Sure?") === true) {
-        apply_dt(true);
-        window.addEventListener('beforeunload', onBeforeUnload);
-        document.title = 'JinjaFx [unsaved]';
-        dirty = true;
-        set_status("green", "OK", "Link Deleted", 10000);
+        set_wait();
+        update_link(dt_id, true);
       }
       return false;
     }
@@ -709,10 +705,10 @@ function getStatusText(code) {
           set_wait();
 
           if (method == "update_link") {
-            update_link(dt_id);
+            update_link(dt_id, false);
           }
           else {
-            update_link(null);
+            update_link(null, false);
           }
         }
       }
@@ -724,11 +720,16 @@ function getStatusText(code) {
     }
   }
 
-  function update_link(v_dt_id) {
+  function update_link(v_dt_id, dflag) {
     var xHR = new XMLHttpRequest();
 
     if (v_dt_id !== null) {
-      xHR.open("POST", "/get_link?id=" + v_dt_id, true);
+      if (dflag) {
+        xHR.open("POST", "/delete_link?id=" + v_dt_id, true);
+      }
+      else {
+        xHR.open("POST", "/get_link?id=" + v_dt_id, true);
+      }
       xHR.setRequestHeader("X-Dt-Protected", dt_protected ? 1 : 0);
       if (dt_password !== null) {
         xHR.setRequestHeader("X-Dt-Password", dt_password);
@@ -752,26 +753,38 @@ function getStatusText(code) {
     xHR.onload = function() {
       if (this.status === 200) {
         if (v_dt_id !== null) {
-          revision += 1;
-          if (dt_protected) {
-            if (dt_mpassword != null) {
-              dt_password = dt_mpassword;
+          if (!dflag) {
+            revision += 1;
+            if (dt_protected) {
+              if (dt_mpassword != null) {
+                dt_password = dt_mpassword;
+              }
+              else if (dt_opassword != null) {
+                dt_password = dt_opassword;
+              }
+              if (dt_opassword != null) {
+                dt_epassword = dt_opassword;
+              }
             }
-            else if (dt_opassword != null) {
-              dt_password = dt_opassword;
+            else {
+              dt_epassword = null;
+              dt_password = null;
             }
-            if (dt_opassword != null) {
-              dt_epassword = dt_opassword;
-            }
+            dt_opassword = null;
+            dt_mpassword = null;
+            set_status("green", "OK", "Link Updated");
+            window.removeEventListener('beforeunload', onBeforeUnload);
           }
           else {
-            dt_epassword = null;
-            dt_password = null;
+            apply_dt(true);
+            delete_pending = false;
+            document.title = 'JinjaFx [unsaved]';
+            dirty = true;
+            set_status("green", "OK", "Link Deleted", 10000);
+            window.addEventListener('beforeunload', onBeforeUnload);
+            clear_wait();
+            return false;
           }
-          dt_opassword = null;
-          dt_mpassword = null;
-          set_status("green", "OK", "Link Updated");
-          window.removeEventListener('beforeunload', onBeforeUnload);
         }
         else {
           window.removeEventListener('beforeunload', onBeforeUnload);
@@ -782,6 +795,7 @@ function getStatusText(code) {
       }
       else if (this.status == 401) {
         protect_action = 2;
+        delete_pending = dflag;
         document.getElementById('lb_protect').innerHTML = 'DataTemplate ' + this.getResponseHeader('X-Dt-Authentication') + ' Passsword';
         new bootstrap.Modal(document.getElementById('protect_input'), {
           keyboard: false
@@ -795,6 +809,7 @@ function getStatusText(code) {
         var sT = (this.statusText.length == 0) ? getStatusText(this.status) : this.statusText;
         set_status("darkred", "HTTP ERROR " + this.status, sT);
       }
+      delete_pending = false;
       clear_wait();
     };
 
@@ -886,8 +901,6 @@ function getStatusText(code) {
               document.getElementById('get').classList.add('d-none');
               document.getElementById('mdd').disabled = false;
 
-              // document.getElementById('protect').classList.remove('disabled');
-              // document.getElementById('delete').classList.remove('disabled');
               if (dt.hasOwnProperty('dt_password') || dt.hasOwnProperty('dt_mpassword')) {
                 document.getElementById('protect_text').innerHTML = 'Update Protection';
                 dt_protected = true;
@@ -1554,7 +1567,7 @@ function getStatusText(code) {
               try_to_load();
             }
             else {
-              update_link(dt_id);
+              update_link(dt_id, delete_pending);
             }
           }
           else {
