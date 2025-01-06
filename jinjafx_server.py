@@ -26,7 +26,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.2.0'
+__version__ = '25.2.1'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -667,7 +667,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                           cheaders['X-Dt-Authentication'] = 'Modify' if (mm != None) else 'Open'
                           r = [ 'text/plain', 401, '401 Unauthorized\r\n', sys._getframe().f_lineno ]
 
-                      return r
+                      return mm, mo, r
 
                     if fpath == '/get_link':
                       dt = json.loads(postdata.decode('utf-8'))
@@ -753,7 +753,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                         dt_yml += 'encrypted: 1\n'
 
                       def update_dt(rdt, dt_yml, r):
-                        r = authenticate_dt(rdt, r)
+                        mm, mo, r = authenticate_dt(rdt, r)
 
                         if r[1] != 401:
                           if dt_protected:
@@ -821,7 +821,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                               dt_yml, r = update_dt(rr.text, dt_yml, r)
 
                             elif fpath == '/delete_link':
-                              r = authenticate_dt(rr.text, r)
+                              mm, mo, r = authenticate_dt(rr.text, r)
 
                               if r[1] != 401:
                                 rr = aws_s3_delete(aws_s3_url, dt_filename)
@@ -892,7 +892,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                               dt_yml, r = update_dt(content, dt_yml, r)
 
                             elif fpath == '/delete_link':
-                              r = authenticate_dt(content, r)
+                              mm, mo, r = authenticate_dt(content, r)
 
                               if r[1] != 401:
                                 rr = github_delete(github_url, dt_filename, sha)
@@ -954,7 +954,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                               dt_yml, r = update_dt(rr, dt_yml, r)
 
                             elif fpath == '/delete_link':
-                              r = authenticate_dt(rr, r)
+                              mm, mo, r = authenticate_dt(rr, r)
 
                               if r[1] != 401:
                                 os.remove(dt_filename)
