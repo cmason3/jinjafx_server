@@ -200,7 +200,7 @@ function getStatusText(code) {
       var a = document.createElement('a');
       a.classList.add('dropdown-item', 'text-decoration-none');
       a.addEventListener('click', select_dataset, false);
-      a.href = '#';
+      a.href = 'javascript:void(0)';
       a.ds_name = ds;
       a.innerHTML = ds;
       document.getElementById('datasets').appendChild(a);
@@ -253,7 +253,7 @@ function getStatusText(code) {
       var a = document.createElement('a');
       a.classList.add('dropdown-item', 'text-decoration-none');
       a.addEventListener('click', select_template, false);
-      a.href = '#';
+      a.href = 'javascript:void(0)';
       a.t_name = t;
       a.innerHTML = t;
       document.getElementById('templates').appendChild(a);
@@ -1805,17 +1805,25 @@ function getStatusText(code) {
         };
       });
 
+      if (window.location.pathname.startsWith('/dt/') && (window.location.pathname.length > 4)) {
+        var e = window.location.pathname.substr(1).split('/');
+        qs['dt'] = decodeURIComponent(e[1]);
+
+        if (e.length > 2) {
+          qs['ds'] = decodeURIComponent(e[2]);
+        }
+      }
+
       if (window.location.search.length > 1) {
         var v = window.location.search.substr(1).split('&');
 
         for (var i = 0; i < v.length; i++) {
           var p = v[i].split('=');
-          qs[p[0].toLowerCase()] = decodeURIComponent(p.length > 1 ? p[1] : '');
-        }
-      }
 
-      if (window.location.pathname.startsWith('/dt/') && (window.location.pathname.length > 4)) {
-        qs['dt'] = decodeURIComponent(window.location.pathname.substr(4));
+          if (!qs.hasOwnProperty(p[0].toLowerCase())) {
+            qs[p[0].toLowerCase()] = decodeURIComponent(p.length > 1 ? p[1] : '');
+          }
+        }
       }
 
       if (qs.hasOwnProperty('dt')) {

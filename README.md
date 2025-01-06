@@ -95,7 +95,7 @@ As well as supporting the standard CodeMirror shortcut keys for the "data.csv", 
 
 The DataSet feature allows you to include multiple different "data.csv" and "vars.yml" contents while maintaining the same "template.j2". When enabled it also enables a "global.yml" pane for specifying global variables which are common across all DataSets (any variables which are redefined in "vars.yml" will overwrite variables in "global.yml"). This is to support scenarios where you have different DataSets for your Live vs your Test environments, but the template should be the same. There are no limits on the number of different DataSets that can be added to a single DataTemplate (the name must start with a letter and only contain alphanumerical, "-", " " or "_" characters). When you click "Generate" it will use the currently active DataSet to generate the output - clicking on the name of the current DataSet (by default there is a single "Default" DataSet) allows you to switch between the different DataSets.
 
-You can also select a specific DataSet when you load a DataTemplate using the `ds` query string parameter (i.e. `?ds=Default'`).
+You can also select a specific DataSet when you load a DataTemplate using the `ds` query string parameter (i.e. `?ds=<ds>'`) or by adding an additional path element (i.e. `/dt/<dt>/<ds>`).
 
 ### Output Formats
 

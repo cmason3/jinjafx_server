@@ -1,8 +1,9 @@
 ## CHANGELOG
 
 ### [25.2.0] - In Development
-- Added support so a specific DataSet can be selected via the DataTemplate URL using `?ds=`
 - Added a "Delete Link" button to allow DataTemplates to be deleted
+- Added support so a specific DataSet can be selected via the DataTemplate URL using `?ds=` or `/dt/<dt>/<ds>`
+- Don't add a hash symbol to the end of the URL when clicking on links
 
 ### [25.1.1] - Jan 1, 2025
 - Rewritten Web Log authentication so it will now prompt you for a password
