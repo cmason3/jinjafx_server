@@ -247,7 +247,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           fpath = '/index.html'
           self.hide = not verbose
 
-        if re.search(r'^/dt/[A-Za-z0-9_-]{1,24}(?:/[A-Za-z][A-Za-z0-9_ -]*)?$', fpath):
+        if re.search(r'^/dt/[A-Za-z0-9_-]{1,24}(?:/[A-Za-z][A-Za-z0-9_ %-]*)?$', fpath):
           fpath = '/index.html'
 
         if re.search(r'^/[a-f0-9]{8}/', fpath):
