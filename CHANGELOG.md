@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [25.2.0] - In Development
+### [25.2.0] - Jan 6, 2025
 - Added a "Delete Link" button to allow DataTemplates to be deleted
 - Added support so a specific DataSet can be selected via the DataTemplate URL using `?ds=` or `/dt/<dt>/<ds>`
 - Don't add a hash symbol to the end of the URL when clicking on links
