@@ -60,7 +60,7 @@ Description=JinjaFx Server
 [Service]
 User=<USER>
 Environment="VIRTUAL_ENV=/opt/jinjafx"
-Environment="JFX_WEBLOG_KEY='<KEY>'"
+Environment="JFX_WEBLOG_KEY=<KEY>"
 ExecStart=/opt/jinjafx/bin/python3 -u -m jinjafx_server -s -l 127.0.0.1 -p 8080 -weblog
 SyslogIdentifier=jinjafx_server
 TimeoutStartSec=60
