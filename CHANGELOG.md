@@ -1,5 +1,11 @@
 ## CHANGELOG
 
+### [25.2.0] - Jan 6, 2025
+- Added a "Delete Link" button to allow DataTemplates to be deleted
+- Added support so a specific DataSet can be selected via the DataTemplate URL using `?ds=` or `/dt/<dt>/<ds>`
+- Don't add a hash symbol to the end of the URL when clicking on links
+- Fixed an issue where the "Protect Link" button was losing it's icon under certain conditions 
+
 ### [25.1.1] - Jan 1, 2025
 - Rewritten Web Log authentication so it will now prompt you for a password
 
@@ -368,6 +374,7 @@
 - Initial release
 
 
+[25.2.0]: https://github.com/cmason3/jinjafx_server/compare/25.1.1...25.2.0
 [25.1.1]: https://github.com/cmason3/jinjafx_server/compare/25.1.0...25.1.1
 [25.1.0]: https://github.com/cmason3/jinjafx_server/compare/24.12.1...25.1.0
 [24.12.1]: https://github.com/cmason3/jinjafx_server/compare/24.12.0...24.12.1

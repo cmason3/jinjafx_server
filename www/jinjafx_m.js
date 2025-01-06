@@ -40,7 +40,6 @@ function _utob(c) {
 }
 
 function utob(u) {
-  // Borrowed from Dan Kogai (https://github.com/dankogai/js-base64)
   return u.replace(/[\uD800-\uDBFF][\uDC00-\uDFFFF]|[^\x00-\x7F]/g, _utob);
 }
 
@@ -57,7 +56,6 @@ function _btou(cccc) {
 }
 
 function btou(b) {
-  // Borrowed from Dan Kogai (https://github.com/dankogai/js-base64)
   return b.replace(/[\xC0-\xDF][\x80-\xBF]|[\xE0-\xEF][\x80-\xBF]{2}|[\xF0-\xF7][\x80-\xBF]{3}/g, _btou);
 }
 
@@ -119,6 +117,7 @@ function getStatusText(code) {
   var dt_opassword = null;
   var dt_mpassword = null;
   var dt_epassword = null;
+  var delete_pending = false;
   var input_form = null;
   var r_input_form = null;
   var jinput = null;
@@ -201,7 +200,7 @@ function getStatusText(code) {
       var a = document.createElement('a');
       a.classList.add('dropdown-item', 'text-decoration-none');
       a.addEventListener('click', select_dataset, false);
-      a.href = '#';
+      a.href = 'javascript:void(0)';
       a.ds_name = ds;
       a.innerHTML = ds;
       document.getElementById('datasets').appendChild(a);
@@ -254,7 +253,7 @@ function getStatusText(code) {
       var a = document.createElement('a');
       a.classList.add('dropdown-item', 'text-decoration-none');
       a.addEventListener('click', select_template, false);
-      a.href = '#';
+      a.href = 'javascript:void(0)';
       a.t_name = t;
       a.innerHTML = t;
       document.getElementById('templates').appendChild(a);
@@ -415,6 +414,14 @@ function getStatusText(code) {
       new bootstrap.Modal(document.getElementById('protect_dt'), {
         keyboard: false
       }).show();
+      return false;
+    }
+
+    if (method == "delete") {
+      if (confirm("Are You Sure?") === true) {
+        set_wait();
+        update_link(dt_id, true);
+      }
       return false;
     }
 
@@ -698,10 +705,10 @@ function getStatusText(code) {
           set_wait();
 
           if (method == "update_link") {
-            update_link(dt_id);
+            update_link(dt_id, false);
           }
           else {
-            update_link(null);
+            update_link(null, false);
           }
         }
       }
@@ -713,11 +720,19 @@ function getStatusText(code) {
     }
   }
 
-  function update_link(v_dt_id) {
+  function update_link(v_dt_id, dflag) {
     var xHR = new XMLHttpRequest();
 
     if (v_dt_id !== null) {
-      xHR.open("POST", "/get_link?id=" + v_dt_id, true);
+      if (dflag) {
+        if (!delete_pending) {
+          dt_password = null;
+        }
+        xHR.open("POST", "/delete_link?id=" + v_dt_id, true);
+      }
+      else {
+        xHR.open("POST", "/get_link?id=" + v_dt_id, true);
+      }
       xHR.setRequestHeader("X-Dt-Protected", dt_protected ? 1 : 0);
       if (dt_password !== null) {
         xHR.setRequestHeader("X-Dt-Password", dt_password);
@@ -741,26 +756,38 @@ function getStatusText(code) {
     xHR.onload = function() {
       if (this.status === 200) {
         if (v_dt_id !== null) {
-          revision += 1;
-          if (dt_protected) {
-            if (dt_mpassword != null) {
-              dt_password = dt_mpassword;
+          if (!dflag) {
+            revision += 1;
+            if (dt_protected) {
+              if (dt_mpassword != null) {
+                dt_password = dt_mpassword;
+              }
+              else if (dt_opassword != null) {
+                dt_password = dt_opassword;
+              }
+              if (dt_opassword != null) {
+                dt_epassword = dt_opassword;
+              }
             }
-            else if (dt_opassword != null) {
-              dt_password = dt_opassword;
+            else {
+              dt_epassword = null;
+              dt_password = null;
             }
-            if (dt_opassword != null) {
-              dt_epassword = dt_opassword;
-            }
+            dt_opassword = null;
+            dt_mpassword = null;
+            set_status("green", "OK", "Link Updated");
+            window.removeEventListener('beforeunload', onBeforeUnload);
           }
           else {
-            dt_epassword = null;
-            dt_password = null;
+            apply_dt(true);
+            delete_pending = false;
+            document.title = 'JinjaFx [unsaved]';
+            dirty = true;
+            set_status("green", "OK", "Link Deleted", 10000);
+            window.addEventListener('beforeunload', onBeforeUnload);
+            clear_wait();
+            return false;
           }
-          dt_opassword = null;
-          dt_mpassword = null;
-          set_status("green", "OK", "Link Updated");
-          window.removeEventListener('beforeunload', onBeforeUnload);
         }
         else {
           window.removeEventListener('beforeunload', onBeforeUnload);
@@ -771,6 +798,7 @@ function getStatusText(code) {
       }
       else if (this.status == 401) {
         protect_action = 2;
+        delete_pending = dflag;
         document.getElementById('lb_protect').innerHTML = 'DataTemplate ' + this.getResponseHeader('X-Dt-Authentication') + ' Passsword';
         new bootstrap.Modal(document.getElementById('protect_input'), {
           keyboard: false
@@ -784,6 +812,7 @@ function getStatusText(code) {
         var sT = (this.statusText.length == 0) ? getStatusText(this.status) : this.statusText;
         set_status("darkred", "HTTP ERROR " + this.status, sT);
       }
+      delete_pending = false;
       clear_wait();
     };
 
@@ -799,16 +828,21 @@ function getStatusText(code) {
     xHR.timeout = 10000;
     xHR.setRequestHeader("Content-Type", "application/json");
 
-    var rd = JSON.stringify(dt);
-    if (rd.length > 2048 * 1024) {
-      set_status("darkred", "ERROR", 'Content Too Large');
-    }
-    else if (rd.length > 1024) {
-      xHR.setRequestHeader("Content-Encoding", "gzip");
-      xHR.send(pako.gzip(rd));
+    if (!dflag) {
+      var rd = JSON.stringify(dt);
+      if (rd.length > 2048 * 1024) {
+        set_status("darkred", "ERROR", 'Content Too Large');
+      }
+      else if (rd.length > 1024) {
+        xHR.setRequestHeader("Content-Encoding", "gzip");
+        xHR.send(pako.gzip(rd));
+      }
+      else {
+        xHR.send(rd);
+      }
     }
     else {
-      xHR.send(rd);
+      xHR.send('{}');
     }
   }
 
@@ -860,7 +894,10 @@ function getStatusText(code) {
                 dt_encrypted = false;
               }
 
-              if (dt.hasOwnProperty('dataset')) {
+              if (qs.hasOwnProperty('ds')) {
+                load_datatemplate(dt['dt'], qs, qs['ds']);
+              }
+              else if (dt.hasOwnProperty('dataset')) {
                 load_datatemplate(dt['dt'], qs, dt['dataset']);
               }
               else {
@@ -872,7 +909,6 @@ function getStatusText(code) {
               document.getElementById('get').classList.add('d-none');
               document.getElementById('mdd').disabled = false;
 
-              document.getElementById('protect').classList.remove('disabled');
               if (dt.hasOwnProperty('dt_password') || dt.hasOwnProperty('dt_mpassword')) {
                 document.getElementById('protect_text').innerHTML = 'Update Protection';
                 dt_protected = true;
@@ -964,6 +1000,7 @@ function getStatusText(code) {
       document.getElementById('get2').onclick = function() { jinjafx('get_link'); };
       document.getElementById('update').onclick = function() { jinjafx('update_link'); };
       document.getElementById('protect').onclick = function() { jinjafx('protect'); };
+      document.getElementById('delete').onclick = function() { jinjafx('delete'); };
 
       if (window.crypto.subtle) {
         document.getElementById('encrypt').classList.remove('d-none');
@@ -989,7 +1026,7 @@ function getStatusText(code) {
               var obj = jsyaml.load(contents, jsyaml_schema);
               if (obj != null) {
                 pending_dt = obj['dt'];
-                apply_dt();
+                apply_dt(false);
                 return true;
               }
             }
@@ -1014,7 +1051,7 @@ function getStatusText(code) {
               var obj = jsyaml.load(e2.target.result, jsyaml_schema);
               if (obj != null) {
                 pending_dt = obj['dt'];
-                apply_dt();
+                apply_dt(false);
                 return true;
               }
             }
@@ -1538,7 +1575,7 @@ function getStatusText(code) {
               try_to_load();
             }
             else {
-              update_link(dt_id);
+              update_link(dt_id, delete_pending);
             }
           }
           else {
@@ -1770,15 +1807,34 @@ function getStatusText(code) {
           }
         };
       });
-  
+
       if (window.location.pathname.startsWith('/dt/') && (window.location.pathname.length > 4)) {
-        qs['dt'] = decodeURIComponent(window.location.pathname.substr(4));
-  
+        var e = window.location.pathname.substr(1).split('/');
+        qs['dt'] = decodeURIComponent(e[1]);
+
+        if (e.length > 2) {
+          qs['ds'] = decodeURIComponent(e[2]);
+        }
+      }
+
+      if (window.location.search.length > 1) {
+        var v = window.location.search.substr(1).split('&');
+
+        for (var i = 0; i < v.length; i++) {
+          var p = v[i].split('=');
+
+          if (!qs.hasOwnProperty(p[0].toLowerCase())) {
+            qs[p[0].toLowerCase()] = decodeURIComponent(p.length > 1 ? p[1] : '');
+          }
+        }
+      }
+
+      if (qs.hasOwnProperty('dt')) {
         if (document.getElementById('get_link').value != 'false') {
           try_to_load();
-  
+
           document.getElementById('lbuttons').classList.remove('d-none');
-  
+
           if (fe != window.cmData) {
             onDataBlur();
           }
@@ -1790,44 +1846,15 @@ function getStatusText(code) {
           loaded = true;
         }
       }
-      else if (window.location.href.indexOf('?') > -1) {
-        var v = window.location.href.substr(window.location.href.indexOf('?') + 1).split('&');
-  
-        for (var i = 0; i < v.length; i++) {
-          var p = v[i].split('=');
-          qs[p[0].toLowerCase()] = decodeURIComponent(p.length > 1 ? p[1] : '');
-        }
-  
-        if (qs.hasOwnProperty('dt')) {
-          if (document.getElementById('get_link').value != 'false') {
-            try_to_load();
-  
-            document.getElementById('lbuttons').classList.remove('d-none');
-  
-            if (fe != window.cmData) {
-              onDataBlur();
-            }
-          }
-          else {
-            set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
-            reset_location('');
-            document.getElementById('buttons').classList.remove('d-none');
-            loaded = true;
-          }
-        }
-        else {
-          reset_location('');
-          document.getElementById('buttons').classList.remove('d-none');
-          loaded = true;
-        }
-      }
       else {
+        reset_location('');
+        document.getElementById('buttons').classList.remove('d-none');
+        document.getElementById('stemplates').style.visibility = 'hidden';
+        document.getElementById('template_info').style.visibility = 'visible';
+
         if (document.getElementById('get_link').value != 'false') {
           document.getElementById('lbuttons').classList.remove('d-none');
         }
-        document.getElementById('stemplates').style.visibility = 'hidden';
-        document.getElementById('template_info').style.visibility = 'visible';
-        document.getElementById('buttons').classList.remove('d-none');
         loaded = true;
       }
     }
@@ -1931,8 +1958,10 @@ function getStatusText(code) {
     }
   }
 
-  function apply_dt() {
-    load_datatemplate(pending_dt, null, null);
+  function apply_dt(dflag) {
+    if (!dflag) {
+      load_datatemplate(pending_dt, null, null);
+    }
     reset_location('');
     dt_id = '';
     dt_password = null;
@@ -1942,9 +1971,10 @@ function getStatusText(code) {
     input_form = null;
     document.getElementById('update').classList.add('d-none');
     document.getElementById('get').classList.remove('d-none');
-    document.getElementById('mdd').disabled = true;
-    document.getElementById('protect').classList.add('disabled');
-    document.getElementById('protect').innerHTML = 'Protect Link';
+    document.getElementById('protect_text').innerHTML = 'Protect Link';
+    setTimeout(function() {
+      document.getElementById('mdd').disabled = true;
+    }, 50);
   }
 
   function onPasteOrDrop(e, obj, target) {
@@ -1956,11 +1986,11 @@ function getStatusText(code) {
 
           if (dirty) {
             if (confirm("Are You Sure?") === true) {
-              apply_dt();
+              apply_dt(false);
             }
           }
           else {
-            apply_dt();
+            apply_dt(false);
           }
         }
       }
@@ -2024,9 +2054,6 @@ function getStatusText(code) {
       if (tinfo) {
         if (editor == window.cmTemplate) {
           remove_info();
-          //document.getElementById('template_info').classList.add('fade-out');
-          //document.getElementById('template_info').style.zIndex = -1000;
-          //document.getElementById('stemplates').style.visibility = 'visible';
           tinfo = false;
         }
       }
@@ -2047,6 +2074,12 @@ function getStatusText(code) {
           var data = _dt.datasets[ds].hasOwnProperty("data") ? _dt.datasets[ds].data : "";
           var vars = _dt.datasets[ds].hasOwnProperty("vars") ? _dt.datasets[ds].vars : "";
           datasets[ds] = [CodeMirror.Doc(data, 'data'), CodeMirror.Doc(vars, 'yaml')];
+
+          if (_ds != null) {
+            if (ds.toLowerCase() == _ds.toLowerCase()) {
+              _ds = ds;
+            }
+          }
         });
 
         if ((_ds == null) || !datasets.hasOwnProperty(_ds)) {
