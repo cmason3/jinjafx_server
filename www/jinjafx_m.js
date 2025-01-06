@@ -725,6 +725,9 @@ function getStatusText(code) {
 
     if (v_dt_id !== null) {
       if (dflag) {
+        if (!delete_pending) {
+          dt_password = null;
+        }
         xHR.open("POST", "/delete_link?id=" + v_dt_id, true);
       }
       else {
