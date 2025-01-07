@@ -1,7 +1,8 @@
 ## CHANGELOG
 
 ### [25.2.2] - In Development
-- Fixed a potential security issue in that we no longer send the saved password hashes with the DataTemplate as they aren't needed
+- Don't send sensitive metadata in fetched DataTemplates as it isn't needed
+- Fixed an issue where we broke CSP due to our use of `javascript:void(0)` to stop hashes appearing within the URL
 
 ### [25.2.1] - Jan 6, 2025
 - Fixed a regression when adding support for "Delete Link"
