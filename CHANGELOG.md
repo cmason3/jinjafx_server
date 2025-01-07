@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [25.2.2] - In Development
+### [25.2.2] - Jan 7, 2025
 - Don't send sensitive metadata in fetched DataTemplates as it isn't needed
 - Fixed an issue where we broke CSP due to our use of `javascript:void(0)` to stop hashes appearing within the URL
 
