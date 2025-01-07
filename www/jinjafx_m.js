@@ -197,13 +197,12 @@ function getStatusText(code) {
     document.getElementById('datasets').innerHTML = '';
 
     Object.keys(datasets).sort(default_on_top).forEach(function(ds) {
-      var a = document.createElement('a');
-      a.classList.add('dropdown-item', 'text-decoration-none');
-      a.addEventListener('click', select_dataset, false);
-      a.href = 'javascript:void(0)';
-      a.ds_name = ds;
-      a.innerHTML = ds;
-      document.getElementById('datasets').appendChild(a);
+      var e = document.createElement('button');
+      e.classList.add('dropdown-item', 'text-decoration-none');
+      e.addEventListener('click', select_dataset, false);
+      e.ds_name = ds;
+      e.innerHTML = ds;
+      document.getElementById('datasets').appendChild(e);
     });
 
     if (Object.keys(datasets).length > 1) {
@@ -250,13 +249,12 @@ function getStatusText(code) {
     document.getElementById('templates').innerHTML = '';
 
     Object.keys(templates).sort(default_on_top).forEach(function(t) {
-      var a = document.createElement('a');
-      a.classList.add('dropdown-item', 'text-decoration-none');
-      a.addEventListener('click', select_template, false);
-      a.href = 'javascript:void(0)';
-      a.t_name = t;
-      a.innerHTML = t;
-      document.getElementById('templates').appendChild(a);
+      var e = document.createElement('button');
+      e.classList.add('dropdown-item', 'text-decoration-none');
+      e.addEventListener('click', select_template, false);
+      e.t_name = t;
+      e.innerHTML = t;
+      document.getElementById('templates').appendChild(e);
     });
 
     if (Object.keys(templates).length > 1) {
@@ -909,7 +907,7 @@ function getStatusText(code) {
               document.getElementById('get').classList.add('d-none');
               document.getElementById('mdd').disabled = false;
 
-              if (dt.hasOwnProperty('dt_password') || dt.hasOwnProperty('dt_mpassword')) {
+              if (dt.hasOwnProperty('protected') && (dt['protected'] === 1)) {
                 document.getElementById('protect_text').innerHTML = 'Update Protection';
                 dt_protected = true;
               }

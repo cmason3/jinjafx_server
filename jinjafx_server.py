@@ -26,7 +26,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.2.1'
+__version__ = '25.2.2'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -258,13 +258,18 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           dt = ''
           self.critical = True
 
+          def sanitise_dt(dt):
+            fields = ('dt_password:', 'dt_mpassword:', 'remote_addr:')
+            dt = '\n'.join([ln for ln in dt.splitlines() if not ln.startswith(fields)])
+            return dt.encode('utf-8')
+
           if aws_s3_url or github_url or repository:
             if not self.ratelimit(remote_addr, 2, False):
               if aws_s3_url:
                 rr = aws_s3_get(aws_s3_url, 'jfx_' + fpath[8:] + '.yml')
   
                 if rr.status_code == 200:
-                  r = [ 'application/json', 200, json.dumps({ 'dt': self.e(rr.text.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
+                  r = [ 'application/json', 200, json.dumps({ 'dt': self.e(sanitise_dt(rr.text)).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
   
                   dt = rr.text
   
@@ -284,7 +289,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   if jobj.get('encoding') and jobj.get('encoding') == 'base64':
                     content = base64.b64decode(content).decode('utf-8')
   
-                  r = [ 'application/json', 200, json.dumps({ 'dt': self.e(content.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
+                  r = [ 'application/json', 200, json.dumps({ 'dt': self.e(sanitise_dt(content)).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
   
                   dt = content
   
@@ -299,10 +304,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   
                 if os.path.isfile(fpath):
                   with open(fpath, 'rb') as f:
-                    rr = f.read()
-                    dt = rr.decode('utf-8')
+                    dt = f.read().decode('utf-8')
   
-                    r = [ 'application/json', 200, json.dumps({ 'dt': self.e(rr).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
+                    r = [ 'application/json', 200, json.dumps({ 'dt': self.e(sanitise_dt(dt)).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
   
                 else:
                   r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
@@ -312,7 +316,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   if 'X-Dt-Password' in self.headers:
                     try:
                       dt = jinjafx.Vaulty().decrypt(dt, self.headers['X-Dt-Password'])
-                      r = [ 'application/json', 200, json.dumps({ 'dt': self.e(dt.encode('utf-8')).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
+                      r = [ 'application/json', 200, json.dumps({ 'dt': self.e(sanitise_dt(dt)).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
 
                     except Exception:
                       cheaders['X-Dt-Authentication'] = 'Open'
@@ -751,6 +755,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                       
                       if dt_encrypted:
                         dt_yml += 'encrypted: 1\n'
+
+                      if dt_protected:
+                        dt_yml += 'protected: 1\n'
 
                       def update_dt(rdt, dt_yml, r):
                         mm, mo, r = authenticate_dt(rdt, r)
