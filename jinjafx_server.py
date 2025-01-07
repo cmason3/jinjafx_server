@@ -259,7 +259,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           self.critical = True
 
           def sanitise_dt(dt):
-            dt = '\n'.join([ln for ln in dt.splitlines() if not ln.startswith(('dt_password:', 'dt_mpassword:', 'remote_addr:'))])
+            fields = ('dt_password:', 'dt_mpassword:', 'remote_addr:')
+            dt = '\n'.join([ln for ln in dt.splitlines() if not ln.startswith(fields)])
             return dt.encode('utf-8')
 
           if aws_s3_url or github_url or repository:
@@ -303,7 +304,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   
                 if os.path.isfile(fpath):
                   with open(fpath, 'rb') as f:
-                    #rr = f.read()
                     dt = f.read().decode('utf-8')
   
                     r = [ 'application/json', 200, json.dumps({ 'dt': self.e(sanitise_dt(dt)).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
