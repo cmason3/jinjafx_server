@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.2.2] - In Development
+- Fixed a potential security issue in that we no longer send the saved password hashes with the DataTemplate as they aren't needed
+
 ### [25.2.1] - Jan 6, 2025
 - Fixed a regression when adding support for "Delete Link"
 
@@ -377,6 +380,7 @@
 - Initial release
 
 
+[25.2.2]: https://github.com/cmason3/jinjafx_server/compare/25.2.1...25.2.2
 [25.2.1]: https://github.com/cmason3/jinjafx_server/compare/25.2.0...25.2.1
 [25.2.0]: https://github.com/cmason3/jinjafx_server/compare/25.1.1...25.2.0
 [25.1.1]: https://github.com/cmason3/jinjafx_server/compare/25.1.0...25.1.1

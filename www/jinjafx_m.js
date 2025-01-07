@@ -886,6 +886,8 @@ function getStatusText(code) {
             try {
               var dt = jsyaml.load(d(JSON.parse(this.responseText)['dt']), jsyaml_schema);
 
+              console.log(JSON.stringify(dt));
+
               if (dt.hasOwnProperty('encrypted')) {
                 dt_encrypted = (dt['encrypted'] === 1);
                 dt_epassword = dt_password;
@@ -909,7 +911,7 @@ function getStatusText(code) {
               document.getElementById('get').classList.add('d-none');
               document.getElementById('mdd').disabled = false;
 
-              if (dt.hasOwnProperty('dt_password') || dt.hasOwnProperty('dt_mpassword')) {
+              if (dt.hasOwnProperty('protected') && (dt['protected'] === 1)) {
                 document.getElementById('protect_text').innerHTML = 'Update Protection';
                 dt_protected = true;
               }
