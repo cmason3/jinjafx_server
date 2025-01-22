@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### [25.2.3] - In Development
+- Add directory structure to outputs in output pane if the output name contains `/`
+- Set a minimum width of 200px on the output list 
+
 ### [25.2.2] - Jan 7, 2025
 - Don't send sensitive metadata in fetched DataTemplates as it isn't needed
 - Fixed an issue where we broke CSP due to our use of `javascript:void(0)` to stop hashes appearing within the URL
@@ -381,6 +385,7 @@
 - Initial release
 
 
+[25.3.0]: https://github.com/cmason3/jinjafx_server/compare/25.2.2...25.3.0
 [25.2.2]: https://github.com/cmason3/jinjafx_server/compare/25.2.1...25.2.2
 [25.2.1]: https://github.com/cmason3/jinjafx_server/compare/25.2.0...25.2.1
 [25.2.0]: https://github.com/cmason3/jinjafx_server/compare/25.1.1...25.2.0

@@ -174,6 +174,7 @@
 
                 var links = '';
                 var tabs = '';
+                var section = '';
 
                 Object.keys(obj.outputs).sort(function(a, b) {
                   if (a.indexOf(':') > -1) {
@@ -198,9 +199,15 @@
                   }
 
                   var g = window.opener.quote(oname)
+                  var e = g.split(/\/+/);
 
                   tabs += '<div id="o' + oid + '" class="h-100 tab-pane fade' + ((oid == 1) ? ' show active' : '') + '">';
-                  tabs += '<h4 class="fw-bold">' + g + '</h4>';
+                  if (e.length > 1) {
+                    tabs += '<h4 class="fw-bold">' + e[e.length - 1] + '</h4>';
+                  }
+                  else {
+                    tabs += '<h4 class="fw-bold">' + g + '</h4>';
+                  }
 
                   var tc = window.opener.d(obj.outputs[output]);
                   if (oformat == 'html') {
@@ -212,10 +219,26 @@
 
                   tabs += '</div>';
 
-                  links += '<li class="nav-item">';
-                  links += '<a class="nav-link' + ((oid == 1) ? ' active"' : '"') + ' data-bs-toggle="tab" href="#o' + oid + '">' + g + '</a>';
-                  links += '</li>';
-
+                  if (e.length > 1) {
+                    var dir = e.slice(0, -1).join('/');
+                    if (section != dir) {
+                      if (section == '') {
+                        links += '<div class="directory">' + dir + '</div>'
+                      }
+                      else {
+                        links += '<div class="mt-3 directory">' + dir + '</div>'
+                      }
+                      section = dir;
+                    }
+                    links += '<li class="nav-item">';
+                    links += '<a class="nav-link' + ((oid == 1) ? ' active"' : '"') + ' data-bs-toggle="tab" href="#o' + oid + '">' + e[e.length - 1] + '</a>';
+                    links += '</li>';
+                  }
+                  else {
+                    links += '<li class="nav-item">';
+                    links += '<a class="nav-link' + ((oid == 1) ? ' active"' : '"') + ' data-bs-toggle="tab" href="#o' + oid + '">' + g + '</a>';
+                    links += '</li>';
+                  }
                   oid += 1;
                 });
 
