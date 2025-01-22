@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [25.2.3] - In Development
+### [25.3.0] - In Development
 - Add directory structure to outputs in output pane if the output name contains `/`
 - Set a minimum width of 200px on the output list 
 

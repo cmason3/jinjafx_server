@@ -174,35 +174,40 @@
 
                 var links = '';
                 var tabs = '';
-                var section = '';
+                var section = undefined;
+                var dflag = false;
 
+                for (var [k, v] of Object.entries(obj.outputs)) {
+                  if (!k.includes('/')) {
+                    obj.outputs['0/' + k] = v;
+                    delete (obj.outputs[k]);
+                  }
+                  else {
+                    if (k.replace(/^[0-9]+\//, '').includes('/')) {
+                      dflag = true;
+                    }
+                  }
+                }
+                
                 Object.keys(obj.outputs).sort(function(a, b) {
-                  if (a.indexOf(':') > -1) {
-                    a = a.split(':').slice(0, -1).join(':')
-                  }
-                  if (b.indexOf(':') > -1) {
-                    b = b.split(':').slice(0, -1).join(':')
-                  }
+                  a = a.split(':').slice(0, -1).join(':')
+                  b = b.split(':').slice(0, -1).join(':')
 
                   if (a == 'Output') {
                     return -1;
                   }
-
                   return a > b ? 1 : b > a ? -1 : 0;
+
                 }).forEach(function(output) {
-                  var oname = output;
-                  var oformat = 'text';
+                  var oname = output.substring(0, output.lastIndexOf(':'));
+                  oname = oname.replace(/^[0-9]+\//, '');
 
-                  if (output.includes(':')) {
-                    oname = output.substring(0, output.lastIndexOf(':'));
-                    oformat = output.substring(output.lastIndexOf(':') + 1);
-                  }
-
+                  var oformat = output.substring(output.lastIndexOf(':') + 1);
                   var g = window.opener.quote(oname)
                   var e = g.split(/\/+/);
 
                   tabs += '<div id="o' + oid + '" class="h-100 tab-pane fade' + ((oid == 1) ? ' show active' : '') + '">';
-                  if (e.length > 1) {
+                  if (dflag) {
                     tabs += '<h4 class="fw-bold">' + e[e.length - 1] + '</h4>';
                   }
                   else {
@@ -219,14 +224,14 @@
 
                   tabs += '</div>';
 
-                  if (e.length > 1) {
+                  if (dflag) {
                     var dir = e.slice(0, -1).join('/');
                     if (section != dir) {
-                      if (section == '') {
-                        links += '<div class="directory">' + dir + '</div>'
+                      if (section == undefined) {
+                        links += '<div class="directory">' + dir + '/</div>'
                       }
                       else {
-                        links += '<div class="mt-3 directory">' + dir + '</div>'
+                        links += '<div class="mt-3 directory">' + dir + '/</div>'
                       }
                       section = dir;
                     }
