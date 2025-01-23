@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.3.1] - Jan 23, 2025
+- Fixed a regression where `jinjafx_input` wasn't working due to Output name validation
+
 ### [25.3.0] - Jan 23, 2025
 - Add directory structure to outputs in output pane if the output name contains `/`
 - Add output name validation to sanitise output names if invalid values are provided
@@ -388,6 +391,7 @@
 - Initial release
 
 
+[25.3.1]: https://github.com/cmason3/jinjafx_server/compare/25.3.0...25.3.1
 [25.3.0]: https://github.com/cmason3/jinjafx_server/compare/25.2.2...25.3.0
 [25.2.2]: https://github.com/cmason3/jinjafx_server/compare/25.2.1...25.2.2
 [25.2.1]: https://github.com/cmason3/jinjafx_server/compare/25.2.0...25.2.1
