@@ -5,6 +5,7 @@
 - Add output name validation to sanitise output names if invalid values are provided
 - Add ability to sort outputs based on a numerical prefix (e.g. `0/` or `1/`) within the name
 - Set a minimum width of 200px on the output list 
+- Updated Pandoc to 3.6.2 in Dockerfile
 
 ### [25.2.2] - Jan 7, 2025
 - Don't send sensitive metadata in fetched DataTemplates as it isn't needed
