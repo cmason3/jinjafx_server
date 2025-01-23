@@ -111,7 +111,7 @@
         if (obj != null) {
           var zip = new JSZip();
           Object.keys(obj.outputs).forEach(function(o) {
-            var ofile = o;
+            var ofile = o.replace(/^[0-9]+\//, '');
             var oformat = 'text';
 
             if (ofile.includes(':')) {
@@ -176,13 +176,40 @@
                 var tabs = '';
                 var section = undefined;
                 var dflag = false;
+                var sort_keys = {};
 
                 for (var [k, v] of Object.entries(obj.outputs)) {
                   if (!k.includes('/')) {
+                    var o = k.substring(0, k.lastIndexOf(':'));
+
                     obj.outputs['0/' + k] = v;
                     delete (obj.outputs[k]);
+
+                    if (sort_keys.hasOwnProperty(o)) {
+                      if (sort_keys[o] != '0') {
+                        document.title = "Error";
+                        document.body.innerHTML = "<div id=\"status\" class=\"alert alert-danger\"><strong><h4>JinjaFx Error</h4></strong>Duplicate Outputs with Different Numerical Sort Keys is Prohibited</div>";
+                        return;
+                      }
+                    }
+                    else {
+                      sort_keys[o] = '0';
+                    }
                   }
                   else {
+                    var m = k.match(/^([0-9]+)\/(.+):\S+/);
+                    if (m) {
+                      if (sort_keys.hasOwnProperty(m[2])) {
+                        if (sort_keys[m[2]] != m[1]) {
+                          document.title = "Error";
+                          document.body.innerHTML = "<div id=\"status\" class=\"alert alert-danger\"><strong><h4>JinjaFx Error</h4></strong>Duplicate Outputs with Different Numerical Sort Keys is Prohibited</div>";
+                          return;
+                        }
+                      }
+                      else {
+                        sort_keys[m[2]] = m[1];
+                      }
+                    }
                     if (k.replace(/^[0-9]+\//, '').includes('/')) {
                       dflag = true;
                     }
@@ -192,10 +219,6 @@
                 Object.keys(obj.outputs).sort(function(a, b) {
                   a = a.split(':').slice(0, -1).join(':')
                   b = b.split(':').slice(0, -1).join(':')
-
-                  if (a == 'Output') {
-                    return -1;
-                  }
                   return a > b ? 1 : b > a ? -1 : 0;
 
                 }).forEach(function(output) {
