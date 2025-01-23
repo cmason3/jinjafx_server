@@ -537,7 +537,7 @@ function getStatusText(code) {
                         try {
                           obj = JSON.parse(xHR.responseText);
                           if (obj.status === "ok") {
-                            r_input_form = d(obj.outputs['Output']);
+                            r_input_form = d(obj.outputs['Output:text']);
                             document.getElementById('jinjafx_input_form').innerHTML = r_input_form;
                             input_form = vars['jinjafx_input']['body'];
                             jinput = new bootstrap.Modal(document.getElementById('jinjafx_input'), {
