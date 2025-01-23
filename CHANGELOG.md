@@ -1,7 +1,9 @@
 ## CHANGELOG
 
-### [25.3.0] - In Development
+### [25.3.0] - Jan 23, 2025
 - Add directory structure to outputs in output pane if the output name contains `/`
+- Add output name validation to sanitise output names if invalid values are provided
+- Add ability to sort outputs based on a numerical prefix (e.g. `0/` or `1/`) within the name
 - Set a minimum width of 200px on the output list 
 
 ### [25.2.2] - Jan 7, 2025
