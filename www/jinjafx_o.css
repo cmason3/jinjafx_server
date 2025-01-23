@@ -27,6 +27,13 @@ pre#print_pre {
   word-wrap: break-word;
   display: none;
 }
+.directory {
+  font-weight: bold;
+  margin-bottom: 0px;
+}
+#pills {
+  min-width: 200px;
+}
 .ms-10 {
   margin-left: 10px;
 }

@@ -1,5 +1,12 @@
 ## CHANGELOG
 
+### [25.3.0] - Jan 23, 2025
+- Add directory structure to outputs in output pane if the output name contains `/`
+- Add output name validation to sanitise output names if invalid values are provided
+- Add ability to sort outputs based on a numerical prefix (e.g. `0/` or `1/`) within the name
+- Set a minimum width of 200px on the output list 
+- Updated Pandoc to 3.6.2 in Dockerfile
+
 ### [25.2.2] - Jan 7, 2025
 - Don't send sensitive metadata in fetched DataTemplates as it isn't needed
 - Fixed an issue where we broke CSP due to our use of `javascript:void(0)` to stop hashes appearing within the URL
@@ -381,6 +388,7 @@
 - Initial release
 
 
+[25.3.0]: https://github.com/cmason3/jinjafx_server/compare/25.2.2...25.3.0
 [25.2.2]: https://github.com/cmason3/jinjafx_server/compare/25.2.1...25.2.2
 [25.2.1]: https://github.com/cmason3/jinjafx_server/compare/25.2.0...25.2.1
 [25.2.0]: https://github.com/cmason3/jinjafx_server/compare/25.1.1...25.2.0

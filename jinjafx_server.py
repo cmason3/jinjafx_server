@@ -26,7 +26,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.2.2'
+__version__ = '25.3.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -551,8 +551,15 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
               for o in outputs:
                 (oname, oformat) = o.rsplit(':', 1) if ':' in o else (o, 'text')
+                oname = re.sub(r' */[ /]+', '/', oname.lstrip(' /').rstrip()) 
                 output = '\n'.join(outputs[o]) + '\n'
+
+                if oname.endswith('/') or (len(oname) == 0):
+                  oname += 'Output'
+
                 if len(output.strip()) > 0:
+                  o = oname + ':' + oformat
+
                   if oformat == 'markdown' or oformat == 'md':
                     o = oname + ':html'
                     options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART | cmarkgfm.cmark.Options.CMARK_OPT_UNSAFE)
