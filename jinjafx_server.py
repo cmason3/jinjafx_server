@@ -21,12 +21,13 @@ if sys.version_info < (3, 9):
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
+from jinja2 import TemplateError, TemplateNotFound
 
 import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, datetime, resource
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.3.1'
+__version__ = '25.3.2'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -516,7 +517,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               ocount = 0
               ret = [0, None]
 
-              t = StoppableJinjaFx(jinjafx.JinjaFx().jinjafx, template, data.decode('utf-8'), gvars, ret)
+              t = StoppableJinjaFx(jinjafx.JinjaFx()._jinjafx, template, data.decode('utf-8'), gvars, ret)
 
               if timelimit > 0:
                 while t.is_alive() and ((time.time() * 1000) - st) <= (timelimit * 1000):
@@ -583,17 +584,35 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               if ocount == 0:
                 raise Exception('nothing to output')
 
-            except Exception as e:
-              tb = traceback.format_exc()
-              match = re.search(r'[\s\S]*File "<(?:template|unknown)>", line ([0-9]+), in.*template', tb, re.IGNORECASE)
-              if match:
-                error = 'error[template.j2:' + match.group(1) + ']: ' + type(e).__name__ + ': ' + str(e)
-              elif 'yaml.SafeLoader' in tb:
-                error = 'error[vars.yml]: ' + type(e).__name__ + ': ' + str(e)
+            except TemplateError as e:
+              if isinstance(e, TemplateNotFound):
+                error = f'error[<template>]: {type(e).__name__}: {e}'
+              elif 'yaml.SafeLoader' in traceback.format_exc():
+                error = f'error[vars.yml:{e.lineno}]: {type(e).__name__}: {e}'
               else:
-                exc_type, exc_obj, exc_tb = sys.exc_info()
-                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                error = 'error[jinjafx_server.py:' + str(exc_tb.tb_lineno) + ']: ' + type(e).__name__ + ': ' + str(e)
+                t = e.name.replace('Default', 'template.j2')
+                error =f'error[{t}:{e.lineno}]: {type(e).__name__}: {e}'
+
+              jsr = {
+                'status': 'error',
+                'error': error
+              }
+              self.error = error
+
+            except Exception as e:
+              xyz = sys.exc_info()
+              error = f'error[jinjafx_server.py:{xyz[2].tb_lineno}]: {type(e).__name__}: {e}'
+
+              #tb = traceback.format_exc()
+              #match = re.search(r'[\s\S]*File "<(?:template|unknown)>", line ([0-9]+), in.*template', tb, re.IGNORECASE)
+              #if match:
+              #  error = 'error[template.j2:' + match.group(1) + ']: ' + type(e).__name__ + ': ' + str(e)
+              #elif 'yaml.SafeLoader' in tb:
+              #  error = 'error[vars.yml]: ' + type(e).__name__ + ': ' + str(e)
+              #else:
+              #  exc_type, exc_obj, exc_tb = sys.exc_info()
+              #  fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+              #  error = 'error[jinjafx_server.py:' + str(exc_tb.tb_lineno) + ']: ' + type(e).__name__ + ': ' + str(e)
 
               jsr = {
                 'status': 'error',

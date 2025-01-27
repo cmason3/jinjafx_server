@@ -329,13 +329,13 @@
               }
               else {
                 document.title = "Error";
-                document.body.innerHTML = "<div id=\"status\" class=\"alert alert-danger\"><strong><h4>JinjaFx Error</h4></strong><pre>"+ obj.error + "</pre></div>";
+                document.body.innerHTML = "<div id=\"status\" class=\"alert alert-danger\"><strong><h4>JinjaFx Error</h4></strong><pre>"+ window.opener.quote(obj.error) + "</pre></div>";
               }
             }
             catch (e) {
               console.log(e);
               document.title = "Error";
-              document.body.innerHTML = "<div id=\"status\" class=\"alert alert-danger\"><strong><h4>Internal Error</h4></strong>" + e + "</div>";
+              document.body.innerHTML = "<div id=\"status\" class=\"alert alert-danger\"><strong><h4>Internal Error</h4></strong>" + window.opener.quote(e) + "</div>";
             }
           }
           else {
