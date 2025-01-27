@@ -1073,7 +1073,7 @@ class StoppableJinjaFx(threading.Thread):
 
   def run(self):
     try:
-      self.ret[1] = self.jinjafx(self.template, self.data, self.gvars, 'Output', [], True)
+      self.ret[1] = self.jinjafx(self.template, self.data, self.gvars, 'Output', [], True, True)
       self.ret[0] = 1
 
     except Exception as e:
