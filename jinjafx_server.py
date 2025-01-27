@@ -585,13 +585,13 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 raise Exception('nothing to output')
 
             except TemplateError as e:
-              if isinstance(e, TemplateNotFound):
-                error = f'error[<template>]: {type(e).__name__}: {e}'
-              elif 'yaml.SafeLoader' in traceback.format_exc():
-                error = f'error[vars.yml:{e.lineno}]: {type(e).__name__}: {e}'
-              else:
+              if hasattr(e, 'name') and e.name and hasattr(e, 'lineno') and e.lineno:
                 t = e.name.replace('Default', 'template.j2')
                 error = f'error[{t}:{e.lineno}]: {type(e).__name__}: {e}'
+
+              else:
+                m = re.search(r'(?s:.*)File "(.+)", line ([0-9]+), .+ template', traceback.format_exc(), re.IGNORECASE | re.MULTILINE)
+                error = f'error[{m.group(1)}:{m.group(2)}]: {type(e).__name__}: {e}'
 
               jsr = {
                 'status': 'error',
