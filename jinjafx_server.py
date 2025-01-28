@@ -21,7 +21,7 @@ if sys.version_info < (3, 9):
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
-from jinja2 import TemplateError, TemplateNotFound
+from jinja2 import TemplateError
 
 import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, datetime, resource
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
