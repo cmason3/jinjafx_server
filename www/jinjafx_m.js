@@ -1641,7 +1641,7 @@ function getStatusText(code) {
       document.getElementById('ml-template-ok').onclick = function() {
         var new_t = document.getElementById("t_name").value;
   
-        if (new_t.match(/^[A-Z][A-Z0-9_ -]*$/i)) {
+        if (new_t.match(/^[A-Z][A-Z0-9_ \/.-]*$/i)) {
           var existing = '';
           for (var p in templates) {
             if (templates.hasOwnProperty(p)) {
