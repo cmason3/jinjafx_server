@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [25.3.2] - In Development
+### [25.3.2] - Jan 28, 2025
 - Allow `/` and `.` to be used in template names
 - Updated code to call `JinjaFx()._jinjafx()` instead of `JinjaFx().jinjafx()`
 - Updated exception handling during template generation
