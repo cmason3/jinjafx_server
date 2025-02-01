@@ -193,8 +193,36 @@ function getStatusText(code) {
     fe.focus();
   }
 
+  function toggle_global() {
+    // alert(document.getElementById('toggle_global').checked);
+  }
+
   function rebuild_datasets() {
     document.getElementById('datasets').innerHTML = '';
+
+    var cbl = document.createElement('label');
+    cbl.for = 'toggle_global';
+    cbl.classList.add('form-check-label');
+    cbl.innerHTML = 'Global.yml';
+
+    var cb = document.createElement('input');
+    cb.classList.add('form-check-input', 'float-end');
+    cb.type = 'checkbox';
+    cb.checked = 'checked';
+    cb.addEventListener('change', toggle_global, false);
+    cb.id = 'toggle_global';
+
+    var e = document.createElement('div');
+    e.classList.add('dropdown-item-nofocus', 'form-check', 'form-switch');
+    e.style.minWidth = '200px';
+    e.appendChild(cbl);
+    e.appendChild(cb);
+
+    document.getElementById('datasets').appendChild(e);
+
+    e = document.createElement('div');
+    e.classList.add('dropdown-divider');
+    document.getElementById('datasets').appendChild(e);
 
     Object.keys(datasets).sort(default_on_top).forEach(function(ds) {
       var e = document.createElement('button');
