@@ -127,6 +127,7 @@ function getStatusText(code) {
   var csv_on = false;
   var cDataPos = null;
   var xsplit = null;
+  var global_visible = true;
 
   var jsyaml_schema = {
     schema: jsyaml.DEFAULT_SCHEMA.extend(['scalar', 'sequence', 'mapping'].map(function(kind) {
@@ -194,7 +195,49 @@ function getStatusText(code) {
   }
 
   function toggle_global() {
-    // alert(document.getElementById('toggle_global').checked);
+    if (document.getElementById('toggle_global').checked) {
+      global_visible = true;
+      split_vars();
+    }
+    else {
+      global_visible = false;
+      unsplit_vars(false);
+    }
+  }
+
+  function split_vars() {
+    document.getElementById('xgvars').classList.remove('d-none');
+    document.getElementById('xlvars').classList.remove('h-100');
+
+    xsplit = Split(["#xgvars", "#xlvars"], {
+      direction: "vertical",
+      cursor: "row-resize",
+      sizes: [50, 50],
+      snapOffset: 0,
+      minSize: 30,
+      onDragStart: remove_info
+    });
+    window.cmgVars.refresh();
+  }
+
+  function unsplit_vars(copy) {
+    document.getElementById('xgvars').classList.add('d-none');
+    document.getElementById('xlvars').classList.add('h-100');
+
+    if (xsplit != null) {
+      xsplit.destroy();
+      xsplit = null;
+
+      if (copy) {
+        if (window.cmgVars.getValue().match(/\S/)) {
+          var ds = Object.keys(datasets).sort(default_on_top)[0];
+          datasets[ds][1].setValue(window.cmgVars.getValue().trimEnd() + "\n\n" + datasets[ds][1].getValue());
+        }
+
+        window.cmgVars.setValue("");
+        window.cmgVars.getDoc().clearHistory();
+      }
+    }
   }
 
   function rebuild_datasets() {
@@ -208,7 +251,7 @@ function getStatusText(code) {
     var cb = document.createElement('input');
     cb.classList.add('form-check-input', 'float-end');
     cb.type = 'checkbox';
-    cb.checked = 'checked';
+    cb.checked = global_visible ? 'checked' : '';
     cb.addEventListener('change', toggle_global, false);
     cb.id = 'toggle_global';
 
@@ -235,18 +278,9 @@ function getStatusText(code) {
 
     if (Object.keys(datasets).length > 1) {
       if (document.getElementById('select_ds').disabled == true) {
-        document.getElementById('xgvars').classList.remove('d-none');
-        document.getElementById('xlvars').classList.remove('h-100');
-
-        xsplit = Split(["#xgvars", "#xlvars"], {
-          direction: "vertical",
-          cursor: "row-resize",
-          sizes: [50, 50],
-          snapOffset: 0,
-          minSize: 30,
-          onDragStart: remove_info
-        });
-        window.cmgVars.refresh();
+        if (global_visible) {
+          split_vars();
+        }
       }
       document.getElementById('select_ds').disabled = false;
       document.getElementById('delete_ds').disabled = false;
@@ -254,21 +288,7 @@ function getStatusText(code) {
     else {
       document.getElementById('select_ds').disabled = true;
       document.getElementById('delete_ds').disabled = true;
-      document.getElementById('xgvars').classList.add('d-none');
-      document.getElementById('xlvars').classList.add('h-100');
-
-      if (xsplit != null) {
-        xsplit.destroy();
-        xsplit = null;
-
-        if (window.cmgVars.getValue().match(/\S/)) {
-          var ds = Object.keys(datasets).sort(default_on_top)[0];
-          datasets[ds][1].setValue(window.cmgVars.getValue().trimEnd() + "\n\n" + datasets[ds][1].getValue());
-        }
-
-        window.cmgVars.setValue("");
-        window.cmgVars.getDoc().clearHistory();
-      }
+      unsplit_vars(true);
     }
     document.getElementById('selected_ds').innerHTML = current_ds;
   }
@@ -1052,6 +1072,8 @@ function getStatusText(code) {
               var obj = jsyaml.load(contents, jsyaml_schema);
               if (obj != null) {
                 pending_dt = obj['dt'];
+                global_visible = true;
+                split_vars();
                 apply_dt(false);
                 return true;
               }
@@ -1077,6 +1099,8 @@ function getStatusText(code) {
               var obj = jsyaml.load(e2.target.result, jsyaml_schema);
               if (obj != null) {
                 pending_dt = obj['dt'];
+                global_visible = true;
+                split_vars();
                 apply_dt(false);
                 return true;
               }
@@ -2012,10 +2036,14 @@ function getStatusText(code) {
 
           if (dirty) {
             if (confirm("Are You Sure?") === true) {
+              global_visible = true;
+              split_vars();
               apply_dt(false);
             }
           }
           else {
+            global_visible = true;
+            split_vars();
             apply_dt(false);
           }
         }

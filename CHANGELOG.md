@@ -3,6 +3,8 @@
 ### [25.4.0] - In Development
 - Add the ability to hide the `GLOBAL.YML` pane via a toggle switch
 
+-- Issue with deleting DataSets and Templates with the dropdown open
+
 ### [25.3.2] - Jan 28, 2025
 - Allow `/` and `.` to be used in template names
 - Updated code to call `JinjaFx()._jinjafx()` instead of `JinjaFx().jinjafx()`
