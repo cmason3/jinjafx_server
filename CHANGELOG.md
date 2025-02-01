@@ -4,6 +4,7 @@
 - Add the ability to hide the `GLOBAL.YML` pane via a toggle switch
 
 -- Issue with deleting DataSets and Templates with the dropdown open
+-- Save global visible status on saved datatemplates
 
 ### [25.3.2] - Jan 28, 2025
 - Allow `/` and `.` to be used in template names

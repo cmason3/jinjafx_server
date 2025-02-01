@@ -277,18 +277,23 @@ function getStatusText(code) {
     });
 
     if (Object.keys(datasets).length > 1) {
-      if (document.getElementById('select_ds').disabled == true) {
-        if (global_visible) {
-          split_vars();
+      if (global_visible && (xsplit == null)) {
+        split_vars();
+      }
+      else if (!global_visible) {
+        if (xsplit != null) {
+          unsplit_vars(true);
         }
       }
       document.getElementById('select_ds').disabled = false;
       document.getElementById('delete_ds').disabled = false;
     }
     else {
+      if (xsplit != null) {
+        unsplit_vars(true);
+      }
       document.getElementById('select_ds').disabled = true;
       document.getElementById('delete_ds').disabled = true;
-      unsplit_vars(true);
     }
     document.getElementById('selected_ds').innerHTML = current_ds;
   }
@@ -1073,7 +1078,6 @@ function getStatusText(code) {
               if (obj != null) {
                 pending_dt = obj['dt'];
                 global_visible = true;
-                split_vars();
                 apply_dt(false);
                 return true;
               }
@@ -1100,7 +1104,6 @@ function getStatusText(code) {
               if (obj != null) {
                 pending_dt = obj['dt'];
                 global_visible = true;
-                split_vars();
                 apply_dt(false);
                 return true;
               }
@@ -2037,13 +2040,11 @@ function getStatusText(code) {
           if (dirty) {
             if (confirm("Are You Sure?") === true) {
               global_visible = true;
-              split_vars();
               apply_dt(false);
             }
           }
           else {
             global_visible = true;
-            split_vars();
             apply_dt(false);
           }
         }
