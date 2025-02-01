@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.4.0] - In Development
+- Add the ability to hide the `GLOBAL.YML` pane via a toggle switch
+
 ### [25.3.2] - Jan 28, 2025
 - Allow `/` and `.` to be used in template names
 - Updated code to call `JinjaFx()._jinjafx()` instead of `JinjaFx().jinjafx()`
@@ -396,6 +399,7 @@
 - Initial release
 
 
+[25.4.0]: https://github.com/cmason3/jinjafx_server/compare/25.3.2...25.4.0
 [25.3.2]: https://github.com/cmason3/jinjafx_server/compare/25.3.1...25.3.2
 [25.3.1]: https://github.com/cmason3/jinjafx_server/compare/25.3.0...25.3.1
 [25.3.0]: https://github.com/cmason3/jinjafx_server/compare/25.2.2...25.3.0
