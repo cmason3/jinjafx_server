@@ -27,7 +27,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.3.2'
+__version__ = '25.4.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -767,6 +767,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   
                       dt_yml += 'revision: ' + str(dt_revision) + '\n'
                       dt_yml += 'dataset: "' + dt['dataset'] + '"\n'
+
+                      if 'show_global' in dt:
+                        dt_yml += 'show_global: ' + dt['show_global'] + '\n'
                       
                       if dt_encrypted:
                         dt_yml += 'encrypted: 1\n'
