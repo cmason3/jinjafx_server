@@ -1,10 +1,8 @@
 ## CHANGELOG
 
-### [25.4.0] - In Development
-- Add the ability to hide the `GLOBAL.YML` pane via a toggle switch
-
--- Issue with deleting DataSets and Templates with the dropdown open
--- Save global visible status on saved datatemplates
+### [25.4.0] - Feb 3, 2025
+- Add the ability to hide the `Global.yml` pane via a toggle switch
+- If you delete a DataSet or Template with the dropdown open it will now close automatically.
 
 ### [25.3.2] - Jan 28, 2025
 - Allow `/` and `.` to be used in template names

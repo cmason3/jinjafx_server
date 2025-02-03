@@ -203,6 +203,11 @@ function getStatusText(code) {
       global_visible = false;
       unsplit_vars(false);
     }
+    window.addEventListener('beforeunload', onBeforeUnload);
+    if (document.getElementById('get_link').value != 'false') {
+      document.title = 'JinjaFx [unsaved]';
+    }
+    dirty = true;
   }
 
   function split_vars() {
@@ -413,6 +418,7 @@ function getStatusText(code) {
     fe.focus();
 
     if (method == "delete_dataset") {
+      document.getElementById('datasets').classList.remove('show');
       if ((window.cmData.getValue().match(/\S/) || window.cmVars.getValue().match(/\S/)) || ((Object.keys(datasets).length == 2) && window.cmgVars.getValue().match(/\S/))) {
         if (confirm("Are You Sure?") === true) {
           delete_dataset(current_ds);
@@ -424,6 +430,7 @@ function getStatusText(code) {
       return false;
     }
     else if (method == "add_dataset") {
+      document.getElementById('datasets').classList.remove('show');
       document.getElementById("ds_name").value = '';
       new bootstrap.Modal(document.getElementById('dataset_input'), {
         keyboard: true
@@ -431,6 +438,7 @@ function getStatusText(code) {
       return false;
     }
     else if (method == "delete_template") {
+      document.getElementById('templates').classList.remove('show');
       if (window.cmTemplate.getValue().match(/\S/)) {
         if (confirm("Are You Sure?") === true) {
           delete_template(current_t);
@@ -442,6 +450,7 @@ function getStatusText(code) {
       return false;
     }
     else if (method == "add_template") {
+      document.getElementById('templates').classList.remove('show');
       document.getElementById("t_name").value = '';
       new bootstrap.Modal(document.getElementById('template_input'), {
         keyboard: true
@@ -714,6 +723,10 @@ function getStatusText(code) {
 
         dt.dataset = current_ds;
 
+        if (Object.keys(datasets).length > 1) {
+          dt.show_global = global_visible ? '1' : '0';
+        }
+
         if (Object.keys(templates).length === 1) {
           dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
         }
@@ -944,6 +957,8 @@ function getStatusText(code) {
               else {
                 dt_encrypted = false;
               }
+
+              global_visible = (!dt.hasOwnProperty('show_global') || dt['show_global']) ? true : false;
 
               if (qs.hasOwnProperty('ds')) {
                 load_datatemplate(dt['dt'], qs, qs['ds']);

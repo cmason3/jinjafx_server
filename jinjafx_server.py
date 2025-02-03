@@ -767,6 +767,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   
                       dt_yml += 'revision: ' + str(dt_revision) + '\n'
                       dt_yml += 'dataset: "' + dt['dataset'] + '"\n'
+
+                      if 'show_global' in dt:
+                        dt_yml += 'show_global: ' + dt['show_global'] + '\n'
                       
                       if dt_encrypted:
                         dt_yml += 'encrypted: 1\n'
