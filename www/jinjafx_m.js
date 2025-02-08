@@ -350,6 +350,7 @@ function getStatusText(code) {
     delete datasets[ds];
     rebuild_datasets();
     switch_dataset(Object.keys(datasets).sort(default_on_top)[0], false, true);
+    toggle_vault();
     fe.focus();
   }
 
