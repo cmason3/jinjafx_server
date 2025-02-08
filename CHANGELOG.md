@@ -1,5 +1,10 @@
 ## CHANGELOG
 
+### [25.5.0] - In Development
+-- Overhaul Ansible Vault encryption
+-- Check jinjafx_input still works!
+-- DIsabled drop downs are see through!
+
 ### [25.4.0] - Feb 3, 2025
 - Add the ability to hide the `Global.yml` pane via a toggle switch
 - If you delete a DataSet or Template with the dropdown open it will now close automatically.
@@ -400,6 +405,7 @@
 - Initial release
 
 
+[25.5.0]: https://github.com/cmason3/jinjafx_server/compare/25.4.0...25.5.0
 [25.4.0]: https://github.com/cmason3/jinjafx_server/compare/25.3.2...25.4.0
 [25.3.2]: https://github.com/cmason3/jinjafx_server/compare/25.3.1...25.3.2
 [25.3.1]: https://github.com/cmason3/jinjafx_server/compare/25.3.0...25.3.1

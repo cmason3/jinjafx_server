@@ -128,6 +128,7 @@ function getStatusText(code) {
   var cDataPos = null;
   var xsplit = null;
   var global_visible = true;
+  var vault_visible = false;
 
   var jsyaml_schema = {
     schema: jsyaml.DEFAULT_SCHEMA.extend(['scalar', 'sequence', 'mapping'].map(function(kind) {
@@ -192,6 +193,25 @@ function getStatusText(code) {
       onDataBlur();
     }
     fe.focus();
+  }
+
+  function toggle_vault() {
+    var _vv = false;
+    if (window.cmVars.getValue().includes('$ANSIBLE_VAULT;')) {
+      _vv = true;
+    }
+    else if (window.cmgVars.getValue().includes('$ANSIBLE_VAULT;')) {
+      _vv = true;
+    }
+    if (_vv != vault_visible) {
+      if (_vv) {
+        document.getElementById('ansible-vault').classList.remove('d-none');
+      }
+      else {
+        document.getElementById('ansible-vault').classList.add('d-none');
+      }
+      vault_visible = _vv;
+    }
   }
 
   function toggle_global() {
@@ -398,9 +418,11 @@ function getStatusText(code) {
     }
     else {
       if (vaulted_vars) {
+        /*
         new bootstrap.Modal(document.getElementById('vault_input'), {
           keyboard: false
         }).show();
+        */
       }
       else {
         if (dt_id != '') {
@@ -1465,9 +1487,11 @@ function getStatusText(code) {
         fe.focus();
       });
   
+      /*
       document.getElementById('vault_input').addEventListener('shown.bs.modal', function (e) {
         document.getElementById("vault").focus();
       });
+      */
   
       document.getElementById('vault_encrypt').addEventListener('shown.bs.modal', function (e) {
         document.getElementById("vault_string").focus();
@@ -1492,6 +1516,7 @@ function getStatusText(code) {
         fe.focus();
       });
   
+      /*
       document.getElementById('ml-vault-ok').onclick = function() {
         dt.vpw = e(document.getElementById("vault").value);
         if (dt_id != '') {
@@ -1507,6 +1532,7 @@ function getStatusText(code) {
           document.getElementById('ml-vault-ok').click();
         }
       };
+      */
   
       document.getElementById('protect_dt').addEventListener('shown.bs.modal', function (e) {
         document.getElementById("password_open1").focus();
@@ -2126,6 +2152,9 @@ function getStatusText(code) {
           remove_info();
           tinfo = false;
         }
+      }
+      if ((editor == window.cmgVars) || (editor == window.cmVars))  {
+        toggle_vault();
       }
     }
   }

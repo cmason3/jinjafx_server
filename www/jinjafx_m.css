@@ -85,7 +85,7 @@ textarea {
   border-radius: 0.5rem;
   padding: 10px;
 }
-.templates {
+.topright {
   position: absolute;
   z-index: 2;
   right: 8px;
