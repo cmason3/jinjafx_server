@@ -3,6 +3,7 @@
 ### [25.5.0] - Feb 10, 2025
 - Disabled dropdowns for DataSets and Templates are now opaque and don't show text behind them
 - Overhauled how Ansible Vault works and added `jinjafx_vault_undefined` from JinjaFx
+- Updated `minSize` of panes, so they can't be resized smaller than their content
 - Updated Pandoc to 3.6.3 in Dockerfile
 
 ### [25.4.0] - Feb 3, 2025
