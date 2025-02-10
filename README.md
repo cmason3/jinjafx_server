@@ -121,6 +121,8 @@ You can also paste in an image and it will convert it to a Base64 encoded Data U
 
 JinjaFx Server supports the ability to perform Ansible Vault encryption of strings from within the browser using client side JavaScript. By clicking on the padlock it will prompt you for your string and the password to use which you can then use within `vars.yml`. JinjaFx doesn't support the ability to use different passwords for different strings within the same DataTemplate so it is important that all vaulted strings are using the same password within the same DataTemplate.
 
+By default JinjaFx will fail with "invalid ansible vault password" if the provided Ansible Vault password is incorrect. The `jinjafx_vault_undefined` variable allows you to change this behaviour - if set to `True` then it will proceed to process the template, but if it can't decrypt a vaulted variable due to an incorrect or missing password then the variable won't be defined.
+
 ### JinjaFx Input
 
 There might be some situations where you want inputs to be provided during the generation of the template which are not known beforehand. JinjaFx supports the ability to prompt the user for input using the `jinjafx_input` variable which can be specified in `vars.yml`. The following example demonstrates how we can prompt the user for two inputs ("Name" and "Age") before the template is generated:
