@@ -27,7 +27,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.4.0'
+__version__ = '25.5.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -494,22 +494,41 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
               if 'vars' in dt and len(dt['vars'].strip()) > 0:
                 gyaml = self.d(dt['vars']).decode('utf-8')
+                vpw = self.d(dt['vpw']).decode('utf-8') if 'vpw' in dt else ''
+                vault_undef = False
 
-                if 'vpw' in dt:
-                  vpw = self.d(dt['vpw']).decode('utf-8')
+                if 'jinjafx_vault_undefined' in gyaml:
+                  yaml.add_constructor('!vault', lambda x, y: None, yaml.SafeLoader)
+                  if y := yaml.load(gyaml, Loader=yaml.SafeLoader):
+                    vault_undef = y.get('jinjafx_vault_undefined', vault_undef)
 
-                  if gyaml.lstrip().startswith('$ANSIBLE_VAULT;'):
-                    gyaml = jinjafx.AnsibleVault().decrypt(gyaml.encode('utf-8'), vpw).decode('utf-8')
+                def yaml_vault_tag(loader, node):
+                  x = jinjafx.AnsibleVault().decrypt(node.value.encode('utf-8'), vpw, vault_undef)
+                  if x is not None:
+                    return x.decode('utf-8')
 
-                  def yaml_vault_tag(loader, node):
-                    return jinjafx.AnsibleVault().decrypt(node.value.encode('utf-8'), vpw).decode('utf-8')
+                  else:
+                    return '_undef'
 
-                  yaml.add_constructor('!vault', yaml_vault_tag, yaml.SafeLoader)
+                yaml.add_constructor('!vault', yaml_vault_tag, yaml.SafeLoader)
 
-                y = yaml.load(gyaml, Loader=yaml.SafeLoader)
-                if y != None:
+                if y := yaml.load(gyaml, Loader=yaml.SafeLoader):
                   if isinstance(y, list):
                     y = {'_': y}
+
+                  s = [y]
+
+                  while s:
+                    c = s.pop()
+                    for key in list(c.keys()):
+                      if c[key] == '_undef':
+                        del c[key]
+                      elif isinstance(c[key], dict):
+                        s.append(c[key])
+                      elif isinstance(c[key], list):
+                        for item in c[key]:
+                          if isinstance(item, dict):
+                            s.append(item)
 
                   gvars.update(y)
 

@@ -1,5 +1,10 @@
 ## CHANGELOG
 
+### [25.5.0] - Feb 10, 2025
+- Disabled dropdowns for DataSets and Templates are now opaque and don't show text behind them
+- Overhauled how Ansible Vault works and added `jinjafx_vault_undefined` from JinjaFx
+- Updated Pandoc to 3.6.3 in Dockerfile
+
 ### [25.4.0] - Feb 3, 2025
 - Add the ability to hide the `Global.yml` pane via a toggle switch
 - If you delete a DataSet or Template with the dropdown open it will now close automatically.
@@ -400,6 +405,7 @@
 - Initial release
 
 
+[25.5.0]: https://github.com/cmason3/jinjafx_server/compare/25.4.0...25.5.0
 [25.4.0]: https://github.com/cmason3/jinjafx_server/compare/25.3.2...25.4.0
 [25.3.2]: https://github.com/cmason3/jinjafx_server/compare/25.3.1...25.3.2
 [25.3.1]: https://github.com/cmason3/jinjafx_server/compare/25.3.0...25.3.1
