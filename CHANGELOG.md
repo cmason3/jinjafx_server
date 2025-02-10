@@ -1,9 +1,9 @@
 ## CHANGELOG
 
-### [25.5.0] - In Development
--- Overhaul Ansible Vault encryption
--- Check jinjafx_input still works!
--- DIsabled drop downs are see through!
+### [25.5.0] - Feb 10, 2025
+- Disabled dropdowns for DataSets and Templates are now opaque and don't show text behind them
+- Overhauled how Ansible Vault works and added `jinjafx_vault_undefined` from JinjaFx
+- Updated Pandoc to 3.6.3 in Dockerfile
 
 ### [25.4.0] - Feb 3, 2025
 - Add the ability to hide the `Global.yml` pane via a toggle switch

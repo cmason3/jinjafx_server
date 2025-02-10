@@ -161,6 +161,7 @@ function getStatusText(code) {
         }
       }
       dirty = true;
+      toggle_vault();
       document.getElementById('selected_ds').innerHTML = ds;
       current_ds = ds;
       onDataBlur();
@@ -397,7 +398,6 @@ function getStatusText(code) {
   }
 
   function jinjafx_generate() {
-    var vaulted_vars = dt.vars.indexOf('$ANSIBLE_VAULT;') > -1;
     dt.vars = e(dt.vars);
 
     if (Object.keys(templates).length === 1) {
@@ -418,20 +418,14 @@ function getStatusText(code) {
       set_status("darkred", "ERROR", 'Content Too Large');
     }
     else {
-      if (vaulted_vars) {
-        /*
-        new bootstrap.Modal(document.getElementById('vault_input'), {
-          keyboard: false
-        }).show();
-        */
+      if (document.getElementById('vault-password').value.trim() != '') {
+        dt.vpw = e(document.getElementById('vault-password').value);
+      }
+      if (dt_id != '') {
+        window.open("/output.html?dt=" + dt_id, "_blank");
       }
       else {
-        if (dt_id != '') {
-          window.open("/output.html?dt=" + dt_id, "_blank");
-        }
-        else {
-          window.open("/output.html", "_blank");
-        }
+        window.open("/output.html", "_blank");
       }
     }
   }
@@ -567,15 +561,6 @@ function getStatusText(code) {
           var global = window.cmgVars.getValue().replace(/\t/g, "  ");
 
           if (global.match(/\S/)) {
-            if (global.trimStart().startsWith('$ANSIBLE_VAULT;') && vars.match(/\S/)) {
-              set_status("darkred", "ERROR", "Ansible Vault not supported in 'global.yml' with 'vars.yml'");
-              return false;
-            }
-            if (vars.trimStart().startsWith('$ANSIBLE_VAULT;')) {
-              set_status("darkred", "ERROR", "Ansible Vault not supported in 'vars.yml' with 'global.yml'");
-              return false;
-            }
-
             try {
               jsyaml.load(global, jsyaml_schema);
               dt.vars += global.trimEnd() + "\n\n";
@@ -792,6 +777,10 @@ function getStatusText(code) {
           set_wait();
 
           if (method == "update_link") {
+            if (!vault_visible) {
+              document.getElementById('vault-password').value = '';
+              localStorage.removeItem('vault_' + dt_id);
+            }
             update_link(dt_id, false);
           }
           else {
@@ -878,6 +867,12 @@ function getStatusText(code) {
         }
         else {
           window.removeEventListener('beforeunload', onBeforeUnload);
+          if (document.getElementById('vault-password').value.trim() != '') {
+            localStorage.setItem('vault_' + this.responseText.trim(), document.getElementById('vault-password').value);
+          }
+          else {
+            localStorage.removeItem('vault_' + this.responseText.trim());
+          }
           window.location.href = '/dt/' + this.responseText.trim();
         }
         document.title = 'JinjaFx - Jinja2 Templating Tool';
@@ -994,6 +989,13 @@ function getStatusText(code) {
               }
               dt_id = qs.dt;
 
+              if (localStorage.getItem('vault_' + dt_id)) {
+                document.getElementById('vault-password').value = localStorage.getItem('vault_' + dt_id);
+              }
+              else {
+                document.getElementById('vault-password').value = '';
+              }
+
               document.getElementById('update').classList.remove('d-none');
               document.getElementById('get').classList.add('d-none');
               document.getElementById('mdd').disabled = false;
@@ -1094,7 +1096,18 @@ function getStatusText(code) {
       if (window.crypto.subtle) {
         document.getElementById('encrypt').classList.remove('d-none');
       }
-  
+
+      document.getElementById("vault-password").addEventListener('change', function (e) {
+        if (dt_id != '') {
+          if (document.getElementById('vault-password').value.trim() != '') {
+            localStorage.setItem('vault_' + dt_id, document.getElementById('vault-password').value);
+          }
+          else {
+            localStorage.removeItem('vault_' + dt_id);
+          }
+        }
+      });
+
       if (window.showOpenFilePicker) {
         document.getElementById('import').onclick = async() => {
           clear_status();
@@ -1116,6 +1129,7 @@ function getStatusText(code) {
               if (obj != null) {
                 pending_dt = obj['dt'];
                 global_visible = true;
+                document.getElementById("vault-password").value = '';
                 apply_dt(false);
                 return true;
               }
@@ -1142,6 +1156,7 @@ function getStatusText(code) {
               if (obj != null) {
                 pending_dt = obj['dt'];
                 global_visible = true;
+                document.getElementById("vault-password").value = '';
                 apply_dt(false);
                 return true;
               }
@@ -1488,12 +1503,6 @@ function getStatusText(code) {
         fe.focus();
       });
   
-      /*
-      document.getElementById('vault_input').addEventListener('shown.bs.modal', function (e) {
-        document.getElementById("vault").focus();
-      });
-      */
-  
       document.getElementById('vault_encrypt').addEventListener('shown.bs.modal', function (e) {
         document.getElementById("vault_string").focus();
       });
@@ -1516,24 +1525,6 @@ function getStatusText(code) {
         }
         fe.focus();
       });
-  
-      /*
-      document.getElementById('ml-vault-ok').onclick = function() {
-        dt.vpw = e(document.getElementById("vault").value);
-        if (dt_id != '') {
-          window.open("/output.html?dt=" + dt_id, "_blank");
-        }
-        else {
-          window.open("/output.html", "_blank");
-        }
-      };
-  
-      document.getElementById('vault').onkeyup = function(e) {
-        if (e.which == 13) {
-          document.getElementById('ml-vault-ok').click();
-        }
-      };
-      */
   
       document.getElementById('protect_dt').addEventListener('shown.bs.modal', function (e) {
         document.getElementById("password_open1").focus();
@@ -2082,11 +2073,13 @@ function getStatusText(code) {
           if (dirty) {
             if (confirm("Are You Sure?") === true) {
               global_visible = true;
+              document.getElementById("vault-password").value = '';
               apply_dt(false);
             }
           }
           else {
             global_visible = true;
+            document.getElementById("vault-password").value = '';
             apply_dt(false);
           }
         }
@@ -2233,6 +2226,7 @@ function getStatusText(code) {
       window.cmgVars.getDoc().clearHistory();
       window.cmTemplate.getDoc().clearHistory();
 
+      toggle_vault();
       rebuild_datasets();
       rebuild_templates();
       remove_info();

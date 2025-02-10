@@ -52,8 +52,17 @@ body {
 textarea {
   resize: none;
 }
+.btn-warn-opaque:disabled {
+  color: #535353 !important;
+  border-color: #ffd75e !important;
+  background-color: #ffd75e !important;
+  opacity: 1 !important;
+}
 .mw-150 {
   min-width: 150px;
+}
+.mw-250 {
+  min-width: 250px;
 }
 .me-10 {
   margin-right: 10px;

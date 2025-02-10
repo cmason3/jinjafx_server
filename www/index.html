@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/display/fullscreen.min.css" integrity="sha512-T8xB3MmwpA77VK9lUH3UkdUTnkmpqOxHF8OceOKaHrvpcXMSNX0xtpa9FoLTDAVO1JnB2UiMdVeI2V0HTHjTWA==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/fold/foldgutter.min.css" integrity="sha512-YwkMTlTHn8dBnwa47IF+cKsS00HPiiVhQ4DpwT1KF2gUftfFR7aefepabSPLAs6zrMyD89M3w0Ow6mQ5XJEUCw==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="/bb176715/jinjafx.css">
-    <link rel="stylesheet" href="/8876901a/jinjafx_m.css">
+    <link rel="stylesheet" href="/5ae811ff/jinjafx_m.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js" integrity="sha512-7Pi/otdlbbCR+LnW+F7PwFcSDJOuUJB3OxtEHbg4vSMvzvJjde4Po1v4BR9Gdc9aXNUNFVUY+SK51wWT8WF0Gg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.js" integrity="sha512-6cPYokihlrofMNApz7OXVQNObWjLiKGIBBb7+UB+AuMiRCLKmFKgrwms21sHq3bdFFZWpfHYRJBJvMFMPj1S9g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/selection/mark-selection.min.js" integrity="sha512-XaS0JPIY5yDTDaYIMjkoXz+LF/DEVhRn1eq9QOhJPhMuJGGPOKZTulF+LY8/uwd18k00CIaSe4f8fCyp/5U7IQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -32,7 +32,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js" integrity="sha512-CSBhVREyzHAjAFfBlIBakjoRUKp5h7VSweP0InR/pAJyptH7peuhCsqAI/snV+TwZmXZqoUklpXp6R6wMnYf5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/dayjs.min.js" integrity="sha512-FwNWaxyfy2XlEINoSnZh1JQ5TRRtGow0D6XcmAWmYCRgvqOUTnzCxPc9uF35u5ZEpirk1uhlPVA19tflhvnW1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.13/plugin/relativeTime.min.js" integrity="sha512-MVzDPmm7QZ8PhEiqJXKz/zw2HJuv61waxb8XXuZMMs9b+an3LoqOqhOEt5Nq3LY1e4Ipbbd/e+AWgERdHlVgaA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="/1a7e31b7/jinjafx_m.js"></script>
+    <script src="/b000c1ba/jinjafx_m.js"></script>
   </head>
   <body>
     <div id="overlay"></div>
@@ -57,7 +57,7 @@
         <div id="buttons" class="btn-toolbar ms-auto d-flex d-none" role="group">
           <div class="btn-group me-2">
             <div class="btn-group">
-              <button id="select_ds" type="button" class="btn btn-warning text-black text-start mw-150" data-bs-toggle="dropdown" title="Select DataSet" disabled>
+              <button id="select_ds" type="button" class="btn btn-warning text-black text-start mw-150 btn-warn-opaque" data-bs-toggle="dropdown" title="Select DataSet" disabled>
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polygon points="12 2 2 7 12 12 22 7 12 2" />
                   <polyline points="2 17 12 22 22 17" />
@@ -66,8 +66,8 @@
               </button>
               <div id="datasets" class="dropdown-menu"></div>
             </div>
-            <button id="delete_ds" type="button" class="btn btn-warning text-black" title="Delete DataSet" disabled>-</button>
-            <button id="add_ds" type="button" class="btn btn-warning text-black" title="Add DataSet">+</button>
+            <button id="delete_ds" type="button" class="btn btn-warning text-black btn-warn-opaque" title="Delete DataSet" disabled>-</button>
+            <button id="add_ds" type="button" class="btn btn-warning text-black btn-warn-opaque" title="Add DataSet">+</button>
           </div>
 
           <button id="encrypt" type="button" class="btn btn-secondary text-white me-2 d-none" title="Encrypt String with Ansible Vault">
@@ -170,7 +170,7 @@
                 <div class="badge lb-vars float-start labels">V<br />A<br />R<br />S<br />.<br />Y<br />M<br />L<br /></div>
                 <textarea id="vars"></textarea>
                 <span id="ansible-vault" class="topright d-none">
-                  <div class="input-group">
+                  <div class="input-group mw-250">
                     <span class="input-group-text" title="Ansible Vault Password">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -189,8 +189,8 @@
             <span id="stemplates" class="topright">
               <div class="btn-group">
                 <div class="btn-group">
-                  <button id="select_t" type="button" class="btn btn-warning btn-sm text-start mw-150" data-bs-toggle="dropdown" title="Select Template" disabled>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <button id="select_t" type="button" class="btn btn-warning btn-sm text-start mw-150 btn-warn-opaque" data-bs-toggle="dropdown" title="Select Template" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <rect x="3" y="3" width="7" height="7"></rect>
                       <rect x="14" y="3" width="7" height="7"></rect>
                       <rect x="14" y="14" width="7" height="7"></rect>
@@ -199,8 +199,8 @@
                   </button>
                   <div id="templates" class="dropdown-menu"></div>
                 </div>
-                <button id="delete_t" type="button" class="btn btn-warning btn-sm" title="Delete Template" disabled>-</button>
-                <button id="add_t" type="button" class="btn btn-warning btn-sm" title="Add Template">+</button>
+                <button id="delete_t" type="button" class="btn btn-warning btn-sm btn-warn-opaque" title="Delete Template" disabled>-</button>
+                <button id="add_t" type="button" class="btn btn-warning btn-sm btn-warn-opaque" title="Add Template">+</button>
               </div>
             </span>
             <span id="template_info" class="info">
@@ -285,27 +285,6 @@ et-0/0/<span class="cm-jfx-tag">{0-9:1}</span></pre>
         </div>
       </div>
     </div>
-    <!--
-    <div id="vault_input" class="modal fade" role="dialog">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 id="ml-title" class="mt-0">Ansible Vault</h4>
-          </div>
-          <div class="form-group row modal-body">
-            <label for="vault" class="col-sm-12 col-form-label">Vault Password</label>
-            <div class="col-sm-12">
-              <input type="password" class="form-control" id="vault">
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button id="ml-vault-ok" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    -->
     <div id="vault_encrypt" class="modal fade" role="dialog">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
