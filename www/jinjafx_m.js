@@ -240,7 +240,7 @@ function getStatusText(code) {
       cursor: "row-resize",
       sizes: [50, 50],
       snapOffset: 0,
-      minSize: 30,
+      minSize: 50,
       onDragStart: remove_info
     });
     window.cmgVars.refresh();
@@ -1429,7 +1429,7 @@ function getStatusText(code) {
         cursor: "col-resize",
         sizes: [60, 40],
         snapOffset: 0,
-        minSize: 45,
+        minSize: 300,
         onDragStart: remove_info
       });
   
@@ -1438,7 +1438,7 @@ function getStatusText(code) {
         cursor: "row-resize",
         sizes: [40, 60],
         snapOffset: 0,
-        minSize: 30,
+        minSize: 120,
         onDragStart: remove_info
       });
   
