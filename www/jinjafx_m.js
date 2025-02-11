@@ -643,7 +643,7 @@ function getStatusText(code) {
                     set_wait();
 
                     var rbody = vars['jinjafx_input']['body'];
-                    rbody = rbody.replace(/<(?:output[\t ]+.+?|\/output[\t ]*)>.*?\n/gi, '');
+                    rbody = rbody.replace(/<(?:output[\t ]+.+?|\/output[\t ]*(?:\\n[\t ]*)?)>.*?\n/gi, '');
 
                     xHR.timeout = 10000;
                     xHR.setRequestHeader("Content-Type", "application/json");
@@ -1331,7 +1331,7 @@ function getStatusText(code) {
                 state.output = 1;
                 return "jfx-output-left";
               }
-              else if (stream.match(/<(?=\/output *>)/i)) {
+              else if (stream.match(/<(?=\/output *(?:\\n *)?>)/i)) {
                 state.type = 2;
                 state.output = 1;
                 return "jfx-output-left";
