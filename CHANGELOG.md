@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.5.2] - Feb 11, 2025
+- Fixed a regression where Pandoc conversion to DOCX hasn't been working since 25.3.0
+
 ### [25.5.1] - Feb 11, 2025
 - Changed behaviour of `jinjafx_vault_undefined`, so it only returns undefined if the password is missing
 - Added support for adding blank lines between output sections using `</output\n>` as closing tag
@@ -410,6 +413,7 @@
 - Initial release
 
 
+[25.5.2]: https://github.com/cmason3/jinjafx_server/compare/25.5.1...25.5.2
 [25.5.1]: https://github.com/cmason3/jinjafx_server/compare/25.5.0...25.5.1
 [25.5.0]: https://github.com/cmason3/jinjafx_server/compare/25.4.0...25.5.0
 [25.4.0]: https://github.com/cmason3/jinjafx_server/compare/25.3.2...25.4.0
