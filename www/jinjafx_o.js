@@ -93,7 +93,7 @@
           xHR.responseType = "blob";
           xHR.setRequestHeader("Content-Type", "application/json");
 
-          var o = JSON.stringify(obj.outputs[active + ':html']);
+          var o = JSON.stringify(obj.outputs[active]);
           if (o.length > 1024) {
             xHR.setRequestHeader("Content-Encoding", "gzip");
             xHR.send(pako.gzip(o));
@@ -259,12 +259,12 @@
                       section = dir;
                     }
                     links += '<li class="nav-item">';
-                    links += '<a class="nav-link' + ((oid == 1) ? ' active"' : '"') + ' data-bs-toggle="tab" href="#o' + oid + '">' + e[e.length - 1] + '</a>';
+                    links += '<a class="nav-link' + ((oid == 1) ? ' active"' : '"') + ' data-id="' + output + '" data-format="' + oformat + '" data-bs-toggle="tab" href="#o' + oid + '">' + e[e.length - 1] + '</a>';
                     links += '</li>';
                   }
                   else {
                     links += '<li class="nav-item">';
-                    links += '<a class="nav-link' + ((oid == 1) ? ' active"' : '"') + ' data-bs-toggle="tab" href="#o' + oid + '">' + g + '</a>';
+                    links += '<a class="nav-link' + ((oid == 1) ? ' active"' : '"') + ' data-id="' + output + '" data-format="' + oformat + '" data-bs-toggle="tab" href="#o' + oid + '">' + g + '</a>';
                     links += '</li>';
                   }
                   oid += 1;
@@ -294,8 +294,8 @@
                 function toggle_docx() {
                   var e = document.getElementsByClassName('nav-link active');
                   for (var i = 0; i < e.length; i++) {
-                    active = e.item(i).text;
-                    if (active + ':html' in obj.outputs) {
+                    active = e.item(i).getAttribute('data-id');
+                    if (e.item(i).getAttribute('data-format') == "html") {
                       document.getElementById('docx').classList.remove('d-none');
                     }
                     else {
