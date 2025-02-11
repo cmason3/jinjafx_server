@@ -27,7 +27,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.5.0'
+__version__ = '25.5.1'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -501,6 +501,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   yaml.add_constructor('!vault', lambda x, y: None, yaml.SafeLoader)
                   if y := yaml.load(gyaml, Loader=yaml.SafeLoader):
                     vault_undef = y.get('jinjafx_vault_undefined', vault_undef)
+
+                if vpw.strip():
+                  vault_undef = False
 
                 def yaml_vault_tag(loader, node):
                   x = jinjafx.AnsibleVault().decrypt(node.value.encode('utf-8'), vpw, vault_undef)

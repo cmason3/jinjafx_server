@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### [25.5.1] - Feb 11, 2025
+- Changed behaviour of `jinjafx_vault_undefined`, so it only returns undefined if the password is missing
+- Added support for adding blank lines between output sections using `</output\n>` as closing tag
+
 ### [25.5.0] - Feb 10, 2025
 - Disabled dropdowns for DataSets and Templates are now opaque and don't show text behind them
 - Overhauled how Ansible Vault works and added `jinjafx_vault_undefined` from JinjaFx
@@ -406,6 +410,7 @@
 - Initial release
 
 
+[25.5.1]: https://github.com/cmason3/jinjafx_server/compare/25.5.0...25.5.1
 [25.5.0]: https://github.com/cmason3/jinjafx_server/compare/25.4.0...25.5.0
 [25.4.0]: https://github.com/cmason3/jinjafx_server/compare/25.3.2...25.4.0
 [25.3.2]: https://github.com/cmason3/jinjafx_server/compare/25.3.1...25.3.2
