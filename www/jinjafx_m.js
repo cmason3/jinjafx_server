@@ -1470,11 +1470,18 @@ function getStatusText(code) {
                 if ((e.tagName == 'INPUT') && ((e.type == 'checkbox') || (e.type == 'radio'))) {
                   v = e.checked;
                 }
-                if (vars.hasOwnProperty(e.dataset.var)) {
-                  vars[e.dataset.var].push(v);
+                if (e.tagName == 'TEXTAREA') {
+                  vars[e.dataset.var] = '|2\n' + v.split(/\r?\n/g).map(function (e) {
+                    return '    ' + e;
+                  }).join('\r\n');
                 }
                 else {
-                  vars[e.dataset.var] = [v];
+                  if (vars.hasOwnProperty(e.dataset.var)) {
+                    vars[e.dataset.var].push(v);
+                  }
+                  else {
+                    vars[e.dataset.var] = [v];
+                  }
                 }
               }
             }
@@ -1482,16 +1489,21 @@ function getStatusText(code) {
   
           var vars_yml = 'jinjafx_input:\r\n';
           Object.keys(vars).forEach(function(v) {
-            for (i = 0; i < vars[v].length; i++) {
-              if (typeof vars[v][i] !== "boolean") {
-                vars[v][i] = '"' + vars[v][i].replace(/"/g, '\\x22') + '"';
+            if (Array.isArray(vars[v])) {
+              for (i = 0; i < vars[v].length; i++) {
+                if (typeof vars[v][i] !== "boolean") {
+                  vars[v][i] = '"' + vars[v][i].replace(/"/g, '\\x22') + '"';
+                }
+              }
+              if (vars[v].length > 1) {
+                vars_yml += '  ' + v + ': [' + vars[v].join(', ') + ']\r\n';
+              }
+              else {
+                vars_yml += '  ' + v + ': ' + vars[v][0] + '\r\n';
               }
             }
-            if (vars[v].length > 1) {
-              vars_yml += '  ' + v + ': [' + vars[v].join(', ') + ']\r\n';
-            }
             else {
-              vars_yml += '  ' + v + ': ' + vars[v][0] + '\r\n';
+              vars_yml += '  ' + v + ': ' + vars[v];
             }
           });
           dt.vars += '\r\n' + vars_yml;
