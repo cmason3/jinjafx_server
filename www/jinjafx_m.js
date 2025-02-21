@@ -1443,7 +1443,7 @@ function getStatusText(code) {
       });
   
       document.getElementById('jinjafx_input').addEventListener('shown.bs.modal', function (e) {
-        var focusable = document.getElementById('jinjafx_input_form').querySelectorAll('input,select');
+        var focusable = document.getElementById('jinjafx_input_form').querySelectorAll('input,select,textarea');
         if (focusable.length) {
           focusable[0].focus();
         }
@@ -1451,7 +1451,7 @@ function getStatusText(code) {
   
       document.getElementById('ml-input-reset').onclick = function(e) {
         document.getElementById('jinjafx_input_form').innerHTML = r_input_form;
-        var focusable = document.getElementById('jinjafx_input_form').querySelectorAll('input,select');
+        var focusable = document.getElementById('jinjafx_input_form').querySelectorAll('input,select,textarea');
         if (focusable.length) {
           focusable[0].focus();
         }
@@ -1463,7 +1463,7 @@ function getStatusText(code) {
           jinput.hide();
   
           var vars = {};
-          document.getElementById('input_form').querySelectorAll('input,select').forEach(function(e, i) {
+          document.getElementById('input_form').querySelectorAll('input,select,textarea').forEach(function(e, i) {
             if (e.getAttribute('data-var') != null) {
               if (e.dataset.var.match(/\S/)) {
                 var v = e.value;

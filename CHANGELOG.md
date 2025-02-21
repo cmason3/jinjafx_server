@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.5.3] - Feb 21, 2025
+- Fixed issue #72 - `textarea` Inputs Not Recognized in Custom JinjaFx Input Forms
+
 ### [25.5.2] - Feb 11, 2025
 - Fixed a regression where Pandoc conversion to DOCX hasn't been working since 25.3.0
 
@@ -413,6 +416,7 @@
 - Initial release
 
 
+[25.5.3]: https://github.com/cmason3/jinjafx_server/compare/25.5.2...25.5.3
 [25.5.2]: https://github.com/cmason3/jinjafx_server/compare/25.5.1...25.5.2
 [25.5.1]: https://github.com/cmason3/jinjafx_server/compare/25.5.0...25.5.1
 [25.5.0]: https://github.com/cmason3/jinjafx_server/compare/25.4.0...25.5.0
