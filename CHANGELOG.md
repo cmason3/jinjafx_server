@@ -1,5 +1,10 @@
 ## CHANGELOG
 
+### [25.5.5] - Mar 17, 2025
+- Update font look on MacOS to make it less heavy
+- Added support for `-nocache` argument for internal development
+- Updated Pandoc to 3.6.4 in Dockerfile
+
 ### [25.5.4] - Feb 21, 2025
 - Actually fixed issue #72 properly this time as we now deal with multi-line strings
 
@@ -418,7 +423,7 @@
 ### 21.11.0 - Nov 29, 2021
 - Initial release
 
-
+[25.5.5]: https://github.com/cmason3/jinjafx_server/compare/25.5.4...25.5.5
 [25.5.4]: https://github.com/cmason3/jinjafx_server/compare/25.5.3...25.5.4
 [25.5.3]: https://github.com/cmason3/jinjafx_server/compare/25.5.2...25.5.3
 [25.5.2]: https://github.com/cmason3/jinjafx_server/compare/25.5.1...25.5.2

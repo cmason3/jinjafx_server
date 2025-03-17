@@ -27,7 +27,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.5.4'
+__version__ = '25.5.5'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -41,6 +41,7 @@ github_token = None
 jfx_weblog_key = None
 repository = None
 verbose = False
+nocache = False
 pandoc = None
 
 rtable = {}
@@ -409,7 +410,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         self.send_header('Content-Type', r[0])
         self.send_header('Content-Length', str(len(r[2])))
 
-      if versioned:
+      if versioned and not nocache:
         self.send_header('Cache-Control', 'public, max-age=31536000')
 
       elif not cache:
@@ -1121,6 +1122,7 @@ def main(rflag=[0]):
   global rl_limit
   global timelimit
   global logfile
+  global nocache
   global verbose
   global pandoc
 
@@ -1128,8 +1130,6 @@ def main(rflag=[0]):
     if not os.getenv('JOURNAL_STREAM'):
       print('JinjaFx Server v' + __version__ + ' - Jinja2 Templating Tool')
       print('Copyright (c) 2020-2025 Chris Mason <chris@netnix.org>\n')
-
-    update_versioned_links(base + '/www')
 
     parser = ArgumentParser(add_help=False)
     parser.add_argument('-s', action='store_true', required=True)
@@ -1145,8 +1145,10 @@ def main(rflag=[0]):
     parser.add_argument('-logfile', metavar='<logfile>', type=str)
     parser.add_argument('-weblog', action='store_true', default=False)
     parser.add_argument('-pandoc', action='store_true', default=False)
+    parser.add_argument('-nocache', action='store_true', default=False)
     parser.add_argument('-v', action='store_true', default=False)
     args = parser.parse_args()
+    nocache = args.nocache
     verbose = args.v
 
     if args.pandoc:
@@ -1206,6 +1208,7 @@ def main(rflag=[0]):
       soft, hard = resource.getrlimit(resource.RLIMIT_AS)
       resource.setrlimit(resource.RLIMIT_AS, (args.ml * 1024 * 1024, hard))
 
+    update_versioned_links(base + '/www')
     log(f'Starting JinjaFx Server (PID is {os.getpid()}) on http://{args.l}:{args.p}...')
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -1272,12 +1275,17 @@ def update_versioned_links(d):
         for ln in fh:
           m = re.search(r'(?:href|src)="/([a-f0-9]{8})/(.+?)"', ln)
           if m:
-            with open(d + '/' + m.group(2), 'rb') as fh2:
-              h = hashlib.sha256(fh2.read()).hexdigest()[:8]
-
-              if h != m.group(1):
-                ln = re.sub(m.group(1), h, ln)
+            if nocache:
+              if m.group(1) != '00000000':
+                ln = re.sub(m.group(1), '00000000', ln)
                 changed = True
+            else:
+              with open(d + '/' + m.group(2), 'rb') as fh2:
+                h = hashlib.sha256(fh2.read()).hexdigest()[:8]
+
+                if h != m.group(1):
+                  ln = re.sub(m.group(1), h, ln)
+                  changed = True
 
           html.append(ln)
 
