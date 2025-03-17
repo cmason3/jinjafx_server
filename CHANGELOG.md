@@ -1,6 +1,7 @@
 ## CHANGELOG
 
 ### [25.5.5] - In Development
+- Update font look on MacOS to make it less heavy
 - Added support for `-nocache` argument for internal development
 - Updated Pandoc to 3.6.4 in Dockerfile
 
