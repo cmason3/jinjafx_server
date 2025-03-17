@@ -1,6 +1,7 @@
 ## CHANGELOG
 
 ### [25.5.5] - In Development
+- Added support for `-nocache` argument for internal development
 - Updated Pandoc to 3.6.4 in Dockerfile
 
 ### [25.5.4] - Feb 21, 2025
