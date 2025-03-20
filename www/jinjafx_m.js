@@ -619,9 +619,9 @@ function getStatusText(code) {
                             document.getElementById('jinjafx_input_form').innerHTML = r_input_form;
                             input_form = vars['jinjafx_input']['body'];
 
-                            if (vars['jinjafx_input'].hasOwnProperty('script')) {
+                            if (input_script !== null) {
                               var script = document.createElement('script');
-                              script.innerHTML = vars['jinjafx_input']['script'];
+                              script.innerHTML = input_script;
                               document.getElementById('jinjafx_input').appendChild(script);
                             }
 
@@ -1032,6 +1032,10 @@ function getStatusText(code) {
               }
 
               reset_location('/dt/' + dt_id);
+
+              if (qs.hasOwnProperty('g')) {
+                document.getElementById('generate').dispatchEvent(new Event('click'));
+              }
             }
             catch (e) {
               console.log(e);
@@ -1466,6 +1470,13 @@ function getStatusText(code) {
   
       document.getElementById('ml-input-reset').onclick = function(e) {
         document.getElementById('jinjafx_input_form').innerHTML = r_input_form;
+
+        if (input_script !== null) {
+          var script = document.createElement('script');
+          script.innerHTML = input_script;
+          document.getElementById('jinjafx_input').appendChild(script);
+        }
+
         var focusable = document.getElementById('jinjafx_input_form').querySelectorAll('input,select,textarea');
         if (focusable.length) {
           focusable[0].focus();
