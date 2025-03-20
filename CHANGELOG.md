@@ -2,7 +2,7 @@
 
 ### [25.6.0] - Mar 20, 2025
 - Added support for `-allowjs` which allows dynamic JavaScript in HTML outputs and JinjaFx Input modals - this should only be enabled in internal environments where you trust your users
-- Added support for a `script` option to JinjaFx Input modals to allow dynamic input modals - requires `-allowjs`
+- Added support for a `script` option for JinjaFx Input modals to allow dynamic input modals - requires `-allowjs`
 
 ### [25.5.5] - Mar 17, 2025
 - Update font look on MacOS to make it less heavy
