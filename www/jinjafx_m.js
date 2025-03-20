@@ -119,6 +119,7 @@ function getStatusText(code) {
   var dt_epassword = null;
   var delete_pending = false;
   var input_form = null;
+  var input_script = null;
   var r_input_form = null;
   var jinput = null;
   var protect_action = 0;
@@ -596,6 +597,13 @@ function getStatusText(code) {
                 }
 
                 if (vars['jinjafx_input'].hasOwnProperty('body')) {
+                  if (vars['jinjafx_input'].hasOwnProperty('script')) {
+                    if (input_script !== vars['jinjafx_input']['script']) {
+                      input_script = vars['jinjafx_input']['script'];
+                      input_form = null;
+                    }
+                  }
+
                   if (input_form !== vars['jinjafx_input']['body']) {
                     var xHR = new XMLHttpRequest();
                     xHR.open("POST", '/jinjafx?dt=jinjafx_input', true);
@@ -610,6 +618,13 @@ function getStatusText(code) {
                             r_input_form = d(obj.outputs['Output:text']);
                             document.getElementById('jinjafx_input_form').innerHTML = r_input_form;
                             input_form = vars['jinjafx_input']['body'];
+
+                            if (vars['jinjafx_input'].hasOwnProperty('script')) {
+                              var script = document.createElement('script');
+                              script.innerHTML = vars['jinjafx_input']['script'];
+                              document.getElementById('jinjafx_input').appendChild(script);
+                            }
+
                             jinput = new bootstrap.Modal(document.getElementById('jinjafx_input'), {
                               keyboard: false
                             });
