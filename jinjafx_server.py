@@ -27,7 +27,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.5.5'
+__version__ = '25.6.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -387,9 +387,14 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         else:
           r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
+      script_src = "'self' https://cdnjs.cloudflare.com"
+
+      if allowjs:
+        script_src += " 'unsafe-inline'"
+
       headers = {
         'X-Content-Type-Options': 'nosniff',
-        'Content-Security-Policy': "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src 'self' https://cdnjs.cloudflare.com; img-src data: *; frame-ancestors 'none'",
+        'Content-Security-Policy': "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src " + script_src + "; img-src data: *; frame-ancestors 'none'",
         'Referrer-Policy': 'strict-origin-when-cross-origin'
       }
       etag = '"' + hashlib.sha224(repr(headers).encode('utf-8') + b'|' + r[0].encode('utf-8') + b'; ' + r[2]).hexdigest() + '"'
@@ -1122,6 +1127,7 @@ def main(rflag=[0]):
   global rl_limit
   global timelimit
   global logfile
+  global allowjs
   global nocache
   global verbose
   global pandoc
@@ -1145,9 +1151,11 @@ def main(rflag=[0]):
     parser.add_argument('-logfile', metavar='<logfile>', type=str)
     parser.add_argument('-weblog', action='store_true', default=False)
     parser.add_argument('-pandoc', action='store_true', default=False)
+    parser.add_argument('-allowjs', action='store_true', default=False)
     parser.add_argument('-nocache', action='store_true', default=False)
     parser.add_argument('-v', action='store_true', default=False)
     args = parser.parse_args()
+    allowjs = args.allowjs
     nocache = args.nocache
     verbose = args.v
 
