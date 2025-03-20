@@ -36,7 +36,7 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
    -pandoc                            - enable support for DOCX using pandoc (requires pandoc)
    -allowjs                           - allows javascript in `jinjafx_input` and html output
    -nocache                           - disables versioned urls for internal development
-   -v                                 - log all HTTP requests
+   -v                                 - log all http requests
 
  Environment Variables:
    AWS_ACCESS_KEY              - specify an aws access key to authenticate for '-s3'
@@ -188,6 +188,7 @@ jinjafx_input:
 If you pass `-allowjs` on the command line then you can also specify a `script` section, which allows you to perform dynamic actions within your modal, e.g:
 
 ```yaml
+---
 jinjafx_input:
   script: |2
     document.getElementById('select_dropdown').addEventListener('change', function() {
