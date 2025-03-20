@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### [25.6.1] - Mar 20, 2025
+- Fixed an issue where JinjaFx Input scripts were removed when the modal was reset
+- You can now pass `?g` at the end of the URL to trigger auto-generate - you will need to allow popups or use a JinjaFx Input modal
+
 ### [25.6.0] - Mar 20, 2025
 - Added support for `-allowjs` which allows dynamic JavaScript in HTML outputs and JinjaFx Input modals - this should only be enabled in internal environments where you trust your users
 - Added support for a `script` option for JinjaFx Input modals to allow dynamic input modals - requires `-allowjs`
@@ -427,6 +431,7 @@
 ### 21.11.0 - Nov 29, 2021
 - Initial release
 
+[25.6.1]: https://github.com/cmason3/jinjafx_server/compare/25.6.0...25.6.1
 [25.6.0]: https://github.com/cmason3/jinjafx_server/compare/25.5.5...25.6.0
 [25.5.5]: https://github.com/cmason3/jinjafx_server/compare/25.5.4...25.5.5
 [25.5.4]: https://github.com/cmason3/jinjafx_server/compare/25.5.3...25.5.4
