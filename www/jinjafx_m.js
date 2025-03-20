@@ -1501,6 +1501,22 @@ function getStatusText(code) {
                     return '    ' + e;
                   }).join('\r\n');
                 }
+                else if (e.tagName == 'SELECT') {
+                  var options = [];
+                  for (var i = 0; i < e.options.length; i++) {
+                    if (e.options[i].selected) {
+                      options.push(e.options[i].value || e.options[i].text);
+                    }
+                  }
+                  if (options.length) {
+                    if (vars.hasOwnProperty(e.dataset.var)) {
+                      vars[e.dataset.var] = vars[e.dataset.var].concat(options);
+                    }
+                    else {
+                      vars[e.dataset.var] = options;
+                    }
+                  }
+                }
                 else {
                   if (vars.hasOwnProperty(e.dataset.var)) {
                     vars[e.dataset.var].push(v);

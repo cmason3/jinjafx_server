@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.6.2] - Mar 20, 2025
+- Fixed an issue where `select` tags within JinjaFx Input modals wasn't working when multi-select was enabled
+
 ### [25.6.1] - Mar 20, 2025
 - Fixed an issue where JinjaFx Input scripts were removed when the modal was reset
 - You can now pass `?g` at the end of the URL to trigger auto-generate - you will need to allow popups or use a JinjaFx Input modal
@@ -431,6 +434,7 @@
 ### 21.11.0 - Nov 29, 2021
 - Initial release
 
+[25.6.2]: https://github.com/cmason3/jinjafx_server/compare/25.6.1...25.6.2
 [25.6.1]: https://github.com/cmason3/jinjafx_server/compare/25.6.0...25.6.1
 [25.6.0]: https://github.com/cmason3/jinjafx_server/compare/25.5.5...25.6.0
 [25.5.5]: https://github.com/cmason3/jinjafx_server/compare/25.5.4...25.5.5
