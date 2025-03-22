@@ -943,9 +943,9 @@ function getStatusText(code) {
     }
   }
 
-  function reset_location(suffix) {
+  function reset_location(suffix, qs) {
     if (window.location.pathname.startsWith('/dt/')) {
-      window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('/dt/')) + suffix);
+      window.history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('/dt/')) + suffix + qs);
     }
     else if (window.location.href.indexOf('/index.html?') > -1) {
       if (suffix.length == 0) {
@@ -1031,22 +1031,24 @@ function getStatusText(code) {
                 revision = 1;
               }
 
-              reset_location('/dt/' + dt_id);
-
               if (qs.hasOwnProperty('g')) {
+                reset_location('/dt/' + dt_id, '?g');
                 document.getElementById('generate').dispatchEvent(new Event('click'));
+              }
+              else {
+                reset_location('/dt/' + dt_id, '');
               }
             }
             catch (e) {
               console.log(e);
               set_status("darkred", "INTERNAL ERROR", e);
-              reset_location('');
+              reset_location('', '');
             }
           }
           else {
             var sT = (this.statusText.length == 0) ? getStatusText(this.status) : this.statusText;
             set_status("darkred", "HTTP ERROR " + this.status, sT);
-            reset_location('');
+            reset_location('', '');
           }
           document.getElementById('lbuttons').classList.remove('d-none');
           document.getElementById('buttons').classList.remove('d-none');
@@ -1056,7 +1058,7 @@ function getStatusText(code) {
 
         xHR.onerror = function() {
           set_status("darkred", "ERROR", "XMLHttpRequest.onError()");
-          reset_location('');
+          reset_location('', '');
           document.getElementById('lbuttons').classList.remove('d-none');
           document.getElementById('buttons').classList.remove('d-none');
           loaded = true;
@@ -1064,7 +1066,7 @@ function getStatusText(code) {
         };
         xHR.ontimeout = function() {
           set_status("darkred", "ERROR", "XMLHttpRequest.onTimeout()");
-          reset_location('');
+          reset_location('', '');
           document.getElementById('lbuttons').classList.remove('d-none');
           document.getElementById('buttons').classList.remove('d-none');
           loaded = true;
@@ -1720,7 +1722,7 @@ function getStatusText(code) {
           }
           else {
             if (protect_action == 1) {
-              reset_location('');
+              reset_location('', '');
               dt_password = null;
             }
             loaded = true;
@@ -1731,7 +1733,7 @@ function getStatusText(code) {
         }
         else {
           if (protect_action == 1) {
-            reset_location('');
+            reset_location('', '');
             document.getElementById('lbuttons').classList.remove('d-none');
             document.getElementById('buttons').classList.remove('d-none');
             dt_password = null;
@@ -1981,13 +1983,13 @@ function getStatusText(code) {
         }
         else {
           set_status("darkred", "HTTP ERROR 503", "Service Unavailable");
-          reset_location('');
+          reset_location('', '');
           document.getElementById('buttons').classList.remove('d-none');
           loaded = true;
         }
       }
       else {
-        reset_location('');
+        reset_location('', '');
         document.getElementById('buttons').classList.remove('d-none');
         document.getElementById('stemplates').style.visibility = 'hidden';
         document.getElementById('template_info').style.visibility = 'visible';
@@ -2102,7 +2104,7 @@ function getStatusText(code) {
     if (!dflag) {
       load_datatemplate(pending_dt, null, null);
     }
-    reset_location('');
+    reset_location('', '');
     dt_id = '';
     dt_password = null;
     dt_opassword = null;

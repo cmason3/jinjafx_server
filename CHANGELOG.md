@@ -2,6 +2,7 @@
 
 ### [25.6.3] - In Development
 - Make `?g` persistent within the URL bar
+- TODO: Make dataset persistent within the URL bar if provided
 
 ### [25.6.2] - Mar 20, 2025
 - Fixed an issue where `select` tags within JinjaFx Input modals wasn't working when multi-select was enabled
