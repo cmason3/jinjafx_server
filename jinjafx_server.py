@@ -27,7 +27,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.6.2'
+__version__ = '25.7.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()

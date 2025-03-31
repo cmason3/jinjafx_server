@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.7.0] - In Development
+- Add the ability to access data.csv via JavaScript from JinjaFx Input modals
+
 ### [25.6.2] - Mar 20, 2025
 - Fixed an issue where `select` tags within JinjaFx Input modals wasn't working when multi-select was enabled
 
@@ -434,6 +437,7 @@
 ### 21.11.0 - Nov 29, 2021
 - Initial release
 
+[25.7.0]: https://github.com/cmason3/jinjafx_server/compare/25.6.2...25.7.0
 [25.6.2]: https://github.com/cmason3/jinjafx_server/compare/25.6.1...25.6.2
 [25.6.1]: https://github.com/cmason3/jinjafx_server/compare/25.6.0...25.6.1
 [25.6.0]: https://github.com/cmason3/jinjafx_server/compare/25.5.5...25.6.0
