@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [25.7.0] - In Development
+### [25.7.0] - Mar 31, 2025
 - Added support for `jinjafx.rows` and `jinjafx.data()` to allow access to `data.csv` via JavaScript from within JinjaFx Input modals
 
 ### [25.6.2] - Mar 20, 2025
