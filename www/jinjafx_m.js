@@ -1,5 +1,48 @@
 var dt = {};
 
+var jinjafx = {
+  data: function(row, col) {
+    if ('_data' in jinjafx) {
+      if (typeof col === 'string') {
+        if (jinjafx._data[0].indexOf(col) !== -1) {
+          col = jinjafx._data[0].indexOf(col);
+        }
+        else {
+          console.log('invalid column "' + col + '" passed to jinjafx.data()');
+          return null;
+        }
+      }
+
+      if ((typeof row === 'number') && (typeof col === 'number')) {
+        if (jinjafx._data.length > row) {
+          if (jinjafx._data[row].length > col) {
+            return jinjafx._data[row][col];
+          }
+          else {
+            console.log('invalid column "' + col + '" passed to jinjafx.data()');
+            return null;
+          }
+        }
+        else {
+          console.log('invalid row "' + row + '" passed to jinjafx.data()');
+          return null;
+        }
+      }
+      else if (typeof row === 'number') {
+        if (jinjafx._data.length > row) {
+          return jinjafx._data[row];
+        }
+        else {
+          console.log('invalid row "' + row + '" passed to jinjafx.data()');
+          return null;
+        }
+      }
+    }
+    return null;
+  },
+  rows: 0
+};
+
 function reset_dt() {
   dt = {};
 }
@@ -431,7 +474,7 @@ function getStatusText(code) {
     }
   }
 
-  function jinjafx(method) {
+  function _jinjafx(method) {
     clear_status();
     fe.focus();
 
@@ -1102,15 +1145,15 @@ function getStatusText(code) {
         xHR.send(null);
       }
   
-      document.getElementById('delete_ds').onclick = function() { jinjafx('delete_dataset'); };
-      document.getElementById('add_ds').onclick = function() { jinjafx('add_dataset'); };
-      document.getElementById('delete_t').onclick = function() { jinjafx('delete_template'); };
-      document.getElementById('add_t').onclick = function() { jinjafx('add_template'); };
-      document.getElementById('get').onclick = function() { jinjafx('get_link'); };
-      document.getElementById('get2').onclick = function() { jinjafx('get_link'); };
-      document.getElementById('update').onclick = function() { jinjafx('update_link'); };
-      document.getElementById('protect').onclick = function() { jinjafx('protect'); };
-      document.getElementById('delete').onclick = function() { jinjafx('delete'); };
+      document.getElementById('delete_ds').onclick = function() { _jinjafx('delete_dataset'); };
+      document.getElementById('add_ds').onclick = function() { _jinjafx('add_dataset'); };
+      document.getElementById('delete_t').onclick = function() { _jinjafx('delete_template'); };
+      document.getElementById('add_t').onclick = function() { _jinjafx('add_template'); };
+      document.getElementById('get').onclick = function() { _jinjafx('get_link'); };
+      document.getElementById('get2').onclick = function() { _jinjafx('get_link'); };
+      document.getElementById('update').onclick = function() { _jinjafx('update_link'); };
+      document.getElementById('protect').onclick = function() { _jinjafx('protect'); };
+      document.getElementById('delete').onclick = function() { _jinjafx('delete'); };
 
       if (window.crypto.subtle) {
         document.getElementById('encrypt').classList.remove('d-none');
@@ -1186,8 +1229,8 @@ function getStatusText(code) {
         }, false);
       }
   
-      document.getElementById('export').onclick = function() { jinjafx('export'); };
-      document.getElementById('generate').onclick = function() { jinjafx('generate'); };
+      document.getElementById('export').onclick = function() { _jinjafx('export'); };
+      document.getElementById('generate').onclick = function() { _jinjafx('generate'); };
       document.getElementById('encrypt').onclick = function() {
         clear_status();
         new bootstrap.Modal(document.getElementById('vault_encrypt'), {
@@ -1220,7 +1263,7 @@ function getStatusText(code) {
         },
         "Ctrl-S": function(cm) {
           if (!document.getElementById('update').classList.contains('d-none')) {
-            jinjafx('update_link');
+            _jinjafx('update_link');
           }
           else {
             set_status("darkred", "ERROR", "No Link to Update");
@@ -1228,17 +1271,17 @@ function getStatusText(code) {
         },
         "Cmd-S": function(cm) {
           if (!document.getElementById('update').classList.contains('d-none')) {
-            jinjafx('update_link');
+            _jinjafx('update_link');
           }
           else {
             set_status("darkred", "ERROR", "No Link to Update");
           }
         },
         "Ctrl-G": function(cm) {
-          jinjafx('generate');
+          _jinjafx('generate');
         },
         "Cmd-G": function(cm) {
-          jinjafx('generate');
+          _jinjafx('generate');
         },
         "Ctrl-D": false,
         "Cmd-D": false
@@ -2053,6 +2096,8 @@ function getStatusText(code) {
     var delim = new RegExp(cc > tc ? '[ \\t]*(?<!\\\\),[ \\t]*' : ' *\\t *');
     var hrow = datarows[0].split(delim);
 
+    jinjafx._data = [hrow];
+
     var table = '<table class="table table-responsive table-hover table-sm">';
     table += '<thead><tr>';
     for (var col = 0; col < hrow.length; col++) {
@@ -2062,6 +2107,8 @@ function getStatusText(code) {
 
     for (var row = 1; row < datarows.length; row++) {
       var rowdata = datarows[row].split(delim);
+
+      jinjafx._data.push(rowdata);
 
       if (rowdata.length != hrow.length) {
         table += '<tr class="table-danger">';
@@ -2077,6 +2124,7 @@ function getStatusText(code) {
       table += '</tr>';
     }
     table += '</tbody></table>';
+    jinjafx.rows = datarows.length - 1;
     return table;
   }
 
@@ -2091,6 +2139,8 @@ function getStatusText(code) {
       csv_on = true;
     }
     else {
+      jinjafx.rows = 0;
+      delete jinjafx._data;
       window.cmData.getWrapperElement().style.display = 'block';
       document.getElementById("csv").style.display = 'none';
       window.cmData.refresh();

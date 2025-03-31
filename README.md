@@ -196,6 +196,8 @@ jinjafx_input:
     });
 ```
 
+Within the script block, you can also use `jinjafx.rows` and `jinjafx.data()`, which have identical syntax to the Jinja2 versions and allows you to access `data.csv` from within a JinjaFx Input modal.
+
 You can also specify an optional `size` attribute alongside the `body` attribute which sets the width of the modal using the pre-defined Bootstrap sizes (i.e. "sm", "lg" and "xl"). The input form supports full native HTML validation using `required` and `pattern` attributes. The values which are input are then mapped to Jinja2 variables using the `data-var` custom attribute (e.g. `data-var="name"` would map to `jinjafx_input['name']` or `jinjafx_input.name`):
 
 ```jinja2
