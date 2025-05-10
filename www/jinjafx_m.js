@@ -1539,11 +1539,11 @@ function getStatusText(code) {
                 if ((e.tagName == 'INPUT') && ((e.type == 'checkbox') || (e.type == 'radio'))) {
                   v = e.checked;
                 }
-                if (e.tagName == 'TEXTAREA') {
-                  vars[e.dataset.var] = '|2\n' + v.split(/\r?\n/g).map(function (e) {
-                    return '    ' + e;
-                  }).join('\r\n');
-                }
+                //if (e.tagName == 'TEXTAREA') {
+                //  vars[e.dataset.var] = '|2\n' + v.split(/\r?\n/g).map(function (e) {
+                //    return '    ' + e;
+                //  }).join('\r\n');
+                //}
                 else if (e.tagName == 'SELECT') {
                   var options = [];
                   for (var i = 0; i < e.options.length; i++) {
@@ -1561,6 +1561,9 @@ function getStatusText(code) {
                   }
                 }
                 else {
+                  if (e.tagName == 'TEXTAREA') {
+                    v = v.split(/\r?\n/g).join('\\n');
+                  }
                   if (vars.hasOwnProperty(e.dataset.var)) {
                     vars[e.dataset.var].push(v);
                   }
@@ -1588,7 +1591,7 @@ function getStatusText(code) {
               }
             }
             else {
-              vars_yml += '  ' + v + ': ' + vars[v];
+              vars_yml += '  ' + v + ': ' + vars[v] + '\r\n';
             }
           });
           dt.vars += '\r\n' + vars_yml;
