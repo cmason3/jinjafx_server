@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [25.7.2] - In Development
+### [25.7.2] - May 12, 2025
 - Fixed an issue if multiple textareas were included within a jinjafx_input form - thanks to @netopsengineer
 - You can now also include multiple textareas with the same `data-var` to generate a list similar to other elements
 
