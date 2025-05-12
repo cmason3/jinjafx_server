@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### [25.7.2] - May 12, 2025
+- Fixed an issue if multiple textareas were included within a jinjafx_input form - thanks to @netopsengineer
+- You can now also include multiple textareas with the same `data-var` to generate a list similar to other elements
+
 ### [25.7.1] - April 1, 2025
 - Minor tweak to exception handling, so it now prints the line number within the template under certain conditions
 
@@ -440,6 +444,7 @@
 ### 21.11.0 - November 29, 2021
 - Initial release
 
+[25.7.2]: https://github.com/cmason3/jinjafx_server/compare/25.7.1...25.7.2
 [25.7.1]: https://github.com/cmason3/jinjafx_server/compare/25.7.0...25.7.1
 [25.7.0]: https://github.com/cmason3/jinjafx_server/compare/25.6.2...25.7.0
 [25.6.2]: https://github.com/cmason3/jinjafx_server/compare/25.6.1...25.6.2
