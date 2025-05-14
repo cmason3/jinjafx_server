@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [25.7.3] - In Development
+### [25.7.3] - May 14, 2025
 - DataTemplate is now considered "unsaved" if you change DataSets within a DataTemplate
 
 ### [25.7.2] - May 12, 2025
