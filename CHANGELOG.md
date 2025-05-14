@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.7.3] - May 14, 2025
+- DataTemplate is now considered "unsaved" if you change DataSets within a DataTemplate
+
 ### [25.7.2] - May 12, 2025
 - Fixed an issue if multiple textareas were included within a jinjafx_input form - thanks to @netopsengineer
 - You can now also include multiple textareas with the same `data-var` to generate a list similar to other elements
@@ -444,6 +447,7 @@
 ### 21.11.0 - November 29, 2021
 - Initial release
 
+[25.7.3]: https://github.com/cmason3/jinjafx_server/compare/25.7.2...25.7.3
 [25.7.2]: https://github.com/cmason3/jinjafx_server/compare/25.7.1...25.7.2
 [25.7.1]: https://github.com/cmason3/jinjafx_server/compare/25.7.0...25.7.1
 [25.7.0]: https://github.com/cmason3/jinjafx_server/compare/25.6.2...25.7.0
