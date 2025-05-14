@@ -27,7 +27,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.7.3'
+__version__ = '25.7.4'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -578,6 +578,13 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 text = text.replace('"', "&quot;")
                 return text
 
+              def html_unescape(text):
+                text = text.replace('&lt;', '<')
+                text = text.replace('&gt;', '>')
+                text = text.replace("&apos;", "'")
+                text = text.replace("&quot;", '"')
+                return text
+
               for o in outputs:
                 (oname, oformat) = o.rsplit(':', 1) if ':' in o else (o, 'text')
                 oname = re.sub(r' */[ /]+', '/', oname.lstrip(' /').rstrip()) 
@@ -593,6 +600,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     o = oname + ':html'
                     options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART | cmarkgfm.cmark.Options.CMARK_OPT_UNSAFE)
                     output = cmarkgfm.github_flavored_markdown_to_html(html_escape(output), options).replace('&amp;amp;', '&amp;').replace('&amp;', '&')
+                    output = re.sub(r'&lt;span.*?&lt;/span&gt;', lambda m: html_unescape(m.group()), output, flags=re.DOTALL)
                     head = '<!DOCTYPE html>\n<html>\n<head>\n'
                     head += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown.min.css" crossorigin="anonymous">\n'
                     head += '<style>\n  pre, code { white-space: pre-wrap !important; word-wrap: break-word !important; }\n</style>\n</head>\n'

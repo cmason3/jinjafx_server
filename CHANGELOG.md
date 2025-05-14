@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.7.4] - May 14, 2025
+- Added support so you can use `<span>` tags in markdown to change the colour or style of text
+
 ### [25.7.3] - May 14, 2025
 - DataTemplate is now considered "unsaved" if you change DataSets within a DataTemplate
 
@@ -447,6 +450,7 @@
 ### 21.11.0 - November 29, 2021
 - Initial release
 
+[25.7.4]: https://github.com/cmason3/jinjafx_server/compare/25.7.3...25.7.4
 [25.7.3]: https://github.com/cmason3/jinjafx_server/compare/25.7.2...25.7.3
 [25.7.2]: https://github.com/cmason3/jinjafx_server/compare/25.7.1...25.7.2
 [25.7.1]: https://github.com/cmason3/jinjafx_server/compare/25.7.0...25.7.1
