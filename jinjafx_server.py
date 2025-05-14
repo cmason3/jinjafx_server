@@ -666,7 +666,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 try:
                   if not self.ratelimit(remote_addr, 4, False):
                     html = self.d(json.loads(postdata.decode('utf-8')))
-                    p = subprocess.run([pandoc, '-f', 'html-native_spans+raw_html', '-t', 'docx', '--sandbox', '--standalone', '--embed-resources', '--reference-doc=' + base + '/pandoc/reference.docx'], input=html, stdout=subprocess.PIPE, check=True)
+                    p = subprocess.run([pandoc, '-f', 'html', '-t', 'docx', '--sandbox', '--standalone', '--embed-resources', '--reference-doc=' + base + '/pandoc/reference.docx'], input=html, stdout=subprocess.PIPE, check=True)
                     self.send_response(200)
                     self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
                     self.send_header('Content-Length', str(len(p.stdout)))
