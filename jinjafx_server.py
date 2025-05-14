@@ -598,7 +598,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   if oformat == 'markdown' or oformat == 'md':
                     o = oname + ':html'
                     options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART | cmarkgfm.cmark.Options.CMARK_OPT_UNSAFE)
-                    output = re.sub(r'<span.*?</span>', lambda m: escape_span_tag(m.group()), output, flags=re.DOTALL)
+                    output = re.sub(r'<span .*?</span>', lambda m: escape_span_tag(m.group()), output, flags=re.DOTALL | re.IGNORECASE)
                     output = cmarkgfm.github_flavored_markdown_to_html(html_escape(output), options).replace('&amp;amp;', '&amp;').replace('&amp;', '&')
 
                     for h in escaped_tags:

@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [25.7.4] - May 14, 2025
+### [25.7.4] - In Development
 - Added support so you can use `<span>` tags in markdown to change the colour or style of text
 
 ### [25.7.3] - May 14, 2025
