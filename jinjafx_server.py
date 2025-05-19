@@ -597,7 +597,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     for style in ['red', 'green', 'blue', 'highlight']:
                       output = re.sub('{(' + style + ')}(.+?){/\\1}', r'<span class="\1">\2</span>', output, flags=re.DOTALL | re.IGNORECASE)
 
-                    print(output)
                     head = '<!DOCTYPE html>\n<html>\n<head>\n'
                     head += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown.min.css" crossorigin="anonymous">\n'
                     head += '<style>\n  pre, code { white-space: pre-wrap !important; word-wrap: break-word !important; }\n'
