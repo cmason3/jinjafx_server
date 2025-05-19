@@ -1,7 +1,7 @@
 ## CHANGELOG
 
 ### [25.7.4] - In Development
-- Added support so you can use `<span>` tags in markdown to change the colour or style of text
+- Added support so you can use custom tags in markdown to change the colour or text (i.e. `{red}Red Text{/red}')
 
 ### [25.7.3] - May 14, 2025
 - DataTemplate is now considered "unsaved" if you change DataSets within a DataTemplate
