@@ -119,7 +119,7 @@ JinjaFx Server supports the ability to use "output" tags to create different out
 </output>
 ```
 
-GitHub Flavoured Markdown doesn't support the use of HTML tags, but JinjaFx does allow the use of `<span>` tags within Markdown, which allows you to colour and change the style of your text. You can also paste in an image and it will convert it to a Base64 encoded Data URI that is formatted as Markdown.
+GitHub Flavoured Markdown doesn't support the use of HTML tags, but JinjaFx allows custom tags within Markdown, which allows you to change the colour of your text (i.e. `{red}Red Text{/red}`). The supported tags are as follows: 'red', 'green', 'blue' and 'highlight'. You can also paste in an image and it will convert it to a Base64 encoded Data URI that is formatted as Markdown.
 
 ### Ansible Vault
 
