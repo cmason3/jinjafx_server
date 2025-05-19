@@ -123,7 +123,6 @@
             if (!ofile.includes('.')) {
               ofile += '.' + oformat.replace('text', 'txt');
             }
-
             zip.file(ofile, window.opener.d(obj.outputs[o]));
           });
 
