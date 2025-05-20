@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [25.7.5] - In Development
+### [25.7.5] - May 20, 2025
 - Allow nested custom style tags in Markdown
 
 ### [25.7.4] - May 19, 2025
