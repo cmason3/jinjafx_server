@@ -27,7 +27,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.7.5'
+__version__ = '25.7.6'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -178,7 +178,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
             else:
               if not check_only:
-                rtable[key] = min(rtable[key] + rl_duration, t + (rl_duration * 2)) 
+                rtable[key] = min(rtable[key] + rl_duration, t + (rl_duration * 2))
               return True
 
           else:
@@ -227,7 +227,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           if self.headers['X-WebLog-Password'] == jfx_weblog_key:
             with llock:
               logs = '\r\n'.join(logring)
-  
+
             logs = logs.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
             logs = logs.replace('\033[1;31m', '<span class="text-danger">')
             logs = logs.replace('\033[1;32m', '<span class="text-success">')
@@ -269,50 +269,50 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             if not self.ratelimit(remote_addr, 2, False):
               if aws_s3_url:
                 rr = aws_s3_get(aws_s3_url, 'jfx_' + fpath[8:] + '.yml')
-  
+
                 if rr.status_code == 200:
                   r = [ 'application/json', 200, json.dumps({ 'dt': self.e(sanitise_dt(rr.text)).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
-  
+
                   dt = rr.text
-  
+
                 elif rr.status_code == 403:
                   r = [ 'text/plain', 403, '403 Forbidden\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
+
                 elif rr.status_code == 404:
                   r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
+
               elif github_url:
                 rr = github_get(github_url, 'jfx_' + fpath[8:] + '.yml')
-  
+
                 if rr.status_code == 200:
                   jobj = rr.json()
                   content = jobj['content']
-  
+
                   if jobj.get('encoding') and jobj.get('encoding') == 'base64':
                     content = base64.b64decode(content).decode('utf-8')
-  
+
                   r = [ 'application/json', 200, json.dumps({ 'dt': self.e(sanitise_dt(content)).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
-  
+
                   dt = content
-  
+
                 elif rr.status_code == 401:
                   r = [ 'text/plain', 403, '403 Forbidden\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
+
                 elif rr.status_code == 404:
                   r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
+
               else:
                 fpath = os.path.normpath(repository + '/jfx_' + fpath[8:] + '.yml')
-  
+
                 if os.path.isfile(fpath):
                   with open(fpath, 'rb') as f:
                     dt = f.read().decode('utf-8')
-  
+
                     r = [ 'application/json', 200, json.dumps({ 'dt': self.e(sanitise_dt(dt)).decode('utf-8') }).encode('utf-8'), sys._getframe().f_lineno ]
-  
+
                 else:
                   r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
+
               if r[1] == 200:
                 if dt.lstrip().startswith('$VAULTY;'):
                   if 'X-Dt-Password' in self.headers:
@@ -323,7 +323,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                     except Exception:
                       cheaders['X-Dt-Authentication'] = 'Open'
                       r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-                   
+
                   else:
                     cheaders['X-Dt-Authentication'] = 'Open'
                     r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
@@ -340,11 +340,11 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                         if t != self.derive_key(self.headers['X-Dt-Password'], t[2:int(t[1]) + 2], t[0]):
                           cheaders['X-Dt-Authentication'] = 'Modify'
                           r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
+
                       else:
                         cheaders['X-Dt-Authentication'] = 'Open'
                         r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-  
+
                   else:
                     cheaders['X-Dt-Authentication'] = 'Open'
                     r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
@@ -580,7 +580,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
               for o in outputs:
                 (oname, oformat) = o.rsplit(':', 1) if ':' in o else (o, 'text')
-                oname = re.sub(r' */[ /]+', '/', oname.lstrip(' /').rstrip()) 
+                oname = re.sub(r' */[ /]+', '/', oname.lstrip(' /').rstrip())
                 output = '\n'.join(outputs[o]) + '\n'
 
                 if oname.endswith('/') or (len(oname) == 0):
@@ -623,8 +623,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 error = f'error[{t}:{e.lineno}]: {type(e).__name__}: {e}'
 
               else:
-                m = re.search(r'(?s:.*)File "(.+)", line ([0-9]+), .+ template', traceback.format_exc(), re.IGNORECASE | re.MULTILINE)
-                error = f'error[{m.group(1)}:{m.group(2)}]: {type(e).__name__}: {e}'
+                error = jinjafx._format_error(e, 'template code')
 
               jsr = {
                 'status': 'error',
@@ -633,14 +632,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
               self.error = error
 
             except Exception as e:
-              m = re.search(r'(?s:.*)File "(.+)", line ([0-9]+), .+ template', traceback.format_exc(), re.IGNORECASE | re.MULTILINE)
-              if m:
-                error = f'error[{m.group(1)}:{m.group(2)}]: {type(e).__name__}: {e}'
-
-              else:
-                traceback.print_exc()
-                xyz = sys.exc_info()
-                error = f'error[jinjafx_server.py:{xyz[2].tb_lineno}]: {type(e).__name__}: {e}'
+              error = jinjafx._format_error(e, 'template code', '_jinjafx')
 
               jsr = {
                 'status': 'error',
@@ -733,83 +725,83 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                       vdt = {}
                       dt_yml += '---\n'
                       dt_yml += 'dt:\n'
-  
+
                       if 'datasets' in dt:
                         if 'global' in dt:
                           vdt['global'] = self.d(dt['global']).decode('utf-8') if 'global' in dt and len(dt['global'].strip()) > 0 else ''
-  
+
                           if vdt['global'] == '':
                             dt_yml += '  global: ""\n\n'
                           else:
                             dt_yml += '  global: |2\n'
                             dt_yml += re.sub('^', ' ' * 4, vdt['global'].rstrip(), flags=re.MULTILINE) + '\n\n'
-  
+
                         dt_yml += '  datasets:\n'
-  
+
                         for ds in dt['datasets']:
                           vdt['data'] = self.d(dt['datasets'][ds]['data']).decode('utf-8') if 'data' in dt['datasets'][ds] and len(dt['datasets'][ds]['data'].strip()) > 0 else ''
                           vdt['vars'] = self.d(dt['datasets'][ds]['vars']).decode('utf-8') if 'vars' in dt['datasets'][ds] and len(dt['datasets'][ds]['vars'].strip()) > 0 else ''
-  
+
                           dt_yml += '    "' + ds + '":\n'
-  
+
                           if vdt['data'] == '':
                             dt_yml += '      data: ""\n'
                           else:
                             dt_yml += '      data: |2\n'
                             dt_yml += re.sub('^', ' ' * 8, vdt['data'].rstrip(), flags=re.MULTILINE) + '\n\n'
-  
+
                           if vdt['vars'] == '':
                             dt_yml += '      vars: ""\n\n'
                           else:
                             dt_yml += '      vars: |2\n'
                             dt_yml += re.sub('^', ' ' * 8, vdt['vars'].rstrip(), flags=re.MULTILINE) + '\n\n'
-  
+
                       else :
                         vdt['data'] = self.d(dt['data']).decode('utf-8') if 'data' in dt and len(dt['data'].strip()) > 0 else ''
                         vdt['vars'] = self.d(dt['vars']).decode('utf-8') if 'vars' in dt and len(dt['vars'].strip()) > 0 else ''
-  
+
                         if vdt['data'] == '':
                           dt_yml += '  data: ""\n'
                         else:
                           dt_yml += '  data: |2\n'
                           dt_yml += re.sub('^', ' ' * 4, vdt['data'].rstrip(), flags=re.MULTILINE) + '\n\n'
-  
+
                         if vdt['vars'] == '':
                           dt_yml += '  vars: ""\n\n'
                         else:
                           dt_yml += '  vars: |2\n'
                           dt_yml += re.sub('^', ' ' * 4, vdt['vars'].rstrip(), flags=re.MULTILINE) + '\n\n'
-  
+
                       if isinstance(dt['template'], dict):
                         dt_yml += '  template:\n'
-  
+
                         for t in dt['template']:
                           te = self.d(dt['template'][t]).decode('utf-8') if len(dt['template'][t].strip()) > 0 else ''
-  
+
                           if te == '':
                             dt_yml += '    "' + t + '": ""\n'
                           else:
                             dt_yml += '    "' + t + '": |2\n'
                             dt_yml += re.sub('^', ' ' * 6, te, flags=re.MULTILINE) + '\n\n'
-                            
+
                       else:
                         te = self.d(dt['template']).decode('utf-8') if len(dt['template'].strip()) > 0 else ''
-  
+
                         if te == '':
                           dt_yml += '  template: ""\n'
                         else:
                           dt_yml += '  template: |2\n'
                           dt_yml += re.sub('^', ' ' * 4, te, flags=re.MULTILINE) + '\n\n'
-  
+
                       if not dt_yml.endswith('\n\n'):
                         dt_yml += '\n'
-  
+
                       dt_yml += 'revision: ' + str(dt_revision) + '\n'
                       dt_yml += 'dataset: "' + dt['dataset'] + '"\n'
 
                       if 'show_global' in dt:
                         dt_yml += 'show_global: ' + dt['show_global'] + '\n'
-                      
+
                       if dt_encrypted:
                         dt_yml += 'encrypted: 1\n'
 
@@ -824,19 +816,19 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                             if dt_opassword != '' or dt_mpassword != '':
                               if dt_opassword != '':
                                 dt_yml += 'dt_password: "' + binascii.hexlify(self.derive_key(dt_opassword)).decode('utf-8') + '"\n'
-  
+
                               if dt_mpassword != '':
                                 dt_yml += 'dt_mpassword: "' + binascii.hexlify(self.derive_key(dt_mpassword)).decode('utf-8') + '"\n'
-  
+
                             else:
                               if mo != None:
                                 dt_yml += 'dt_password: "' + mo.group(1) + '"\n'
-  
+
                               if mm != None:
                                 dt_yml += 'dt_mpassword: "' + mm.group(1) + '"\n'
-  
+
                         return dt_yml, r
-  
+
                       def add_client_fields(dt_yml, remote_addr):
                         dt_yml += 'remote_addr: "' + remote_addr + '"\n'
                         dt_yml += 'updated: "' + str(int(time.time()))  + '"\n'
@@ -1080,7 +1072,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     self.send_header('Content-Type', r[0])
     self.send_header('Content-Length', str(len(r[2])))
     self.send_header('X-Content-Type-Options', 'nosniff')
-   
+
     for k in cheaders:
       self.send_header(k, cheaders[k])
 
