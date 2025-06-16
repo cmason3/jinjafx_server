@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.7.6] - June 16, 2025
+- Improved exception logging if an error happened within `JinjaFx()._jinjafx()`
+
 ### [25.7.5] - May 20, 2025
 - Allow nested custom style tags in Markdown
 
@@ -70,7 +73,7 @@
 - Add directory structure to outputs in output pane if the output name contains `/`
 - Add output name validation to sanitise output names if invalid values are provided
 - Add ability to sort outputs based on a numerical prefix (e.g. `0/` or `1/`) within the name
-- Set a minimum width of 200px on the output list 
+- Set a minimum width of 200px on the output list
 - Updated Pandoc to 3.6.2 in Dockerfile
 
 ### [25.2.2] - January 7, 2025
@@ -84,7 +87,7 @@
 - Added a "Delete Link" button to allow DataTemplates to be deleted
 - Added support so a specific DataSet can be selected via the DataTemplate URL using `?ds=` or `/dt/<dt>/<ds>`
 - Don't add a hash symbol to the end of the URL when clicking on links
-- Fixed an issue where the "Protect Link" button was losing it's icon under certain conditions 
+- Fixed an issue where the "Protect Link" button was losing it's icon under certain conditions
 
 ### [25.1.1] - January 1, 2025
 - Rewritten Web Log authentication so it will now prompt you for a password
