@@ -456,6 +456,8 @@
 ### 21.11.0 - November 29, 2021
 - Initial release
 
+
+[25.7.6]: https://github.com/cmason3/jinjafx_server/compare/25.7.5...25.7.6
 [25.7.5]: https://github.com/cmason3/jinjafx_server/compare/25.7.4...25.7.5
 [25.7.4]: https://github.com/cmason3/jinjafx_server/compare/25.7.3...25.7.4
 [25.7.3]: https://github.com/cmason3/jinjafx_server/compare/25.7.2...25.7.3

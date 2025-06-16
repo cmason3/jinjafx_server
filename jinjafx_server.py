@@ -19,8 +19,6 @@ import sys
 if sys.version_info < (3, 9):
   sys.exit('Requires Python >= 3.9')
 
-sys.path.insert(0, '/Users/cmason3/Projects/jinjafx')
-
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import __version__ as jinja2_version
 from jinja2 import TemplateError
