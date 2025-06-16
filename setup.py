@@ -9,7 +9,7 @@ for line in open('jinjafx_server.py'):
 HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 README = re.sub(r'^.*\[<img', '[<img', README, flags=re.DOTALL)
-README = re.sub(r'<p.+?</p>', '', README, flags=re.DOTALL)    
+README = re.sub(r'<p.+?</p>', '', README, flags=re.DOTALL)
 
 setup(
   name="jinjafx_server",
@@ -30,7 +30,7 @@ setup(
   packages=["jinjafx_server"],
   include_package_data=True,
   package_data={'': ['www/*', 'pandoc/reference.docx']},
-  install_requires=["jinjafx>=1.24.4", "requests", "cmarkgfm>=0.5.0", "emoji"],
+  install_requires=["jinjafx>=1.25.3", "requests", "cmarkgfm>=0.5.0", "emoji"],
   entry_points={
     "console_scripts": [
       "jinjafx_server=jinjafx_server:main",
