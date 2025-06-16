@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.7.7] - June 16, 2025
+- Fixed issue in that I didn't save `setup.py` before submitting a new release
+
 ### [25.7.6] - June 16, 2025
 - Improved exception logging if an error happened within `JinjaFx()._jinjafx()`
 
@@ -457,6 +460,7 @@
 - Initial release
 
 
+[25.7.7]: https://github.com/cmason3/jinjafx_server/compare/25.7.6...25.7.7
 [25.7.6]: https://github.com/cmason3/jinjafx_server/compare/25.7.5...25.7.6
 [25.7.5]: https://github.com/cmason3/jinjafx_server/compare/25.7.4...25.7.5
 [25.7.4]: https://github.com/cmason3/jinjafx_server/compare/25.7.3...25.7.4
