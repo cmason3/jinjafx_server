@@ -27,7 +27,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.7.8'
+__version__ = '25.7.9'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -624,7 +624,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
               else:
                 error = jinjafx._format_error(e, 'template code')
-                error = error.replace('__init.py__:', 'jinjafx_server.py:')
+                error = error.replace('__init__.py:', 'jinjafx_server.py:')
 
               jsr = {
                 'status': 'error',
@@ -634,7 +634,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
             except Exception as e:
               error = jinjafx._format_error(e, 'template code', '_jinjafx')
-              error = error.replace('__init.py__:', 'jinjafx_server.py:')
+              error = error.replace('__init__.py:', 'jinjafx_server.py:')
 
               jsr = {
                 'status': 'error',
@@ -1243,9 +1243,8 @@ def main(rflag=[0]):
 
 
   except Exception as e:
-    exc_type, exc_obj, exc_tb = sys.exc_info()
-    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-    print('error[jinjafx_server.py:' + str(exc_tb.tb_lineno) + ']: ' + str(e), file=sys.stderr)
+    error = jinjafx._format_error(e)
+    print(error.replace('__init__.py:', 'jinjafx_server.py:'), file=sys.stderr)
     sys.exit(-2)
 
   finally:
