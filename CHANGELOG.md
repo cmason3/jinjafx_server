@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.7.9] - June 17, 2025
+- Fix stupid typo and remember to test things properly before releasing
+
 ### [25.7.8] - June 17, 2025
 - Replace occurrences of `__init__.py` with `jinjafx_server.py` in error messages
 
@@ -463,6 +466,7 @@
 - Initial release
 
 
+[25.7.9]: https://github.com/cmason3/jinjafx_server/compare/25.7.8...25.7.9
 [25.7.8]: https://github.com/cmason3/jinjafx_server/compare/25.7.7...25.7.8
 [25.7.7]: https://github.com/cmason3/jinjafx_server/compare/25.7.6...25.7.7
 [25.7.6]: https://github.com/cmason3/jinjafx_server/compare/25.7.5...25.7.6
