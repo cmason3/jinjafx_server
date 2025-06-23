@@ -1,5 +1,10 @@
 ## CHANGELOG
 
+### [25.7.10] - June 23, 2025
+- Don't rename 'Default' to 'template.j2' in error messages as that is now handled within `jinjafx`
+- Updated `bootstrap` to 5.3.7
+- Updated `codemirror` to 5.65.19
+
 ### [25.7.9] - June 17, 2025
 - Fix stupid typo and remember to test things properly before releasing
 
@@ -466,6 +471,7 @@
 - Initial release
 
 
+[25.7.10]: https://github.com/cmason3/jinjafx_server/compare/25.7.9...25.7.10
 [25.7.9]: https://github.com/cmason3/jinjafx_server/compare/25.7.8...25.7.9
 [25.7.8]: https://github.com/cmason3/jinjafx_server/compare/25.7.7...25.7.8
 [25.7.7]: https://github.com/cmason3/jinjafx_server/compare/25.7.6...25.7.7
