@@ -30,7 +30,7 @@ setup(
   packages=["jinjafx_server"],
   include_package_data=True,
   package_data={'': ['www/*', 'pandoc/reference.docx']},
-  install_requires=["jinjafx>=1.25.3", "requests", "cmarkgfm>=0.5.0", "emoji"],
+  install_requires=["jinjafx>=1.26.0", "requests", "cmarkgfm>=0.5.0", "emoji"],
   entry_points={
     "console_scripts": [
       "jinjafx_server=jinjafx_server:main",
