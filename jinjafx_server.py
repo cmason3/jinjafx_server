@@ -27,7 +27,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.7.10'
+__version__ = '25.7.11'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -653,7 +653,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 try:
                   if not self.ratelimit(remote_addr, 4, False):
                     html = self.d(json.loads(postdata.decode('utf-8')))
-                    p = subprocess.run([pandoc, '-f', 'html', '-t', 'docx', '--sandbox', '--standalone', '--embed-resources', '--reference-doc=' + base + '/pandoc/reference.docx'], input=html, stdout=subprocess.PIPE, check=True)
+                    p = subprocess.run([pandoc, '-f', 'html', '-t', 'docx', '-o', '-', '--sandbox', '--standalone', '--embed-resources', '--reference-doc=' + base + '/pandoc/reference.docx'], input=html, stdout=subprocess.PIPE, check=True)
                     self.send_response(200)
                     self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
                     self.send_header('Content-Length', str(len(p.stdout)))
