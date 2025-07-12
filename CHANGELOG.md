@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.7.12] - July 12, 2025
+- Added option `-nocsp` to completely disable Content-Security-Policy in html output
+
 ### [25.7.11] - June 25, 2025
 - Fixed an issue with Pandoc 3.0.2 in that it won't output docx to stdout by default
 
@@ -474,6 +477,7 @@
 - Initial release
 
 
+[25.7.12]: https://github.com/cmason3/jinjafx_server/compare/25.7.11...25.7.12
 [25.7.11]: https://github.com/cmason3/jinjafx_server/compare/25.7.10...25.7.11
 [25.7.10]: https://github.com/cmason3/jinjafx_server/compare/25.7.9...25.7.10
 [25.7.9]: https://github.com/cmason3/jinjafx_server/compare/25.7.8...25.7.9

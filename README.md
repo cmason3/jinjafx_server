@@ -20,7 +20,7 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
  jinjafx_server -s [-l <address>] [-p <port>]
                 [-r <directory> | -s3 <aws s3 url> | -github <owner>/<repo>[:<branch>]]
                 [-rl <rate/limit>] [-tl <time limit>] [-ml <memory limit>]
-                [-logfile <logfile>] [-weblog] [-pandoc] [-allowjs] [-nocache] [-v]
+                [-logfile <logfile>] [-weblog] [-pandoc] [-allowjs | -nocsp] [-nocache] [-v]
 
    -s                                 - start the JinjaFx Server
    -l <address>                       - specify a listen address (default is '127.0.0.1')
@@ -35,6 +35,7 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
    -weblog                            - enable web log interface (/logs)
    -pandoc                            - enable support for DOCX using pandoc (requires pandoc)
    -allowjs                           - allows javascript in `jinjafx_input` and html output
+   -nocsp                             - disables 'content-security-policy' (implies '-allowjs')
    -nocache                           - disables versioned urls for internal development
    -v                                 - log all http requests
 
@@ -81,7 +82,7 @@ The `-rl` argument is used to provide an optional rate limit of the source IP - 
 
 The `-weblog` argument in combination with the `JFX_WEBLOG_KEY` environment variable enables the Web Log interface to view the current application logs - this can be accessed from a web browser using the URL `/logs` - the user will be prompted for the key or they can provide it via a query string of `?key=<JFX_WEBLOG_KEY>`.
 
-If you specify `-allowjs` then this allows you to inject dynamic JavaScript into HTML outputs and JinjaFx Input modals, but this basically disables the Content Security Policy, which protects you from XSS attacks. This is only advisable if you are hosting this internally and you trust your users.
+If you specify `-allowjs` then this allows you to inject dynamic JavaScript into HTML outputs and JinjaFx Input modals, but this basically disables the scripting aspects of the Content Security Policy (use `-nocsp` to disable it completely), which protects you from XSS attacks. This is only advisable if you are hosting this internally and you trust your users.
 
 ### Shortcut Keys
 
@@ -185,7 +186,7 @@ jinjafx_input:
     </div>
 ```
 
-If you pass `-allowjs` on the command line then you can also specify a `script` section, which allows you to perform dynamic actions within your modal, e.g:
+If you pass `-allowjs` (or `-nocsp`) on the command line then you can also specify a `script` section, which allows you to perform dynamic actions within your modal, e.g:
 
 ```yaml
 ---
