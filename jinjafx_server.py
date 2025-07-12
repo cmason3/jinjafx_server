@@ -27,7 +27,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.7.11'
+__version__ = '25.7.12'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -394,9 +394,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
       headers = {
         'X-Content-Type-Options': 'nosniff',
-        'Content-Security-Policy': "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src " + script_src + "; img-src data: *; frame-ancestors 'none'",
         'Referrer-Policy': 'strict-origin-when-cross-origin'
       }
+
+      if not nocsp:
+        headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src " + script_src + "; img-src data: *; frame-ancestors 'none'"
+
       etag = '"' + hashlib.sha224(repr(headers).encode('utf-8') + b'|' + r[0].encode('utf-8') + b'; ' + r[2]).hexdigest() + '"'
 
       if 'If-None-Match' in self.headers:
@@ -1132,6 +1135,7 @@ def main(rflag=[0]):
   global timelimit
   global logfile
   global allowjs
+  global nocsp
   global nocache
   global verbose
   global pandoc
@@ -1155,11 +1159,14 @@ def main(rflag=[0]):
     parser.add_argument('-logfile', metavar='<logfile>', type=str)
     parser.add_argument('-weblog', action='store_true', default=False)
     parser.add_argument('-pandoc', action='store_true', default=False)
-    parser.add_argument('-allowjs', action='store_true', default=False)
+    group2_ex = parser.add_mutually_exclusive_group()
+    group2_ex.add_argument('-allowjs', action='store_true', default=False)
+    group2_ex.add_argument('-nocsp', action='store_true', default=False)
     parser.add_argument('-nocache', action='store_true', default=False)
     parser.add_argument('-v', action='store_true', default=False)
     args = parser.parse_args()
     allowjs = args.allowjs
+    nocsp = args.nocsp
     nocache = args.nocache
     verbose = args.v
 
