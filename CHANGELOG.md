@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [25.8.0] - In Development
+### [25.8.0] - August 18, 2025
 - Dropped support for Python 3.9
 - Added the ability to cache the DataTemplate Modify password
 - Updated `codemirror` to 5.65.20
