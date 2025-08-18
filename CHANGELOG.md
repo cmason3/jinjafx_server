@@ -1,7 +1,8 @@
 ## CHANGELOG
 
 ### [25.8.0] - In Development
-- TBC
+- Drop support for Python 3.9
+- Updated `codemirror` to 5.65.20
 
 ### [25.7.12] - July 12, 2025
 - Added option `-nocsp` to completely disable Content-Security-Policy in html output
