@@ -14,7 +14,7 @@ README = re.sub(r'<p.+?</p>', '', README, flags=re.DOTALL)
 setup(
   name="jinjafx_server",
   version=__version__,
-  python_requires=">=3.9",
+  python_requires=">=3.10",
   description="JinjaFx Server - Jinja2 Templating Tool",
   long_description=README,
   long_description_content_type="text/markdown",

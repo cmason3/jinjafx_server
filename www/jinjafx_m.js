@@ -193,7 +193,7 @@ function getStatusText(code) {
       datasets[current_ds][0] = window.cmData.getDoc();
       datasets[current_ds][1] = window.cmVars.getDoc();
     }
-   
+
     if (ds != current_ds) {
       window.cmData.swapDoc(datasets[ds][0]);
       window.cmVars.swapDoc(datasets[ds][1]);
@@ -221,7 +221,7 @@ function getStatusText(code) {
     if (sflag) {
       templates[current_t] = window.cmTemplate.getDoc();
     }
-   
+
     if (t != current_t) {
       window.cmTemplate.swapDoc(templates[t]);
 
@@ -854,6 +854,26 @@ function getStatusText(code) {
     }
   }
 
+  function update_protect_modal(type) {
+    document.getElementById('lb_protect').innerHTML = 'DataTemplate ' + type + ' Passsword';
+
+    if (type === "Modify") {
+      document.getElementById('cache_password').disabled = false;
+      if (localStorage.getItem('modify_' + dt_id)) {
+        document.getElementById('cache_password').checked = true;
+        document.getElementById('in_protect').value = localStorage.getItem('modify_' + dt_id);
+        document.getElementById('in_protect').select();
+      }
+      else {
+        document.getElementById('cache_password').checked = false;
+      }
+    }
+    else {
+      document.getElementById('cache_password').disabled = true;
+      document.getElementById('cache_password').checked = false;
+    }
+  }
+
   function update_link(v_dt_id, dflag) {
     var xHR = new XMLHttpRequest();
 
@@ -893,6 +913,12 @@ function getStatusText(code) {
           if (!dflag) {
             revision += 1;
             if (dt_protected) {
+              if (document.getElementById('cache_password').checked) {
+                localStorage.setItem('modify_' + v_dt_id, dt_password);
+              }
+              else {
+                localStorage.removeItem('modify_' + dt_id);
+              }
               if (dt_mpassword != null) {
                 dt_password = dt_mpassword;
               }
@@ -916,6 +942,7 @@ function getStatusText(code) {
             apply_dt(true);
             delete_pending = false;
             document.title = 'JinjaFx [unsaved]';
+            localStorage.removeItem('modify_' + dt_id);
             dirty = true;
             set_status("green", "OK", "Link Deleted", 10000);
             window.addEventListener('beforeunload', onBeforeUnload);
@@ -939,7 +966,7 @@ function getStatusText(code) {
       else if (this.status == 401) {
         protect_action = 2;
         delete_pending = dflag;
-        document.getElementById('lb_protect').innerHTML = 'DataTemplate ' + this.getResponseHeader('X-Dt-Authentication') + ' Passsword';
+        update_protect_modal(this.getResponseHeader('X-Dt-Authentication'));
         new bootstrap.Modal(document.getElementById('protect_input'), {
           keyboard: false
         }).show();
@@ -1016,7 +1043,7 @@ function getStatusText(code) {
         xHR.onload = function() {
           if (this.status === 401) {
             protect_action = 1;
-            document.getElementById('lb_protect').innerHTML = 'DataTemplate ' + this.getResponseHeader('X-Dt-Authentication') + ' Passsword';
+            update_protect_modal(this.getResponseHeader('X-Dt-Authentication'));
             new bootstrap.Modal(document.getElementById('protect_input'), {
               keyboard: false
             }).show();
@@ -1138,13 +1165,13 @@ function getStatusText(code) {
   window.onload = function() {
     try {
       dayjs.extend(window.dayjs_plugin_relativeTime);
-  
+
       if (!window.location.pathname.startsWith('/dt/')) {
         var xHR = new XMLHttpRequest();
         xHR.open("GET", "/jinjafx.html" + window.location.search, true);
         xHR.send(null);
       }
-  
+
       document.getElementById('delete_ds').onclick = function() { _jinjafx('delete_dataset'); };
       document.getElementById('add_ds').onclick = function() { _jinjafx('add_dataset'); };
       document.getElementById('delete_t').onclick = function() { _jinjafx('delete_template'); };
@@ -1174,7 +1201,7 @@ function getStatusText(code) {
         document.getElementById('import').onclick = async() => {
           clear_status();
           fe.focus();
-  
+
           if ((!dirty) || (confirm("Are You Sure?") === true)) {
             const [h] = await window.showOpenFilePicker({
               types: [{
@@ -1182,10 +1209,10 @@ function getStatusText(code) {
                 accept: { 'text/plain': ['.txt', '.dt'] }
               }]
             });
-  
+
             const fh = await h.getFile();
             const contents = await fh.text();
-  
+
             if (contents.replace(/\r/g, '').indexOf('---\ndt:\n') > -1) {
               var obj = jsyaml.load(contents, jsyaml_schema);
               if (obj != null) {
@@ -1204,12 +1231,12 @@ function getStatusText(code) {
         document.getElementById('import').onclick = function() {
           clear_status();
           fe.focus();
-  
+
           if ((!dirty) || (confirm("Are You Sure?") === true)) {
             document.getElementById('import_file').click();
           }
         };
-  
+
         document.getElementById('import_file').addEventListener('change', function(e1) {
           var r = new FileReader();
           r.onload = function(e2) {
@@ -1228,7 +1255,7 @@ function getStatusText(code) {
           r.readAsText(e1.target.files[0]);
         }, false);
       }
-  
+
       document.getElementById('export').onclick = function() { _jinjafx('export'); };
       document.getElementById('generate').onclick = function() { _jinjafx('generate'); };
       document.getElementById('encrypt').onclick = function() {
@@ -1239,11 +1266,11 @@ function getStatusText(code) {
       };
 
       sobj = document.getElementById("status");
-  
+
       window.onresize = function() {
         document.getElementById("content").style.height = (window.innerHeight - 155) + "px";
       };
-  
+
       window.onresize();
 
       var gExtraKeys = {
@@ -1288,7 +1315,7 @@ function getStatusText(code) {
       };
 
       document.body.style.display = "block";
-  
+
       CodeMirror.defineMode("data", cmDataMode);
       window.cmData = CodeMirror.fromTextArea(data, {
         tabSize: 2,
@@ -1299,7 +1326,7 @@ function getStatusText(code) {
         viewportMargin: 80,
         smartIndent: false
       });
-  
+
       window.cmgVars = CodeMirror.fromTextArea(t_gvars, {
         tabSize: 2,
         scrollbarStyle: "null",
@@ -1310,7 +1337,7 @@ function getStatusText(code) {
         smartIndent: false,
         showTrailingSpace: true
       });
-  
+
       window.cmVars = CodeMirror.fromTextArea(vars, {
         tabSize: 2,
         scrollbarStyle: "null",
@@ -1321,15 +1348,15 @@ function getStatusText(code) {
         smartIndent: false,
         showTrailingSpace: true
       });
-  
+
       CodeMirror.registerHelper("fold", "jinja2", function(cm, start) {
         var startLine = cm.getLine(start.line);
         var tokenStack = 1;
-  
+
         if ((startLine.indexOf('{#') != -1) && (startLine.indexOf('#}') == -1)) {
           for (var ln = start.line + 1; (tokenStack > 0) && (ln <= cm.lastLine()); ln++) {
             var theLine = cm.getLine(ln);
-  
+
             if (theLine.indexOf('#}') != -1) {
               if (--tokenStack == 0) {
                 return {
@@ -1344,16 +1371,16 @@ function getStatusText(code) {
           var smatch = startLine.match(/{%([+-]?[ \t]*(if|for|macro|call|filter))[ \t]+/);
           if (smatch) {
             var eregexp = new RegExp('{%([+-]?[ \t]*)end' + smatch[2] + '[ \t]*[+-]?%}');
-  
+
             if (!startLine.match(eregexp)) {
               var sregexp = new RegExp('{%[+-]?[ \t]*' + smatch[2] + '[ \t]+');
-  
+
               for (var ln = start.line + 1; (tokenStack > 0) && (ln <= cm.lastLine()); ln++) {
                 if (cm.getTokenTypeAt(CodeMirror.Pos(ln, 0)) != 'comment') {
                   var theLine = cm.getLine(ln);
                   var sm = theLine.match(sregexp);
                   var ematch = theLine.match(eregexp);
-  
+
                   if (sm && !ematch) {
                     tokenStack += 1;
                   }
@@ -1372,7 +1399,7 @@ function getStatusText(code) {
         }
         return undefined;
       });
-  
+
       function cmOutputMode() {
         return {
           startState: function() {
@@ -1423,11 +1450,11 @@ function getStatusText(code) {
           }
         };
       }
-  
+
       CodeMirror.defineMode("template", function(config, parserConfig) {
         return CodeMirror.overlayMode(CodeMirror.getMode(config, "jinja2"), cmOutputMode(), true);
       });
-  
+
       window.cmTemplate = CodeMirror.fromTextArea(template, {
         lineNumbers: true,
         tabSize: 2,
@@ -1446,23 +1473,23 @@ function getStatusText(code) {
         },
         gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
       });
-  
+
       fe = window.cmTemplate;
       window.cmData.on("focus", function() { fe = window.cmData });
       window.cmVars.on("focus", function() { fe = window.cmVars; onDataBlur() });
       window.cmgVars.on("focus", function() { fe = window.cmgVars; onDataBlur() });
       window.cmTemplate.on("focus", function() { fe = window.cmTemplate; onDataBlur() });
-  
+
       document.getElementById('header').onclick = onDataBlur;
       document.getElementById('push').onclick = onDataBlur;
       document.getElementById('footer').onclick = onDataBlur;
-  
+
       document.getElementById("csv").onclick = function() {
         window.cmData.getWrapperElement().style.display = 'block';
         document.getElementById("csv").style.display = 'none';
         window.cmData.refresh();
         window.cmData.focus();
-  
+
         if (cDataPos != null) {
           window.cmData.setSelection(cDataPos[0], cDataPos[1]);
           window.cmData.scrollIntoView({from: cDataPos[0], to: cDataPos[1]}, 20);
@@ -1470,7 +1497,7 @@ function getStatusText(code) {
         }
         csv_on = false;
       };
-  
+
       window.cmData.on("paste", onPaste);
       window.cmVars.on("paste", onPaste);
       window.cmgVars.on("paste", onPaste);
@@ -1485,7 +1512,7 @@ function getStatusText(code) {
       window.cmVars.on("change", onChange);
       window.cmgVars.on("change", onChange);
       window.cmTemplate.on("change", onChange);
-  
+
       var hsplit = Split(["#cdata", "#cvars"], {
         direction: "horizontal",
         cursor: "col-resize",
@@ -1494,7 +1521,7 @@ function getStatusText(code) {
         minSize: 300,
         onDragStart: remove_info
       });
-  
+
       var vsplit = Split(["#top", "#ctemplate"], {
         direction: "vertical",
         cursor: "row-resize",
@@ -1503,14 +1530,14 @@ function getStatusText(code) {
         minSize: 120,
         onDragStart: remove_info
       });
-  
+
       document.getElementById('jinjafx_input').addEventListener('shown.bs.modal', function (e) {
         var focusable = document.getElementById('jinjafx_input_form').querySelectorAll('input,select,textarea');
         if (focusable.length) {
           focusable[0].focus();
         }
       });
-  
+
       document.getElementById('ml-input-reset').onclick = function(e) {
         document.getElementById('jinjafx_input_form').innerHTML = r_input_form;
 
@@ -1525,12 +1552,12 @@ function getStatusText(code) {
           focusable[0].focus();
         }
       };
-  
+
       document.getElementById('ml-input-ok').onclick = function(e) {
         if (document.getElementById('input_form').checkValidity() !== false) {
           e.preventDefault();
           jinput.hide();
-  
+
           var vars = {};
           document.getElementById('input_form').querySelectorAll('input,select,textarea').forEach(function(e, i) {
             if (e.getAttribute('data-var') != null) {
@@ -1569,7 +1596,7 @@ function getStatusText(code) {
               }
             }
           });
-  
+
           var vars_yml = 'jinjafx_input:\r\n';
           Object.keys(vars).forEach(function(v) {
             if (Array.isArray(vars[v])) {
@@ -1593,21 +1620,21 @@ function getStatusText(code) {
           jinjafx_generate();
         }
       };
-  
+
       document.getElementById('jinjafx_input').addEventListener('hidden.bs.modal', function (e) {
         fe.focus();
       });
-  
+
       document.getElementById('vault_encrypt').addEventListener('shown.bs.modal', function (e) {
         document.getElementById("vault_string").focus();
       });
-  
+
       document.getElementById('vault_string').onkeyup = function(e) {
         if (e.which == 13) {
           document.getElementById('ml-vault-encrypt-ok').click();
         }
       };
-  
+
       document.getElementById('vault_encrypt').addEventListener('hidden.bs.modal', function (e) {
         clear_status();
         document.getElementById("vault_string").value = '';
@@ -1620,31 +1647,31 @@ function getStatusText(code) {
         }
         fe.focus();
       });
-  
+
       document.getElementById('protect_dt').addEventListener('shown.bs.modal', function (e) {
         document.getElementById("password_open1").focus();
       });
-  
+
       document.getElementById('vault_output').addEventListener('shown.bs.modal', function (e) {
         document.getElementById("vault_text").focus();
         document.getElementById("vault_text").select();
       });
-  
+
       document.getElementById('vault_output').addEventListener('hidden.bs.modal', function (e) {
         fe.focus();
       });
-  
+
       document.getElementById('ml-vault-encrypt-ok').onclick = function() {
         clear_status();
         if (document.getElementById('vault_string').value.match(/\S/)) {
           if (document.getElementById('password_vault1').value.match(/\S/)) {
             if (document.getElementById('password_vault1').value == document.getElementById('password_vault2').value) {
               bootstrap.Modal.getOrCreateInstance(document.getElementById('vault_encrypt')).hide()
-  
+
               ansible_vault_encrypt(document.getElementById('vault_string').value, document.getElementById('password_vault1').value).then(function(x) {
                 document.getElementById('vault_text').value = x;
               });
-  
+
               new bootstrap.Modal(document.getElementById('vault_output'), {
                 keyboard: false
               }).show();
@@ -1667,7 +1694,7 @@ function getStatusText(code) {
           return false;
         }
       };
-  
+
       document.getElementById('ml-protect-dt-ok').onclick = function() {
         dt_opassword = null;
         dt_mpassword = null;
@@ -1683,7 +1710,7 @@ function getStatusText(code) {
             return false;
           }
         }
-  
+
         if (document.getElementById('password_modify1').value.match(/\S/)) {
           if (document.getElementById('password_modify1').value == document.getElementById('password_modify2').value) {
             dt_mpassword = document.getElementById('password_modify2').value;
@@ -1694,7 +1721,7 @@ function getStatusText(code) {
             return false;
           }
         }
-  
+
         if ((dt_opassword != null) || (dt_mpassword != null)) {
           if (dt_opassword === dt_mpassword) {
             dt_mpassword = null;
@@ -1720,7 +1747,7 @@ function getStatusText(code) {
           set_status("darkred", "ERROR", "Invalid Password");
         }
       };
-  
+
       document.getElementById('protect_dt').addEventListener('hidden.bs.modal', function (e) {
         document.getElementById("password_open1").value = '';
         document.getElementById("password_open2").value = '';
@@ -1732,22 +1759,22 @@ function getStatusText(code) {
         document.getElementById('encrypt_dt').checked = false;
         fe.focus();
       });
-  
+
       document.getElementById('protect_input').addEventListener('shown.bs.modal', function (e) {
         document.getElementById("in_protect").focus();
         protect_ok = false;
       });
-  
+
       document.getElementById('ml-protect-ok').onclick = function() {
         protect_ok = true;
       };
-  
+
       document.getElementById('in_protect').onkeyup = function(e) {
         if (e.which == 13) {
           document.getElementById('ml-protect-ok').click();
         }
       };
-  
+
       document.getElementById('protect_input').addEventListener('hidden.bs.modal', function (e) {
         if (protect_ok == true) {
           dt_password = document.getElementById("in_protect").value;
@@ -1785,7 +1812,7 @@ function getStatusText(code) {
         document.getElementById("in_protect").value = '';
         clear_wait();
       });
-  
+
       document.getElementById('dataset_input').addEventListener('shown.bs.modal', function (e) {
         document.getElementById("ds_name").focus();
       });
@@ -1793,10 +1820,10 @@ function getStatusText(code) {
       document.getElementById('template_input').addEventListener('shown.bs.modal', function (e) {
         document.getElementById("t_name").focus();
       });
-  
+
       document.getElementById('ml-dataset-ok').onclick = function() {
         var new_ds = document.getElementById("ds_name").value;
-  
+
         if (new_ds.match(/^[A-Z][A-Z0-9_ -]*$/i)) {
           var existing = '';
           for (var p in datasets) {
@@ -1820,10 +1847,10 @@ function getStatusText(code) {
           set_status("darkred", "ERROR", "Invalid Data Set Name");
         }
       };
-  
+
       document.getElementById('ml-template-ok').onclick = function() {
         var new_t = document.getElementById("t_name").value;
-  
+
         if (new_t.match(/^[A-Z][A-Z0-9_ \/.-]*$/i)) {
           var existing = '';
           for (var p in templates) {
@@ -1859,7 +1886,7 @@ function getStatusText(code) {
           document.getElementById('ml-template-ok').click();
         }
       };
-  
+
       function check_open() {
         if (document.getElementById('password_open1').value.match(/\S/)) {
           document.getElementById('encrypt_dt').disabled = false;
@@ -1876,7 +1903,7 @@ function getStatusText(code) {
           document.getElementById('password_open2').classList.add('is-invalid');
         }
       };
-  
+
       function check_vault() {
         if (document.getElementById('password_vault1').value == document.getElementById('password_vault2').value) {
           document.getElementById('password_vault2').classList.remove('is-invalid');
@@ -1887,7 +1914,7 @@ function getStatusText(code) {
           document.getElementById('password_vault2').classList.add('is-invalid');
         }
       };
-  
+
       document.getElementById('password_vault1').onkeyup = function(e) {
         if (document.getElementById('password_vault1').value.match(/\S/)) {
           if (document.getElementById('password_vault2').disabled == true) {
@@ -1905,11 +1932,11 @@ function getStatusText(code) {
           document.getElementById('password_vault2').classList.remove('is-invalid');
         }
       };
-  
+
       document.getElementById('password_vault2').onkeyup = function(e) {
         check_vault();
       };
-  
+
       document.getElementById('password_open1').onkeyup = function(e) {
         if (document.getElementById('password_open1').value.match(/\S/)) {
           if (document.getElementById('password_open2').disabled == true) {
@@ -1930,11 +1957,11 @@ function getStatusText(code) {
           document.getElementById('encrypt_dt').checked = false;
         }
       };
-  
+
       document.getElementById('password_open2').onkeyup = function(e) {
         check_open();
       };
-  
+
       function check_modify() {
         if (document.getElementById('password_modify1').value == document.getElementById('password_modify2').value) {
           document.getElementById('password_modify2').classList.remove('is-invalid');
@@ -1945,7 +1972,7 @@ function getStatusText(code) {
           document.getElementById('password_modify2').classList.add('is-invalid');
         }
       }
-  
+
       document.getElementById('password_modify1').onkeyup = function(e) {
         if (document.getElementById('password_modify1').value.match(/\S/)) {
           if (document.getElementById('password_modify2').disabled == true) {
@@ -1963,11 +1990,11 @@ function getStatusText(code) {
           document.getElementById('password_modify2').classList.remove('is-invalid');
         }
       };
-  
+
       document.getElementById('password_modify2').onkeyup = function(e) {
         check_modify();
       };
-  
+
       document.querySelectorAll('.modal').forEach(function(elem, i) {
         elem.onkeydown = function(e) {
           if (e.keyCode === 9) {
@@ -1975,7 +2002,7 @@ function getStatusText(code) {
             if (focusable.length) {
               var first = focusable[0];
               var last = focusable[focusable.length - 1];
-  
+
               if ((e.target === first) && e.shiftKey) {
                 last.focus();
                 e.preventDefault();
