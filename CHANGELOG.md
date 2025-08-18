@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.8.0] - In Development
+- TBC
+
 ### [25.7.12] - July 12, 2025
 - Added option `-nocsp` to completely disable Content-Security-Policy in html output
 
@@ -477,6 +480,7 @@
 - Initial release
 
 
+[25.8.0]: https://github.com/cmason3/jinjafx_server/compare/25.7.12...25.8.0
 [25.7.12]: https://github.com/cmason3/jinjafx_server/compare/25.7.11...25.7.12
 [25.7.11]: https://github.com/cmason3/jinjafx_server/compare/25.7.10...25.7.11
 [25.7.10]: https://github.com/cmason3/jinjafx_server/compare/25.7.9...25.7.10
