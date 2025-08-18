@@ -1,7 +1,8 @@
 ## CHANGELOG
 
 ### [25.8.0] - In Development
-- Drop support for Python 3.9
+- Dropped support for Python 3.9
+- Added the ability to cache the DataTemplate Modify password
 - Updated `codemirror` to 5.65.20
 
 ### [25.7.12] - July 12, 2025
@@ -178,7 +179,7 @@
 - Updated `github-markdown-css` JavaScript library to 5.6.1
 
 ### [24.5.0] - May 15, 2024
-- Drop support for Python 3.8
+- Dropped support for Python 3.8
 - Updated `bootstrap` JavaScript library to 5.3.3
 - Updated `dayjs` JavaScript library to 1.11.1
 - Updated `github-markdown-css` to 5.5.1
@@ -234,7 +235,7 @@
 - Update JavaScript libraries to latest version
 
 ### [23.6.0] - June 6, 2023
-- Drop support for Python 3.7
+- Dropped support for Python 3.7
 - Update JavaScript libraries to latest version
 
 ### [23.3.2] - March 20, 2023
