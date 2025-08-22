@@ -32,7 +32,7 @@
 - Allow nested custom style tags in Markdown
 
 ### [25.7.4] - May 19, 2025
-- Added support so you can use custom tags in Markdown to change the colour or text (i.e. `{red}Red Text{/red}')
+- Added support so you can use custom tags in Markdown to change the colour or text (i.e. `{red}Red Text{/red}`)
 
 ### [25.7.3] - May 14, 2025
 - DataTemplate is now considered "unsaved" if you change DataSets within a DataTemplate
