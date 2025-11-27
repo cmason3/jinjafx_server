@@ -16,7 +16,7 @@
 - Updated `codemirror` to 5.65.20
 
 ### [25.7.12] - July 12, 2025
-- Added option `-nocsp` to completely disable Content-Security-Policy in html output
+- Added option `-nocsp` to completely disable `Content-Security-Policy` in html output
 
 ### [25.7.11] - June 25, 2025
 - Fixed an issue with Pandoc 3.0.2 in that it won't output docx to stdout by default
