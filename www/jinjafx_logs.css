@@ -3,7 +3,6 @@ body {
   background: rgb(41, 40, 59);
 }
 pre {
-  height: 100%;
   font-size: small;
   line-height: 1.8;
   white-space: pre-wrap;
