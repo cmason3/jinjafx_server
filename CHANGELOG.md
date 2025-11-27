@@ -1,5 +1,10 @@
 ## CHANGELOG
 
+### [25.9.0] - November 27, 2025
+- Updated `bootstrap` to 5.3.8
+- Updated `dayjs` to 1.11.18
+- Updated Pandoc to 3.8.2.1
+
 ### [25.8.0] - August 18, 2025
 - Dropped support for Python 3.9
 - Added the ability to cache the DataTemplate Modify password
@@ -482,6 +487,7 @@
 - Initial release
 
 
+[25.9.0]: https://github.com/cmason3/jinjafx_server/compare/25.8.0...25.9.0
 [25.8.0]: https://github.com/cmason3/jinjafx_server/compare/25.7.12...25.8.0
 [25.7.12]: https://github.com/cmason3/jinjafx_server/compare/25.7.11...25.7.12
 [25.7.11]: https://github.com/cmason3/jinjafx_server/compare/25.7.10...25.7.11
