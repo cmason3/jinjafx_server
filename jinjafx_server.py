@@ -226,18 +226,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       elif fpath == '/get_logs' and jfx_weblog_key is not None:
         if cookies := SimpleCookie(self.headers.get('Cookie')):
           if 'JinjaFx-WebLog-Key' in cookies and cookies['JinjaFx-WebLog-Key'].value == jfx_weblog_key:
-          #if self.request.cookies['JinjaFx-WebLog-Key'] == jfx_weblog_key:
-
-        # if hasattr(self, 'headers') and 'X-WebLog-Password' in self.headers:
-        #   if self.headers['X-WebLog-Password'] == jfx_weblog_key:
             with llock:
               logs = '\r\n'.join(logring)
 
-            #logs = logs.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-            #logs = logs.replace('\033[1;31m', '<span class="text-danger">')
-            #logs = logs.replace('\033[1;32m', '<span class="text-success">')
-            #logs = logs.replace('\033[1;33m', '<span class="text-warning">')
-            #logs = logs.replace('\033[0m', '</span>')
             r = [ 'text/plain', 200, logs.encode('utf-8'), sys._getframe().f_lineno ]
 
           else:

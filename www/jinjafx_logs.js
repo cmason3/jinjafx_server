@@ -1,8 +1,6 @@
 (function() {
   let interval = 60;
   let m = undefined;
-  // let auth_ok = false;
-  // let key = '';
 
   function quote(str) {
     str = str.replaceAll(/&/g, '&amp;');
@@ -22,8 +20,6 @@
 
   function scroll() {
     window.scrollTo(0, document.body.scrollHeight);
-    //let e = document.querySelector('pre');
-    //e.scrollTop = e.scrollHeight;
   }
 
   function update() {
@@ -32,14 +28,11 @@
 
     xHR.onload = function() {
       if (this.status == 200) {
-        // auth_ok = true;
-        // sessionStorage.setItem('jfx_weblog_key', key);
         document.querySelector('pre').innerHTML = ansiToRGB(quote(xHR.responseText));
-        // document.getElementById('container').innerHTML = xHR.responseText;
         scroll();
         setTimeout(update, interval * 1000);
       }
-      else if (this.status == 401) { // && !auth_ok) {
+      else if (this.status == 401) {
         m = new bootstrap.Modal(document.getElementById('password_input'), {
           keyboard: false
         });
@@ -47,24 +40,20 @@
       }
       else {
         document.querySelector('pre').innerHTML = 'HTTP ERROR ' + this.status;
-        // document.getElementById('container').innerHTML = 'HTTP ERROR ' + this.status;
       }
     };
 
     xHR.onerror = function() {
       document.querySelector('pre').innerHTML = 'XMLHttpRequest ERROR';
-      // document.getElementById('container').innerHTML = 'XMLHttpRequest ERROR';
       setTimeout(update, interval * 1000);
     };
 
     xHR.ontimeout = function() {
       document.querySelector('pre').innerHTML = 'XMLHttpRequest TIMEOUT';
-      // document.getElementById('container').innerHTML = 'XMLHttpRequest TIMEOUT';
       setTimeout(update, interval * 1000);
     };
 
     xHR.timeout = 3000;
-    // xHR.setRequestHeader("X-WebLog-Password", key);
     xHR.send();
   }
 
@@ -81,7 +70,6 @@
     document.getElementById('ml-password-ok').addEventListener('click', function (e) {
       if (document.getElementById("in_password").value.trim().length) {
         document.cookie = 'JinjaFx-WebLog-Key=' + document.getElementById("in_password").value + '; max-age=86400; path=/';
-        // key = document.getElementById("in_password").value;
         m.hide();
         update();
       }
@@ -100,19 +88,8 @@
 
     if (qs.has('key')) {
       document.cookie = 'JinjaFx-WebLog-Key=' + qs.get('key') + '; max-age=86400; path=/';
-      // key = qs.get('key');
       window.history.replaceState({}, document.title, window.location.pathname);
-      // sessionStorage.removeItem('jfx_weblog_key');
     }
     update();
-    // else if (sessionStorage.getItem('jfx_weblog_key')) {
-    //  key = sessionStorage.getItem('jfx_weblog_key');
-    //  update();
-    // }
-    // else {
-    //  new bootstrap.Modal(document.getElementById('password_input'), {
-    //    keyboard: false
-     // }).show();
-   // }
   };
 })();
