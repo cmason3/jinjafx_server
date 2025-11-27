@@ -1,11 +1,25 @@
 (function() {
   let interval = 60;
-  let auth_ok = false;
-  let key = '';
+  let m = undefined;
+
+  function quote(str) {
+    str = str.replaceAll(/&/g, '&amp;');
+    str = str.replaceAll(/>/g, '&gt;');
+    return str.replaceAll(/</g, '&lt;');
+  }
+
+  function ansiToRGB(str) {
+    str = str.replaceAll('\033[31m', '<span style="color: rgb(239, 100, 135);">'); // Red
+    str = str.replaceAll('\033[32m', '<span style="color: rgb(94, 202, 137);">'); // Green
+    str = str.replaceAll('\033[33m', '<span style="color: rgb(253, 216, 119);">'); // Yellow
+    str = str.replaceAll('\033[34m', '<span style="color: rgb(101, 174, 247);">'); // Blue
+    str = str.replaceAll('\033[35m', '<span style="color: rgb(170, 127, 240);">'); // Magenta
+    str = str.replaceAll('\033[36m', '<span style="color: rgb(67, 193, 190);">'); // Cyan
+    return str.replaceAll('\033[0m', '</span>');
+  }
 
   function scroll() {
-    let e = document.getElementById('container');
-    e.scrollTop = e.scrollHeight;
+    window.scrollTo(0, document.body.scrollHeight);
   }
 
   function update() {
@@ -14,34 +28,32 @@
 
     xHR.onload = function() {
       if (this.status == 200) {
-        auth_ok = true;
-        sessionStorage.setItem('jfx_weblog_key', key);
-        document.getElementById('container').innerHTML = xHR.responseText;
+        document.querySelector('pre').innerHTML = ansiToRGB(quote(xHR.responseText));
         scroll();
         setTimeout(update, interval * 1000);
       }
-      else if ((this.status == 401) && !auth_ok) {
-        new bootstrap.Modal(document.getElementById('password_input'), {
+      else if (this.status == 401) {
+        m = new bootstrap.Modal(document.getElementById('password_input'), {
           keyboard: false
-        }).show();
+        });
+        m.show();
       }
       else {
-        document.getElementById('container').innerHTML = 'HTTP ERROR ' + this.status;
+        document.querySelector('pre').innerHTML = 'HTTP ERROR ' + this.status;
       }
     };
 
     xHR.onerror = function() {
-      document.getElementById('container').innerHTML = 'XMLHttpRequest ERROR';
+      document.querySelector('pre').innerHTML = 'XMLHttpRequest ERROR';
       setTimeout(update, interval * 1000);
     };
 
     xHR.ontimeout = function() {
-      document.getElementById('container').innerHTML = 'XMLHttpRequest TIMEOUT';
+      document.querySelector('pre').innerHTML = 'XMLHttpRequest TIMEOUT';
       setTimeout(update, interval * 1000);
     };
 
     xHR.timeout = 3000;
-    xHR.setRequestHeader("X-WebLog-Password", key);
     xHR.send();
   }
 
@@ -56,8 +68,14 @@
     });
   
     document.getElementById('ml-password-ok').addEventListener('click', function (e) {
-      key = document.getElementById("in_password").value;
-      update();
+      if (document.getElementById("in_password").value.trim().length) {
+        document.cookie = 'JinjaFx-WebLog-Key=' + document.getElementById("in_password").value + '; max-age=86400; path=/';
+        m.hide();
+        update();
+      }
+      else {
+        document.getElementById("in_password").focus();
+      }
     });
 
     document.getElementById('in_password').addEventListener('keyup', function(e) {
@@ -69,19 +87,9 @@
     let qs = new URLSearchParams(window.location.search);
 
     if (qs.has('key')) {
-      key = qs.get('key');
+      document.cookie = 'JinjaFx-WebLog-Key=' + qs.get('key') + '; max-age=86400; path=/';
       window.history.replaceState({}, document.title, window.location.pathname);
-      sessionStorage.removeItem('jfx_weblog_key');
-      update();
     }
-    else if (sessionStorage.getItem('jfx_weblog_key')) {
-      key = sessionStorage.getItem('jfx_weblog_key');
-      update();
-    }
-    else {
-      new bootstrap.Modal(document.getElementById('password_input'), {
-        keyboard: false
-      }).show();
-    }
+    update();
   };
 })();

@@ -1,10 +1,10 @@
 body {
-  background: #000040;
+  color: rgb(179, 176, 214);
+  background: rgb(41, 40, 59);
 }
 pre {
-  color: white;
-  height: 100%;
-  font-variant-ligatures: none;
+  font-size: small;
+  line-height: 1.8;
   white-space: pre-wrap;
   word-break: break-all;
   overflow-y: scroll;

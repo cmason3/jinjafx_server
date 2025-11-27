@@ -1,12 +1,22 @@
 ## CHANGELOG
 
+### [25.9.0] - November 27, 2025
+- Renamed 'DOCTYPE' to 'doctype' in html files
+- Moved html script tags to the bottom in html files
+- Added a `connect-src` to `Content-Security-Policy`
+- Removed `obsolete.html` as no one should be using IE in 2025!
+- Reworked `logs.html` with some cosmetic enhancements
+- Updated `bootstrap` to 5.3.8
+- Updated `dayjs` to 1.11.18
+- Updated Pandoc to 3.8.2.1
+
 ### [25.8.0] - August 18, 2025
 - Dropped support for Python 3.9
 - Added the ability to cache the DataTemplate Modify password
 - Updated `codemirror` to 5.65.20
 
 ### [25.7.12] - July 12, 2025
-- Added option `-nocsp` to completely disable Content-Security-Policy in html output
+- Added option `-nocsp` to completely disable `Content-Security-Policy` in html output
 
 ### [25.7.11] - June 25, 2025
 - Fixed an issue with Pandoc 3.0.2 in that it won't output docx to stdout by default
@@ -482,6 +492,7 @@
 - Initial release
 
 
+[25.9.0]: https://github.com/cmason3/jinjafx_server/compare/25.8.0...25.9.0
 [25.8.0]: https://github.com/cmason3/jinjafx_server/compare/25.7.12...25.8.0
 [25.7.12]: https://github.com/cmason3/jinjafx_server/compare/25.7.11...25.7.12
 [25.7.11]: https://github.com/cmason3/jinjafx_server/compare/25.7.10...25.7.11
