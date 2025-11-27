@@ -1,19 +1,16 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=1280, user-scalable=no">
     <title>JinjaFx Logs</title>
-    <link rel="shortcut icon" href="/874f2915/jinjafx.png">
+    <link rel="shortcut icon" href="/00000000/jinjafx.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" integrity="sha512-2bBQCjcnw658Lho4nlXJcc6WkV/UxpE/sAokbXPxQNGqmNdQrWqtw26Ns9kFF/yG792pKR1Sx8/Y1Lf1XN4GKA==" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="/ea73c0c8/jinjafx.css">
-    <link rel="stylesheet" href="/53007a23/jinjafx_logs.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/js/bootstrap.bundle.min.js" integrity="sha512-HvOjJrdwNpDbkGJIG2ZNqDlVqMo77qbs4Me4cah0HoDrfhrbA+8SBlZn1KrvAQw7cILLPFJvdwIgphzQmMm+Pw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="/925dfcbd/jinjafx_logs.js"></script>
+    <link rel="stylesheet" href="/00000000/jinjafx.css">
+    <link rel="stylesheet" href="/00000000/jinjafx_logs.css">
   </head>
   <body>
-    <pre id="container" class="p-3"></pre>
-    <div id="password_input" class="modal fade" role="dialog">
+    <div id="password_input" class="modal fade" data-bs-backdrop="static" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
@@ -26,11 +23,18 @@
             </div>
           </div>
           <div class="modal-footer">
+            <!--
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button id="ml-password-ok" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            -->
+            <button id="ml-password-ok" type="button" class="btn btn-primary">OK</button>
           </div>
         </div>
       </div>
     </div>
+    <div class="container-fluid p-2">
+      <pre></pre>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/js/bootstrap.bundle.min.js" integrity="sha512-HvOjJrdwNpDbkGJIG2ZNqDlVqMo77qbs4Me4cah0HoDrfhrbA+8SBlZn1KrvAQw7cILLPFJvdwIgphzQmMm+Pw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/00000000/jinjafx_logs.js"></script>
   </body>
 </html>

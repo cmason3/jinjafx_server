@@ -1,6 +1,11 @@
 ## CHANGELOG
 
 ### [25.9.0] - November 27, 2025
+- Renamed 'DOCTYPE' to 'doctype' in html files
+- Moved html script tags to the bottom in html files
+- Added a `connect-src` to `Content-Security-Policy`
+- Removed `obsolete.html` as no one should be using IE in 2025!
+- Reworked `logs.html` with some cosmetic enhancements
 - Updated `bootstrap` to 5.3.8
 - Updated `dayjs` to 1.11.18
 - Updated Pandoc to 3.8.2.1

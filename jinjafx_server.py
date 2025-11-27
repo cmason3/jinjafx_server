@@ -20,6 +20,7 @@ if sys.version_info < (3, 10):
   sys.exit('Requires Python >= 3.10')
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.cookies import SimpleCookie
 from jinja2 import __version__ as jinja2_version
 from jinja2 import TemplateError
 
@@ -114,18 +115,18 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
           if self.command == 'POST':
             if self.error is not None:
-              ae = ' ->\033[1;' + ansi + 'm ' + str(self.error)[5:] + '\033[0m'
+              ae = ' ->\033[' + ansi + 'm ' + str(self.error)[5:] + '\033[0m'
             else:
               ae = ''
 
             if self.elapsed is not None:
-              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + proto_ver + ctype + ' [' + self.format_bytes(self.length) + '] in ' + str(self.elapsed) + 'ms', ae)
+              log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[34m' + self.command + '\033[0m ' + path + proto_ver + ctype + ' [' + self.format_bytes(self.length) + '] in ' + str(self.elapsed) + 'ms', ae)
             else:
-              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[1;33m' + self.command + '\033[0m ' + path + proto_ver + ctype + ' [' + self.format_bytes(self.length) + ']', ae)
+              log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[34m' + self.command + '\033[0m ' + path + proto_ver + ctype + ' [' + self.format_bytes(self.length) + ']', ae)
 
           elif self.command != None:
             if (args[1] != '200' and args[1] != '304') or (not path.endswith('.js') and not path.endswith('.css') and not path.endswith('.png')) or verbose:
-              log('[' + src + '] [\033[1;' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path + proto_ver)
+              log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path + proto_ver)
 
 
   def encode_link(self, bhash):
@@ -223,16 +224,20 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           r = [ 'text/html', 200, f.read(), sys._getframe().f_lineno ]
 
       elif fpath == '/get_logs' and jfx_weblog_key is not None:
-        if hasattr(self, 'headers') and 'X-WebLog-Password' in self.headers:
-          if self.headers['X-WebLog-Password'] == jfx_weblog_key:
+        if cookies := SimpleCookie(self.headers.get('Cookie')):
+          if 'JinjaFx-WebLog-Key' in cookies and cookies['JinjaFx-WebLog-Key'].value == jfx_weblog_key:
+          #if self.request.cookies['JinjaFx-WebLog-Key'] == jfx_weblog_key:
+
+        # if hasattr(self, 'headers') and 'X-WebLog-Password' in self.headers:
+        #   if self.headers['X-WebLog-Password'] == jfx_weblog_key:
             with llock:
               logs = '\r\n'.join(logring)
 
-            logs = logs.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-            logs = logs.replace('\033[1;31m', '<span class="text-danger">')
-            logs = logs.replace('\033[1;32m', '<span class="text-success">')
-            logs = logs.replace('\033[1;33m', '<span class="text-warning">')
-            logs = logs.replace('\033[0m', '</span>')
+            #logs = logs.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            #logs = logs.replace('\033[1;31m', '<span class="text-danger">')
+            #logs = logs.replace('\033[1;32m', '<span class="text-success">')
+            #logs = logs.replace('\033[1;33m', '<span class="text-warning">')
+            #logs = logs.replace('\033[0m', '</span>')
             r = [ 'text/plain', 200, logs.encode('utf-8'), sys._getframe().f_lineno ]
 
           else:
@@ -398,7 +403,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       }
 
       if not nocsp:
-        headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src " + script_src + "; img-src data: *; frame-ancestors 'none'"
+        headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src " + script_src + "; connect-src 'self' https://cdnjs.cloudflare.com; img-src data: *; frame-ancestors 'none'"
 
       etag = '"' + hashlib.sha224(repr(headers).encode('utf-8') + b'|' + r[0].encode('utf-8') + b'; ' + r[2]).hexdigest() + '"'
 
