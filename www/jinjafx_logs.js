@@ -1,6 +1,6 @@
 (function() {
-  let interval = 60;
-  let m = undefined;
+  var interval = 60;
+  var m = undefined;
 
   function quote(str) {
     str = str.replaceAll(/&/g, '&amp;');
@@ -18,10 +18,6 @@
     return str.replaceAll('\033[0m', '</span>');
   }
 
-  function scroll() {
-    window.scrollTo(0, document.body.scrollHeight);
-  }
-
   function update() {
     var xHR = new XMLHttpRequest();
     xHR.open("GET", '/get_logs', true);
@@ -29,7 +25,7 @@
     xHR.onload = function() {
       if (this.status == 200) {
         document.querySelector('pre').innerHTML = ansiToRGB(quote(xHR.responseText));
-        scroll();
+        window.scrollTo({ 'left': 0, 'top': document.body.scrollHeight, 'behavior': 'instant' });
         setTimeout(update, interval * 1000);
       }
       else if (this.status == 401) {
@@ -57,13 +53,12 @@
     xHR.send();
   }
 
-  window.onresize = scroll;
   window.onload = function() {
     document.getElementById('password_input').addEventListener('shown.bs.modal', function (e) {
       document.getElementById("in_password").focus();
     });
   
-    document.getElementById('password_input').addEventListener('hidden.bs.modal', function (e) {
+    document.getElementById('password_input').addEventListener('hide.bs.modal', function (e) {
       document.getElementById("in_password").value = '';
     });
   
@@ -79,7 +74,7 @@
     });
 
     document.getElementById('in_password').addEventListener('keyup', function(e) {
-      if (e.which == 13) {
+      if (e.key === 'Enter') {
         document.getElementById('ml-password-ok').click();
       }
     });
