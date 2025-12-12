@@ -58,7 +58,7 @@
       document.getElementById("in_password").focus();
     });
   
-    document.getElementById('password_input').addEventListener('hide.bs.modal', function (e) {
+    document.getElementById('password_input').addEventListener('hidden.bs.modal', function (e) {
       document.getElementById("in_password").value = '';
     });
   
