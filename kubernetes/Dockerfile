@@ -7,8 +7,8 @@ RUN set -eux; \
 apt-get update; \
 apt-get install -y --no-install-recommends wget git build-essential; \
 
-wget -P /tmp https://github.com/jgm/pandoc/releases/download/3.8.2.1/pandoc-3.8.2.1-1-amd64.deb; \
-dpkg -i /tmp/pandoc-3.8.2.1-1-amd64.deb; \
+wget -P /tmp https://github.com/jgm/pandoc/releases/download/3.8.3/pandoc-3.8.3-1-amd64.deb; \
+dpkg -i /tmp/pandoc-3.8.3-1-amd64.deb; \
 
 python3 -m venv /opt/jinjafx; \
 /opt/jinjafx/bin/python3 -m pip install --upgrade git+https://github.com/cmason3/jinjafx_server.git@${BRANCH} lxml; \

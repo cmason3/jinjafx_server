@@ -3,6 +3,7 @@
 ### [25.9.1] - December 12, 2025
 - Minor updates to JavaScript logic for logging
 - Updated copyright notices in preparation for 2026
+- Updated Pandoc to 3.8.3
 
 ### [25.9.0] - November 27, 2025
 - Renamed 'DOCTYPE' to 'doctype' in html files
