@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.9.2] - December 14, 2025
+- Minor cosmetic updates to logging
+
 ### [25.9.1] - December 12, 2025
 - Minor updates to JavaScript logic for logging
 - Updated copyright notices in preparation for 2026
@@ -497,6 +500,7 @@
 - Initial release
 
 
+[25.9.2]: https://github.com/cmason3/jinjafx_server/compare/25.9.1...25.9.2
 [25.9.1]: https://github.com/cmason3/jinjafx_server/compare/25.9.0...25.9.1
 [25.9.0]: https://github.com/cmason3/jinjafx_server/compare/25.8.0...25.9.0
 [25.8.0]: https://github.com/cmason3/jinjafx_server/compare/25.7.12...25.8.0
