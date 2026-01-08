@@ -214,7 +214,8 @@
                     }
                   }
                 }
-                
+
+                var outputs = {};
                 Object.keys(obj.outputs).sort(function(a, b) {
                   a = a.split(':').slice(0, -1).join(':')
                   b = b.split(':').slice(0, -1).join(':')
@@ -244,6 +245,7 @@
                     tabs += '<textarea id="t_o' + oid + '" class="output" readonly>' + window.opener.quote(tc) + '</textarea>';
                   }
 
+                  outputs[g] = btoa(tc);
                   tabs += '</div>';
 
                   if (dflag) {
@@ -273,6 +275,13 @@
                 document.getElementById('status').style.display = 'none';
                 document.getElementById('summary').innerHTML = 'Generated at ' + dayjs().format('HH:mm') + ' on ' + dayjs().format('Do MMMM YYYY') + '<br />in ' + Math.ceil(obj.elapsed).toLocaleString() + ' milliseconds';
                 document.getElementById('tabs').innerHTML = tabs;
+
+                var iframes = document.getElementsByTagName('iframe');
+                for (var i = 0; i < iframes.length; i++) {
+                  iframes[i].contentWindow.jinjafx = {};
+                  iframes[i].contentWindow.jinjafx['outputs'] = outputs;
+                }
+
                 document.getElementById('nav-links').innerHTML = links;
                 document.getElementById('wrap').classList.remove('d-none');
                 document.getElementById('footer').classList.remove('d-none');

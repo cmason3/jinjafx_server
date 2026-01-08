@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [25.9.3] - January 8, 2026
+- Pass through rendered outputs to HTML outputs as `jinjafx.outputs` to allow processing via JavaScript
+
 ### [25.9.2] - December 14, 2025
 - Minor cosmetic updates to logging
 
@@ -500,6 +503,7 @@
 - Initial release
 
 
+[25.9.3]: https://github.com/cmason3/jinjafx_server/compare/25.9.2...25.9.3
 [25.9.2]: https://github.com/cmason3/jinjafx_server/compare/25.9.1...25.9.2
 [25.9.1]: https://github.com/cmason3/jinjafx_server/compare/25.9.0...25.9.1
 [25.9.0]: https://github.com/cmason3/jinjafx_server/compare/25.8.0...25.9.0
