@@ -1,2 +1,28 @@
+[project]
+name = "jinjafx_server"
+dynamic = ["version"]
+requires-python = ">= 3.10"
+dependencies = ["jinjafx>=1.26.0", "requests", "cmarkgfm>=0.5.0", "emoji"]
+authors = [{ name = "Chris Mason", email = "chris@netnix.org" }]
+description = "JinjaFx Server - Jinja2 Templating Tool"
+readme = "README.md"
+license = "MIT"
+classifiers = [
+  "Development Status :: 5 - Production/Stable"
+  "Programming Language :: Python :: 3"
+]
+
+[project.urls]
+Repository = "https://github.com/cmason3/jinjafx_server.git"
+Issues = "https://github.com/cmason3/jinjafx_server/issues"
+Changelog = "https://github.com/cmason3/jinjafx_server/blob/main/CHANGELOG.md"
+
+[project.scripts]
+jinjafx_server = "jinjafx_server:main"
+
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = { attr = "jinjafx_server.__version__" }

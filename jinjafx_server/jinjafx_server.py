@@ -19,7 +19,7 @@ import sys
 if sys.version_info < (3, 10):
   sys.exit('Requires Python >= 3.10')
 
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import HTTPServer, BaseHTTPRequestHandler, HTTPStatus
 from http.cookies import SimpleCookie
 from jinja2 import __version__ as jinja2_version
 from jinja2 import TemplateError
@@ -28,7 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.9.3'
+__version__ = '26.1.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()

@@ -39,14 +39,14 @@ def update_file(cdnjs_url, sri, f):
 
 
 for lib in libraries:
-  www = os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + '/../www/')
+  www = os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + '/../jinjafx_server/www/')
   cdnjs = re.compile(r'https://cdnjs.cloudflare.com/ajax/libs/' + re.escape(lib) + '/(.+?)/(.+?)"')
 
   api_url = 'https://api.cdnjs.com/libraries/' + lib + '/' + libraries[lib]
   r = requests.get(api_url + '?fields=sri').json()
 
   if 'sri' in r:
-    update_file(cdnjs, r['sri'], os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + '/../jinjafx_server.py'))
+    update_file(cdnjs, r['sri'], os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + '/../jinjafx_server/jinjafx_server.py'))
 
     for fn in os.listdir(www):
       if fn.endswith('.html'):
