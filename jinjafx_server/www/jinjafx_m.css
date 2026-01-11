@@ -1,0 +1,214 @@
+body {
+  display: none;
+}
+#overlay {
+  position: fixed;
+  display: none;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  cursor: wait;
+}
+#csv * {
+  font-size: 12px;
+}
+#csv {
+  border: 1px solid lightgray;
+  white-space: nowrap;
+  background-color: #fff;
+  overflow: auto;
+  width: auto;
+  height: 100%;
+  display: none;
+}
+#csv th {
+  border: 1px solid darkgray;
+  font-weight: normal;
+  background-color: none !important;
+  color: #219;
+}
+#csv tbody {
+  border-top: none;
+}
+#csv td {
+  border: 1px solid darkgray;
+}
+#csv th:first-child {
+  border-left: none;
+}
+#csv th:last-child {
+  border-right: none;
+}
+#csv td:first-child {
+  border-left: none;
+}
+#csv td:last-child {
+  border-right: none;
+}
+textarea {
+  resize: none;
+}
+.btn-warn-opaque:disabled {
+  color: #535353 !important;
+  border-color: #ffd75e !important;
+  background-color: #ffd75e !important;
+  opacity: 1 !important;
+}
+.mw-150 {
+  min-width: 150px;
+}
+.mw-250 {
+  min-width: 250px;
+}
+.me-10 {
+  margin-right: 10px;
+}
+.caret-off::after {
+  display: none !important;
+}
+.btn-curved {
+  border-top-left-radius: 0.3rem !important;
+  border-bottom-left-radius: 0.3rem !important;
+}
+.dropdown-item-nofocus {
+  display: block;
+  width: 100%;
+  padding: var(--bs-dropdown-item-padding-y) var(--bs-dropdown-item-padding-x);
+  clear: both;
+  font-weight: 400;
+  color: var(--bs-dropdown-link-color);
+  text-align: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--bs-dropdown-item-border-radius, 0);
+}
+.code-block {
+  border: 1px dashed gray;
+  background-color: lightgray;
+  border-radius: 0.5rem;
+  padding: 10px;
+}
+.topright {
+  position: absolute;
+  z-index: 2;
+  right: 8px;
+  top: 8px;
+}
+.info {
+  position: absolute;
+  z-index: 2;
+  right: 15px;
+  top: 15px;
+  bottom: 15px;
+  width: 50%;
+  visibility: hidden;
+}
+.info-inner {
+  border-radius: 0.5rem;
+  border: 0.5px solid #cc0;
+  box-shadow: 10px 10px 8px #888;
+  background-color: #ffffcc;
+  padding: 10px;
+  overflow-y: auto;
+  max-height: 100%;
+}
+.labels {
+  height: 100%;
+  width: 20px;
+  line-height: 0.8rem;
+  overflow-y: hidden;
+  color: white;
+}
+.lb-data {
+  background: #00a9d8;
+}
+.lb-template {
+  background: #008bd9;
+}
+.lb-vars {
+  background: #00a9d8;
+}
+.lb-gvars {
+  background: #008bd9;
+}
+.fade-out {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s linear 500ms, opacity 500ms;
+}
+.gutter {
+  background-color: #eee;
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+.gutter.gutter-vertical {
+  cursor: ns-resize;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
+}
+.gutter.gutter-horizontal {
+  cursor: ew-resize;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+}
+.split-horizontal, .gutter.gutter-horizontal {
+  height: 100%;
+  float: left;
+}
+.CodeMirror * {
+  font-size: 12px;
+}
+.CodeMirror {
+  border: 1px solid lightgray;
+  height: 100%;
+}
+.CodeMirror-foldmarker {
+  color: blue;
+  cursor: pointer;
+}
+.CodeMirror-foldgutter-open::after {
+  content: "\2190";
+  color: blue;
+}
+.CodeMirror-foldgutter-folded::after {
+  content: "\2192";
+  color: blue;
+}
+.cm-trailingspace::after {
+  color: steelblue;
+  content: '$';
+}
+.cm-jfx-header {
+  color: #219;
+}
+.cm-jfx-tag {
+  color: #a11;
+}
+.cm-jfx-output-left {
+  border-radius: 0.5rem 0 0 0.5rem;
+  background: rgba(0, 0, 255, 0.2);
+  padding: 0.1em 0 0.1em 0.1em;
+}
+.cm-jfx-output {
+  padding: 0.1em 0;
+  background: rgba(0, 0, 255, 0.2);
+}
+.cm-jfx-output-tag {
+  padding: 0.1em 0;
+  color: #a11;
+  background: rgba(0, 0, 255, 0.2);
+}
+.cm-jfx-output-number {
+  padding: 0.1em 0;
+  color: #164;
+  background: rgba(0, 0, 255, 0.2);
+}
+.cm-jfx-output-right {
+  border-radius: 0 0.5rem 0.5rem 0;
+  background: rgba(0, 0, 255, 0.2);
+  padding: 0.1em 0.1em 0.1em 0;
+}

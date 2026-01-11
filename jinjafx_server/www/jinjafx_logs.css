@@ -1,0 +1,17 @@
+body {
+  color: rgb(179, 176, 214);
+  background: rgb(41, 40, 59);
+}
+pre {
+  font-size: small;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+pre::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}

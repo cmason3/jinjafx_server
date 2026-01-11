@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=1536, user-scalable=no">
+    <meta name="description" content="JinjaFx is a Python based Jinja2 Templating Tool with support for Ansible filters that renders output based on CSV or YAML datasets">
+    <title>JinjaFx - Jinja2 Templating Tool</title>
+    <link rel="shortcut icon" href="/874f2915/jinjafx.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" integrity="sha512-2bBQCjcnw658Lho4nlXJcc6WkV/UxpE/sAokbXPxQNGqmNdQrWqtw26Ns9kFF/yG792pKR1Sx8/Y1Lf1XN4GKA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/codemirror.min.css" integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/addon/dialog/dialog.min.css" integrity="sha512-Vogm+Cii1SXP5oxWQyPdkA91rHB776209ZVvX4C/i4ypcfBlWVRXZGodoTDAyyZvO36JlTqDqkMhVKAYc7CMjQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/addon/display/fullscreen.min.css" integrity="sha512-T8xB3MmwpA77VK9lUH3UkdUTnkmpqOxHF8OceOKaHrvpcXMSNX0xtpa9FoLTDAVO1JnB2UiMdVeI2V0HTHjTWA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/addon/fold/foldgutter.min.css" integrity="sha512-YwkMTlTHn8dBnwa47IF+cKsS00HPiiVhQ4DpwT1KF2gUftfFR7aefepabSPLAs6zrMyD89M3w0Ow6mQ5XJEUCw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="/ea73c0c8/jinjafx.css">
+    <link rel="stylesheet" href="/5ae811ff/jinjafx_m.css">
+  </head>
+  <body>
+    <div id="overlay"></div>
+    <div id="wrap">
+      <h1 class="d-none">JinjaFx - Jinja2 Templating Tool</h1>
+      <div id="header" class="p-3">
+        <a href="/" tabindex="-1">
+          <svg class="float-start me-10" width="48" height="48" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <rect x="32" y="32" width="250" height="250" fill="#0057b8" stroke="#001f3f" />
+            <rect x="304" y="162" width="120" height="120" fill="#0057b8" stroke="#001f3f" />
+            <rect x="142" y="304" width="140" height="140" fill="#0057b8" stroke="#001f3f" />
+            <rect x="304" y="304" width="177" height="177" fill="#0057b8" stroke="#001f3f" />
+          </svg>
+        </a>
+        <h5 id="title">
+          <a class="text-decoration-none text-reset" href="/" tabindex="-1">
+            <span class="fw-bold">JinjaFx</span><br />
+            <span class="small text-black">&nbsp;Jinja2&nbsp;Templating&nbsp;Tool</span>
+          </a>
+        </h5>
+        <!-- https://github.com/feathericons/feather/tree/master/icons -->
+        <div id="buttons" class="btn-toolbar ms-auto d-flex d-none" role="group">
+          <div class="btn-group me-2">
+            <div class="btn-group">
+              <button id="select_ds" type="button" class="btn btn-warning text-black text-start mw-150 btn-warn-opaque" data-bs-toggle="dropdown" title="Select DataSet" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                  <polyline points="2 17 12 22 22 17" />
+                  <polyline points="2 12 12 17 22 12" />
+                </svg>&nbsp;<span id="selected_ds">Default</span>
+              </button>
+              <div id="datasets" class="dropdown-menu"></div>
+            </div>
+            <button id="delete_ds" type="button" class="btn btn-warning text-black btn-warn-opaque" title="Delete DataSet" disabled>-</button>
+            <button id="add_ds" type="button" class="btn btn-warning text-black btn-warn-opaque" title="Add DataSet">+</button>
+          </div>
+
+          <button id="encrypt" type="button" class="btn btn-secondary text-white me-2 d-none" title="Encrypt String with Ansible Vault">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </button>
+
+          <div id="lbuttons" class="btn-group me-2 d-none">
+            <button id="get" type="button" class="btn btn-secondary text-white" title="Get Link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>&nbsp;Get Link
+            </button>
+            <button id="update" type="button" class="btn btn-secondary text-white btn-curved d-none" title="Update Link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                <polyline points="17 21 17 13 7 13 7 21" />
+                <polyline points="7 3 7 8 15 8" />
+              </svg>&nbsp;Update
+            </button>
+            <div class="btn-group">
+              <button id="mdd" type="button" class="btn btn-secondary text-white dropdown-toggle caret-off" data-bs-toggle="dropdown" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="20" viewBox="0 0 12 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="6" cy="5" r="1"></circle>
+                  <circle cx="6" cy="12" r="1"></circle>
+                  <circle cx="6" cy="19" r="1"></circle>
+                </svg>
+              </button>
+              <div id="menu_items" class="dropdown-menu">
+                <button id="get2" class="dropdown-item text-decoration-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                  </svg>&nbsp;Get New Link
+                </button>
+                <button id="protect" class="dropdown-item text-decoration-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+                  </svg>&nbsp;<span id="protect_text">Protect Link</span>
+                </button>
+                <button id="delete" class="dropdown-item text-decoration-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                  </svg>&nbsp;<span id="delete_text">Delete Link</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <input type="file" id="import_file" accept=".txt,.dt,.text" class="d-none">
+          <button id="import" type="button" class="btn btn-secondary text-white me-2" title="Import DataTemplate">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </button>
+          <button id="export" type="button" class="btn btn-secondary text-white me-2" title="Export DataTemplate">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>&nbsp;Export
+          </button>
+
+          <button id="generate" type="button" class="btn btn-primary text-white" title="Generate">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="16 3 21 3 21 8" />
+              <line x1="4" y1="20" x2="21" y2="3" />
+              <polyline points="21 16 21 21 16 21" />
+              <line x1="15" y1="15" x2="21" y2="21" />
+              <line x1="4" y1="4" x2="9" y2="9" />
+            </svg>&nbsp;Generate
+          </button>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div id="main" class="container-fluid">
+        <div id="content">
+          <div id="top">
+            <div id="cdata" class="split-horizontal position-relative">
+              <div class="badge lb-data float-start labels">D<br />A<br />T<br />A<br />.<br />C<br />S<br />V<br /></div>
+              <textarea id="data"></textarea>
+              <div id="csv"></div>
+            </div>
+            <div id="cvars" class="split-horizontal">
+              <div id="xgvars" class="position-relative d-none">
+                <div class="badge lb-gvars float-start labels">G<br />L<br />O<br />B<br />A<br />L<br />.<br />Y<br />M<br />L<br /></div>
+                <textarea id="t_gvars"></textarea>
+              </div>
+              <div id="xlvars" class="position-relative h-100">
+                <div class="badge lb-vars float-start labels">V<br />A<br />R<br />S<br />.<br />Y<br />M<br />L<br /></div>
+                <textarea id="vars"></textarea>
+                <span id="ansible-vault" class="topright d-none">
+                  <div class="input-group mw-250">
+                    <span class="input-group-text" title="Ansible Vault Password">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                    </span>
+                    <input id="vault-password" type="password" class="form-control" placeholder="Vault Password">
+                  </div>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div id="ctemplate" class="position-relative">
+            <div class="badge lb-template float-start labels">T<br />E<br />M<br />P<br />L<br />A<br />T<br />E<br />.<br />J<br />2<br /></div>
+            <textarea id="template"></textarea>
+            <span id="stemplates" class="topright">
+              <div class="btn-group">
+                <div class="btn-group">
+                  <button id="select_t" type="button" class="btn btn-warning btn-sm text-start mw-150 btn-warn-opaque" data-bs-toggle="dropdown" title="Select Template" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="14" width="7" height="7"></rect>
+                      <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>&nbsp;<span id="selected_t">Default</span>
+                  </button>
+                  <div id="templates" class="dropdown-menu"></div>
+                </div>
+                <button id="delete_t" type="button" class="btn btn-warning btn-sm btn-warn-opaque" title="Delete Template" disabled>-</button>
+                <button id="add_t" type="button" class="btn btn-warning btn-sm btn-warn-opaque" title="Add Template">+</button>
+              </div>
+            </span>
+            <span id="template_info" class="info">
+              <div class="info-inner">
+                <h3>Outputs</h3><hr>
+                <p>JinjaFx can create different outputs from the same template using the following syntax:</p>
+<pre class="code-block">&lt;output "Output 1"&gt;
+...
+&lt;/output&gt;
+
+&lt;output "Output 2"&gt;
+...
+&lt;/output&gt;</pre>
+                <p>By default an output is rendered as text, but you can also tell JinjaFx to render it as HTML or Markdown, e.g:</p>
+<pre class="code-block">&lt;output<span class="cm-jfx-tag">:html</span> "Output 1"&gt;
+...
+&lt;/output&gt;
+
+&lt;output<span class="cm-jfx-tag">:markdown</span> "Output 2"&gt;
+...
+&lt;/output&gt;</pre>
+                <p>JinjaFx supports nested templates - if you click on the "+" at the top right of the "template.j2" pane then you can create multiple templates and import them into the "Default" template via the following syntax:</p>
+<pre class="code-block">{% include "&lt;template&gt;" %}</pre>
+                <br /><h3>Dynamic CSV</h3><hr>
+                <p>Within the "data.csv" pane you can specify regular CSV where each row will be treated as a data set using the header row for variable names. However, it also supports something which I call Dynamic CSV where you can use regular expression based static character classes or static groups as values within the data rows using <span class="cm-jfx-tag">(value1|value2|value3)</span> or <span class="cm-jfx-tag">[a-f]</span>. These will then be expanded into multiple rows, e.g:</p>
+<pre class="code-block">DEVICE, TYPE
+us<span class="cm-jfx-tag">(ma|n[yh]|tx)</span>-pe-1<span class="cm-jfx-tag">[ab]</span>, pe</pre>
+                <p>The above would be expanded to the following, which JinjaFx would then loop through like normal rows (be careful as you can easily create huge data sets) - if you do wish to use literal brackets then they would need to be escaped (e.g. "\[" or "\(").</p>
+<pre class="code-block">DEVICE, TYPE
+usma-pe-1a, pe
+usma-pe-1b, pe
+ustx-pe-1a, pe
+ustx-pe-1b, pe
+usny-pe-1a, pe
+usny-pe-1b, pe
+usnh-pe-1a, pe
+usnh-pe-1b, pe</pre>
+                <p>We also support the ability to expand rows based on numerical counters using the <span class="cm-jfx-tag">{ start[-end]:step }</span> syntax, e.g:</p>
+<pre class="code-block">INTERFACE
+et-0/0/<span class="cm-jfx-tag">{0-9:1}</span></pre>
+                <p>The above syntax would convert one row into ten rows using the values 0 to 9. If the <span class="cm-jfx-tag">end</span> value is omitted then it is a passive counter and will only increment if something else is expanding the rows.</p>
+                <br /><h3>Inputs</h3><hr>
+                <p>Normally data is provided to JinjaFx via CSV or YAML/JSON using the above panes, but JinjaFx can also prompt the user for input using the "jinjafx_input" variable in "vars.yml", e.g:</p>
+<pre class="code-block">jinjafx_input:
+  prompt:
+    name:
+      text: "Name"
+      required: True
+    age:
+      text: "Age"
+      required: True
+      pattern: "[1-9]+[0-9]*"</pre>
+                <p>These inputs can then be used in your template using the following Jinja2 syntax:</p>
+<pre class="code-block">{{ jinjafx_input['name'] }} is {{ jinjafx_input['age'] }} years old</pre>
+                <p>For more advanced syntax that allows you to specify the format of the input dialog please see <a href="https://github.com/cmason3/jinjafx_server#jinjafx-input" target="_blank">README.md</a> on GitHub.</p>
+              </div>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div id="push"></div>
+    </div>
+    <div id="footer">
+      <div class="container-fluid">
+        <h5 id="status" class="float-start"></h5>
+        <h6 class="text-end">JinjaFx v{{ jinjafx.version }}<br /><a class="small" href="https://github.com/cmason3/jinjafx" tabindex="-1" rel="noopener" target="_blank">https://github.com/cmason3/jinjafx</a></h6>
+      </div>
+    </div>
+    <input id="get_link" type="hidden" value="{{ get_link }}">
+    <div id="jinjafx_input" class="modal fade" role="dialog">
+      <div id="input_modal" class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <form id="input_form" role="form">
+            <div id="jinjafx_input_form" class="form-group modal-body">
+            </div>
+            <div class="modal-footer">
+              <button id="ml-input-reset" type="button" class="btn btn-danger">Reset</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button id="ml-input-ok" type="submit" class="btn btn-primary">Generate</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div id="vault_encrypt" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 id="ml-title" class="mt-0">Ansible Vault</h4>
+          </div>
+          <div class="form-group modal-body">
+            <div class="row">
+              <label for="vault_string" class="col-sm-12 col-form-label">String to Encrypt</label>
+              <div class="col-sm-12">
+                <input type="text" class="form-control" id="vault_string">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <label for="password_vault1" class="col-form-label">Vault Password</label>
+                <input type="password" class="form-control" id="password_vault1">
+              </div>
+              <div class="col-6">
+                <label for="password_vault2" class="col-form-label" disabled>Verify Password</label>
+                <input type="password" class="form-control" id="password_vault2" disabled>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button id="ml-vault-encrypt-ok" type="button" class="btn btn-primary">Encrypt</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="vault_output" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 id="ml-title" class="mt-0">Ansible Vault</h4>
+          </div>
+          <div class="form-group row modal-body">
+            <textarea class="form-control" id="vault_text" rows="10" readonly></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="protect_dt" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 id="ml-title" class="mt-0">Protect DataTemplate</h4>
+          </div>
+          <div class="form-group modal-body">
+            <div class="row">
+              <div class="col-6">
+                <label for="password_open1" class="col-form-label">Password to Open/Encrypt</label>
+                <input type="password" class="form-control" id="password_open1">
+              </div>
+              <div class="col-6">
+                <label for="password_open2" class="col-form-label" disabled>Verify Password</label>
+                <input type="password" class="form-control" id="password_open2" disabled>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <label for="password_modify1" class="col-form-label">Password to Modify</label>
+                <input type="password" class="form-control" id="password_modify1">
+              </div>
+              <div class="col-6">
+                <label for="password_modify2" class="col-form-label" disabled>Verify Password</label>
+                <input type="password" class="form-control" id="password_modify2" disabled>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="form-check form-switch me-auto">
+              <input class="form-check-input" type="checkbox" role="switch" id="encrypt_dt" disabled>
+              <label class="form-check-label" for="encrypt_dt" title="Encrypt DataTemplate with Vaulty">Encrypt DataTemplate</label>
+            </div>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button id="ml-protect-dt-ok" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="protect_input" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 id="ml-title" class="mt-0">Protected DataTemplate</h4>
+          </div>
+          <div class="form-group row modal-body">
+            <label id="lb_protect" for="in_protect" class="col-sm-12 col-form-label">DataTemplate Password</label>
+            <div class="col-sm-12">
+              <input type="password" class="form-control" id="in_protect">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="form-check form-switch me-auto">
+              <input class="form-check-input" type="checkbox" role="switch" id="cache_password" disabled>
+              <label class="form-check-label" for="cache_password" title="Cache Password">Cache Password</label>
+            </div>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button id="ml-protect-ok" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="dataset_input" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 id="ml-title" class="mt-0">Add DataSet</h4>
+          </div>
+          <div class="form-group row modal-body">
+            <label for="ds_name" class="col-sm-12 col-form-label">DataSet Name</label>
+            <div class="col-sm-12">
+              <input class="form-control" id="ds_name">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button id="ml-dataset-ok" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="template_input" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 id="ml-title" class="mt-0">Add Template</h4>
+          </div>
+          <div class="form-group row modal-body">
+            <label for="t_name" class="col-sm-12 col-form-label">Template Name</label>
+            <div class="col-sm-12">
+              <input class="form-control" id="t_name">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button id="ml-template-ok" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/js/bootstrap.bundle.min.js" integrity="sha512-HvOjJrdwNpDbkGJIG2ZNqDlVqMo77qbs4Me4cah0HoDrfhrbA+8SBlZn1KrvAQw7cILLPFJvdwIgphzQmMm+Pw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/codemirror.min.js" integrity="sha512-hJEMjfR4ds7mXbBot3i/R+CsiyYpeWSezXul8uLBT8wXAHPUdhRgl4LLTtMGwjarftGKiQqK1v20XScm0ANTPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/addon/selection/mark-selection.min.js" integrity="sha512-XaS0JPIY5yDTDaYIMjkoXz+LF/DEVhRn1eq9QOhJPhMuJGGPOKZTulF+LY8/uwd18k00CIaSe4f8fCyp/5U7IQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/addon/dialog/dialog.min.js" integrity="sha512-NAJeqwfpM7/nfX90EweQhjudb66diK3Y9mkBjb4xJ6wufuVqFVAjHd8mJW//CGHNR9cI8wUfDRJ0jtLzZ9v8Qg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/addon/display/fullscreen.min.js" integrity="sha512-8Rk4wB3MfgQfuOw95XW/vAU8PSTHWI5HddVRXfg+Ykk8CzsiOZkDpxVSrnYq2u/IqO499ooZ61fFHppuzB2ghA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/addon/search/search.min.js" integrity="sha512-Mw3RqCUHTyvN3iSp5TSs731TiLqnKrxzyy2UVZv3+tJa524Rj7pBC7Ivv3ka2oDnkQwLOMHNDKU5nMJ16YRgrA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/addon/search/searchcursor.min.js" integrity="sha512-+ZfZDC9gi1y9Xoxi9UUsSp+5k+AcFE0TRNjI0pfaAHQ7VZTaaoEpBZp9q9OvHdSomOze/7s5w27rcsYpT6xU6g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/addon/edit/trailingspace.min.js" integrity="sha512-xcccdc2hhCFOxhdb8nh6lTpOS7gNTw36W/TIaDoNfydtLhxbebAqiqhY8zty5K5V57/Pgpb9wD27fH1UHYk8yQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/addon/fold/foldcode.min.js" integrity="sha512-Q2qfEJEU257Qlqc4/5g6iKuJNnn5L0xu2D48p8WHe9YC/kLj2UfkdGD01qfxWk+XIcHsZngcA8WuKcizF8MAHA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/addon/fold/foldgutter.min.js" integrity="sha512-TRBGROluEM9UrFPnoCk0vW2PqqcMUyGJETe60qzktKTEiXmPhmxqJLYqOf7TsX4ulMbANjdpLY+DYk0aoht4gA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/addon/mode/overlay.min.js" integrity="sha512-SNwKDMYQwymOPjleeZy1xbdlK1PAjJ6EAplvx0CvNFJbW/pF5ec3h0mAdDl1yySq9r3Qont4STM4W3le7FTm9w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/mode/jinja2/jinja2.min.js" integrity="sha512-Z4le1RxwhD8lDCrspbBxjTLLP2HGC1+mKb9KHR2N/sEx8uOe2vre5XQo8YMPAz8FQTo43HjefjlDtjY4LtfaaQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/mode/yaml/yaml.min.js" integrity="sha512-Prlj899DsOyGWU8noS4ZqQ8Z4jy+215JiZPxt/cT3ds3VqbwwsjSYZ64zCWQ/Z7AUZvymKGRllUSLPW5RKylNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako_deflate.min.js" integrity="sha512-oEsmlMj4bUaKNfYtsxV2eZm+5L0I/JhLsXftLFKeywkgAq8QMLKRlZrMIkMC2AHZQ/gT8YtI+fP1WUwNjF1PoQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.5/split.min.js" integrity="sha512-lNjb0qWDVvt1zfSiXufaxtlFtenve3BLbvljxuMXuSr0DE0HYp5OhX0u89uwNd6MvlX1bgJ8ulfG4JMGurs8UA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js" integrity="sha512-CSBhVREyzHAjAFfBlIBakjoRUKp5h7VSweP0InR/pAJyptH7peuhCsqAI/snV+TwZmXZqoUklpXp6R6wMnYf5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.18/dayjs.min.js" integrity="sha512-FwNWaxyfy2XlEINoSnZh1JQ5TRRtGow0D6XcmAWmYCRgvqOUTnzCxPc9uF35u5ZEpirk1uhlPVA19tflhvnW1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.18/plugin/relativeTime.min.js" integrity="sha512-MVzDPmm7QZ8PhEiqJXKz/zw2HJuv61waxb8XXuZMMs9b+an3LoqOqhOEt5Nq3LY1e4Ipbbd/e+AWgERdHlVgaA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/69a2cea7/jinjafx_m.js"></script>
+  </body>
+</html>

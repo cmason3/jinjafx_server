@@ -1,0 +1,77 @@
+* {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-variant-ligatures: none;
+  -webkit-font-smoothing: antialiased;
+  font-weight: normal;
+}
+html {
+  font-size: 14px;
+}
+html, body {
+  height: 100%;
+}
+svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+.expand svg {
+  vertical-align: top;
+}
+#wrap {
+  min-height: 100%;
+  height: auto !important;
+  margin: 0 auto -55px;
+  background-color: #eee;
+}
+#header {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0px;
+  background-color: #eee;
+}
+#main {
+  padding-bottom: 30px;
+}
+h5#title {
+  color: black;
+  float: left;
+  margin: 0px 10px 0px 0px;
+}
+#content {
+  min-height: 125px;
+}
+#push, #footer {
+  height: 15px;
+}
+.wait, .wait * {
+  cursor: wait !important;
+}
+a:link {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-color: #fff;
+  --bs-btn-bg: #0057b8;
+  --bs-btn-disabled-bg: #0057b8;
+  --bs-btn-hover-bg: #004a9c;
+  --bs-btn-active-bg: #004693;
+  --bs-btn-border-color: #0057b8;
+  --bs-btn-disabled-border-color: #0057b8;
+  --bs-btn-hover-border-color: #004693;
+  --bs-btn-active-border-color: #00418a;
+  --bs-btn-focus-shadow-rgb: 38, 112, 195;
+}
+.nav-pills {
+  --bs-nav-pills-link-active-bg: #0057b8;
+}
+.btn:focus, .btn:active:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
