@@ -2,7 +2,7 @@
 name = "jinjafx_server"
 dynamic = ["version"]
 requires-python = ">= 3.10"
-dependencies = ["jinjafx>=1.26.0", "requests", "cmarkgfm>=0.5.0", "emoji"]
+dependencies = ["jinjafx>=1.27.1", "requests", "cmarkgfm>=0.5.0", "emoji"]
 authors = [{ name = "Chris Mason", email = "chris@netnix.org" }]
 description = "JinjaFx Server - Jinja2 Templating Tool"
 readme = "README.md"

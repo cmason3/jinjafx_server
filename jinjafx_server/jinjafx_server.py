@@ -26,9 +26,9 @@ from jinja2 import TemplateError
 
 import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, datetime, resource
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
-import cmarkgfm, emoji
+import cmarkgfm, emoji, jsonschema
 
-__version__ = '26.1.0'
+__version__ = '26.1.1'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -463,626 +463,634 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
 
   def do_POST(self):
-    cheaders = {}
-
-    uc = self.path.split('?', 1)
-    params = { x[0]: x[1] for x in [x.split('=') for x in uc[1].split('&') ] } if len(uc) > 1 else { }
-    fpath = uc[0]
-
-    if hasattr(self, 'headers') and 'X-Forwarded-For' in self.headers:
-      remote_addr = self.headers['X-Forwarded-For']
-    else:
-      remote_addr = str(self.client_address[0])
-
-    r = [ 'text/plain', 500, '500 Internal Server Error\r\n', sys._getframe().f_lineno ]
-
-    if 'Content-Length' in self.headers:
-      if int(self.headers['Content-Length']) < (25 * 1024 * 1024):
-        postdata = self.rfile.read(int(self.headers['Content-Length']))
-        self.length = len(postdata)
-
-        if 'Content-Encoding' in self.headers and self.headers['Content-Encoding'] == 'gzip':
-          postdata = gzip.decompress(postdata)
-
-        if fpath == '/jinjafx':
-          if self.headers['Content-Type'] == 'application/json':
-            try:
-              gvars = {}
-
-              dt = json.loads(postdata.decode('utf-8'))
-              data = self.d(dt['data']) if 'data' in dt and len(dt['data'].strip()) > 0 else b''
-
-              if isinstance(dt['template'], dict):
-                for t in dt['template']:
-                  dt['template'][t] = self.d(dt['template'][t]).decode('utf-8') if len(dt['template'][t].strip()) > 0 else ''
-
-              else:
-                dt['template'] = self.d(dt['template']).decode('utf-8') if len(dt['template'].strip()) > 0 else ''
-
-              template = dt['template']
-
-              if 'vars' in dt and len(dt['vars'].strip()) > 0:
-                gyaml = self.d(dt['vars']).decode('utf-8')
-                vpw = self.d(dt['vpw']).decode('utf-8') if 'vpw' in dt else ''
-                vault_undef = False
-
-                if 'jinjafx_vault_undefined' in gyaml:
-                  yaml.add_constructor('!vault', lambda x, y: None, yaml.SafeLoader)
-                  if y := yaml.load(gyaml, Loader=yaml.SafeLoader):
-                    vault_undef = y.get('jinjafx_vault_undefined', vault_undef)
-
-                if vpw.strip():
+    try:
+      cheaders = {}
+      
+      uc = self.path.split('?', 1)
+      params = { x[0]: x[1] for x in [x.split('=') for x in uc[1].split('&') ] } if len(uc) > 1 else { }
+      fpath = uc[0]
+  
+      if hasattr(self, 'headers') and 'X-Forwarded-For' in self.headers:
+        remote_addr = self.headers['X-Forwarded-For']
+      else:
+        remote_addr = str(self.client_address[0])
+  
+      r = [ 'text/plain', 500, '500 Internal Server Error\r\n', sys._getframe().f_lineno ]
+  
+      if 'Content-Length' in self.headers:
+        if int(self.headers['Content-Length']) < (25 * 1024 * 1024):
+          postdata = self.rfile.read(int(self.headers['Content-Length']))
+          self.length = len(postdata)
+  
+          if 'Content-Encoding' in self.headers and self.headers['Content-Encoding'] == 'gzip':
+            postdata = gzip.decompress(postdata)
+  
+          if fpath == '/jinjafx':
+            if self.headers['Content-Type'] == 'application/json':
+              try:
+                gvars = {}
+  
+                dt = json.loads(postdata.decode('utf-8'))
+                data = self.d(dt['data']) if 'data' in dt and len(dt['data'].strip()) > 0 else b''
+  
+                if isinstance(dt['template'], dict):
+                  for t in dt['template']:
+                    dt['template'][t] = self.d(dt['template'][t]).decode('utf-8') if len(dt['template'][t].strip()) > 0 else ''
+  
+                else:
+                  dt['template'] = self.d(dt['template']).decode('utf-8') if len(dt['template'].strip()) > 0 else ''
+  
+                template = dt['template']
+  
+                if 'vars' in dt and len(dt['vars'].strip()) > 0:
+                  gyaml = self.d(dt['vars']).decode('utf-8')
+                  vpw = self.d(dt['vpw']).decode('utf-8') if 'vpw' in dt else ''
                   vault_undef = False
-
-                def yaml_vault_tag(loader, node):
-                  x = jinjafx.AnsibleVault().decrypt(node.value.encode('utf-8'), vpw, vault_undef)
-                  if x is not None:
-                    return x.decode('utf-8')
-
-                  else:
-                    return '_undef'
-
-                yaml.add_constructor('!vault', yaml_vault_tag, yaml.SafeLoader)
-
-                if y := yaml.load(gyaml, Loader=yaml.SafeLoader):
-                  if isinstance(y, list):
-                    y = {'_': y}
-
-                  s = [y]
-
-                  while s:
-                    c = s.pop()
-                    for key in list(c.keys()):
-                      if c[key] == '_undef':
-                        del c[key]
-                      elif isinstance(c[key], dict):
-                        s.append(c[key])
-                      elif isinstance(c[key], list):
-                        for item in c[key]:
-                          if isinstance(item, dict):
-                            s.append(item)
-
-                  gvars.update(y)
-
-              st = round(time.time() * 1000)
-              ocount = 0
-              ret = [0, None]
-
-              t = StoppableJinjaFx(jinjafx.JinjaFx()._jinjafx, template, data.decode('utf-8'), gvars, ret)
-
-              if timelimit > 0:
-                while t.is_alive() and ((time.time() * 1000) - st) <= (timelimit * 1000):
-                  time.sleep(0.1)
-
-                if t.is_alive():
-                  t.stop()
-
-              t.join()
-
-              if ret[0] == 1:
-                outputs = ret[1]
-
-              elif ret[0] == -1:
-                raise ret[1]
-
-              else:
-                raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
-
-              jsr = {
-                'status': 'ok',
-                'elapsed': round(time.time() * 1000) - st,
-                'outputs': {}
-              }
-
-              self.elapsed = jsr['elapsed']
-
-              def html_escape(text):
-                text = text.replace("'", "&apos;")
-                text = text.replace('"', "&quot;")
-                return text
-
-              for o in outputs:
-                (oname, oformat) = o.rsplit(':', 1) if ':' in o else (o, 'text')
-                oname = re.sub(r' */[ /]+', '/', oname.lstrip(' /').rstrip())
-                output = '\n'.join(outputs[o]) + '\n'
-
-                if oname.endswith('/') or (len(oname) == 0):
-                  oname += 'Output'
-
-                if len(output.strip()) > 0:
-                  o = oname + ':' + oformat
-
-                  if oformat == 'markdown' or oformat == 'md':
-                    o = oname + ':html'
-                    options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART | cmarkgfm.cmark.Options.CMARK_OPT_UNSAFE)
-                    output = cmarkgfm.github_flavored_markdown_to_html(html_escape(output), options).replace('&amp;amp;', '&amp;').replace('&amp;', '&')
-
-                    for style in ['red', 'green', 'blue', 'highlight']:
-                      output = re.sub('{(' + style + ')}(.+?){/\\1}', r'<span class="\1">\2</span>', output, flags=re.DOTALL | re.IGNORECASE)
-
-                    head = '<!DOCTYPE html>\n<html>\n<head>\n'
-                    head += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown.min.css" crossorigin="anonymous">\n'
-                    head += '<style>\n  pre, code { white-space: pre-wrap !important; word-wrap: break-word !important; }\n'
-                    head += '  .red { color: red; }\n  .green { color: green; }\n  .blue { color: blue; }\n  .highlight { background: yellow !important; print-color-adjust: exact; }\n</style>\n</head>\n'
-                    output = emoji.emojize(output, language='alias').encode('ascii', 'xmlcharrefreplace').decode('utf-8')
-                    output = head + '<body>\n<div class="markdown-body">\n' + output + '</div>\n</body>\n</html>\n'
-
-                  elif oformat == 'html':
-                    output = output.encode('ascii', 'xmlcharrefreplace').decode('utf-8')
-
-                  elif oformat != 'text':
-                    raise Exception('unknown output format "' + oformat + '" specified for output "' + oname + '"')
-
-                  jsr['outputs'].update({ o: self.e(output.encode('utf-8')).decode('utf-8') })
-                  if o != '_stderr_':
-                    ocount += 1
-
-              if ocount == 0:
-                raise Exception('nothing to output')
-
-            except TemplateError as e:
-              if hasattr(e, 'name') and e.name and hasattr(e, 'lineno') and e.lineno:
-                error = f'error[{e.name}:{e.lineno}]: {type(e).__name__}: {e}'
-
-              else:
-                error = jinjafx._format_error(e, 'template code')
+  
+                  if 'jinjafx_vault_undefined' in gyaml:
+                    yaml.add_constructor('!vault', lambda x, y: None, yaml.SafeLoader)
+                    if y := yaml.load(gyaml, Loader=yaml.SafeLoader):
+                      vault_undef = y.get('jinjafx_vault_undefined', vault_undef)
+  
+                  if vpw.strip():
+                    vault_undef = False
+  
+                  def yaml_vault_tag(loader, node):
+                    x = jinjafx.AnsibleVault().decrypt(node.value.encode('utf-8'), vpw, vault_undef)
+                    if x is not None:
+                      return x.decode('utf-8')
+  
+                    else:
+                      return '_undef'
+  
+                  yaml.add_constructor('!vault', yaml_vault_tag, yaml.SafeLoader)
+  
+                  if y := yaml.load(gyaml, Loader=yaml.SafeLoader):
+                    if isinstance(y, list):
+                      y = {'_': y}
+  
+                    s = [y]
+  
+                    while s:
+                      c = s.pop()
+                      for key in list(c.keys()):
+                        if c[key] == '_undef':
+                          del c[key]
+                        elif isinstance(c[key], dict):
+                          s.append(c[key])
+                        elif isinstance(c[key], list):
+                          for item in c[key]:
+                            if isinstance(item, dict):
+                              s.append(item)
+  
+                    gvars.update(y)
+  
+                st = round(time.time() * 1000)
+                ocount = 0
+                ret = [0, None]
+  
+                t = StoppableJinjaFx(jinjafx.JinjaFx()._jinjafx, template, data.decode('utf-8'), gvars, ret)
+  
+                if timelimit > 0:
+                  while t.is_alive() and ((time.time() * 1000) - st) <= (timelimit * 1000):
+                    time.sleep(0.1)
+  
+                  if t.is_alive():
+                    t.stop()
+  
+                t.join()
+  
+                if ret[0] == 1:
+                  outputs = ret[1]
+  
+                elif ret[0] == -1:
+                  raise ret[1]
+  
+                else:
+                  raise Exception("execution time limit of " + str(timelimit) + "s exceeded")
+  
+                jsr = {
+                  'status': 'ok',
+                  'elapsed': round(time.time() * 1000) - st,
+                  'outputs': {}
+                }
+  
+                self.elapsed = jsr['elapsed']
+  
+                def html_escape(text):
+                  text = text.replace("'", "&apos;")
+                  text = text.replace('"', "&quot;")
+                  return text
+  
+                for o in outputs:
+                  (oname, oformat) = o.rsplit(':', 1) if ':' in o else (o, 'text')
+                  oname = re.sub(r' */[ /]+', '/', oname.lstrip(' /').rstrip())
+                  output = '\n'.join(outputs[o]) + '\n'
+  
+                  if oname.endswith('/') or (len(oname) == 0):
+                    oname += 'Output'
+  
+                  if len(output.strip()) > 0:
+                    o = oname + ':' + oformat
+  
+                    if oformat == 'markdown' or oformat == 'md':
+                      o = oname + ':html'
+                      options = (cmarkgfm.cmark.Options.CMARK_OPT_GITHUB_PRE_LANG | cmarkgfm.cmark.Options.CMARK_OPT_SMART | cmarkgfm.cmark.Options.CMARK_OPT_UNSAFE)
+                      output = cmarkgfm.github_flavored_markdown_to_html(html_escape(output), options).replace('&amp;amp;', '&amp;').replace('&amp;', '&')
+  
+                      for style in ['red', 'green', 'blue', 'highlight']:
+                        output = re.sub('{(' + style + ')}(.+?){/\\1}', r'<span class="\1">\2</span>', output, flags=re.DOTALL | re.IGNORECASE)
+  
+                      head = '<!DOCTYPE html>\n<html>\n<head>\n'
+                      head += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown.min.css" crossorigin="anonymous">\n'
+                      head += '<style>\n  pre, code { white-space: pre-wrap !important; word-wrap: break-word !important; }\n'
+                      head += '  .red { color: red; }\n  .green { color: green; }\n  .blue { color: blue; }\n  .highlight { background: yellow !important; print-color-adjust: exact; }\n</style>\n</head>\n'
+                      output = emoji.emojize(output, language='alias').encode('ascii', 'xmlcharrefreplace').decode('utf-8')
+                      output = head + '<body>\n<div class="markdown-body">\n' + output + '</div>\n</body>\n</html>\n'
+  
+                    elif oformat == 'html':
+                      output = output.encode('ascii', 'xmlcharrefreplace').decode('utf-8')
+  
+                    elif oformat != 'text':
+                      raise Exception('unknown output format "' + oformat + '" specified for output "' + oname + '"')
+  
+                    jsr['outputs'].update({ o: self.e(output.encode('utf-8')).decode('utf-8') })
+                    if o != '_stderr_':
+                      ocount += 1
+  
+                if ocount == 0:
+                  raise Exception('nothing to output')
+  
+              except TemplateError as e:
+                if hasattr(e, 'name') and e.name and hasattr(e, 'lineno') and e.lineno:
+                  error = f'error[{e.name}:{e.lineno}]: {type(e).__name__}: {e}'
+  
+                else:
+                  error = jinjafx._format_error(e, 'template code')
+                  error = error.replace('__init__.py:', 'jinjafx_server.py:')
+  
+                jsr = {
+                  'status': 'error',
+                  'error': error
+                }
+                self.error = error
+  
+              except Exception as e:
+                if isinstance(e, jsonschema.ValidationError):
+                  error = jinjafx._format_error(e, exc_source='vars.yml')
+                else:
+                  error = jinjafx._format_error(e, 'template code', '_jinjafx')
+  
                 error = error.replace('__init__.py:', 'jinjafx_server.py:')
-
-              jsr = {
-                'status': 'error',
-                'error': error
-              }
-              self.error = error
-
-            except Exception as e:
-              error = jinjafx._format_error(e, 'template code', '_jinjafx')
-              error = error.replace('__init__.py:', 'jinjafx_server.py:')
-
-              jsr = {
-                'status': 'error',
-                'error': error
-              }
-              self.error = error
-
-            r = [ 'application/json', 200, json.dumps(jsr), sys._getframe().f_lineno ]
-
+  
+                jsr = {
+                  'status': 'error',
+                  'error': error
+                }
+                self.error = error
+  
+              r = [ 'application/json', 200, json.dumps(jsr), sys._getframe().f_lineno ]
+  
+            else:
+              r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
+  
           else:
-            r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
-
-        else:
-          if fpath == '/html2docx':
-            if pandoc:
-              if self.headers['Content-Type'] == 'application/json':
-                try:
-                  if not self.ratelimit(remote_addr, 4, False):
-                    html = self.d(json.loads(postdata.decode('utf-8')))
-                    p = subprocess.run([pandoc, '-f', 'html', '-t', 'docx', '-o', '-', '--sandbox', '--standalone', '--embed-resources', '--reference-doc=' + base + '/pandoc/reference.docx'], input=html, stdout=subprocess.PIPE, check=True)
-                    self.send_response(200)
-                    self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-                    self.send_header('Content-Length', str(len(p.stdout)))
-                    self.send_header('X-Download-Filename', 'Output.' + datetime.datetime.now().strftime('%Y%m%d-%H%M%S') + '.docx')
-                    self.end_headers()
-                    self.wfile.write(p.stdout)
-                    return
-
-                  else:
-                    r = [ 'text/plain', 429, '429 Too Many Requests\r\n', sys._getframe().f_lineno ]
-
-                except Exception as e:
-                  log(traceback.format_exc())
+            if fpath == '/html2docx':
+              if pandoc:
+                if self.headers['Content-Type'] == 'application/json':
+                  try:
+                    if not self.ratelimit(remote_addr, 4, False):
+                      html = self.d(json.loads(postdata.decode('utf-8')))
+                      p = subprocess.run([pandoc, '-f', 'html', '-t', 'docx', '-o', '-', '--sandbox', '--standalone', '--embed-resources', '--reference-doc=' + base + '/pandoc/reference.docx'], input=html, stdout=subprocess.PIPE, check=True)
+                      self.send_response(200)
+                      self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                      self.send_header('Content-Length', str(len(p.stdout)))
+                      self.send_header('X-Download-Filename', 'Output.' + datetime.datetime.now().strftime('%Y%m%d-%H%M%S') + '.docx')
+                      self.end_headers()
+                      self.wfile.write(p.stdout)
+                      return
+  
+                    else:
+                      r = [ 'text/plain', 429, '429 Too Many Requests\r\n', sys._getframe().f_lineno ]
+  
+                  except Exception as e:
+                    log(traceback.format_exc())
+                    r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
+  
+                else:
                   r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
-
-              else:
-                r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
-
-          elif fpath == '/get_link' or fpath == '/delete_link':
-            if aws_s3_url or github_url or repository:
-              if self.headers['Content-Type'] == 'application/json':
-                try:
-                  dt_yml = ''
-                  dt_password = ''
-                  dt_opassword = ''
-                  dt_mpassword = ''
-                  dt_epassword = ''
-                  dt_revision = 1
-                  dt_protected = 0
-                  dt_encrypted = 0
-
-                  if hasattr(self, 'headers'):
-                    if 'X-Dt-Protected' in self.headers:
-                      dt_protected = int(self.headers['X-Dt-Protected'])
-                    if 'X-Dt-Password' in self.headers:
-                      dt_password = self.headers['X-Dt-Password']
-                    if 'X-Dt-Open-Password' in self.headers:
-                      dt_opassword = self.headers['X-Dt-Open-Password']
-                    if 'X-Dt-Encrypted' in self.headers:
-                      dt_encrypted = int(self.headers['X-Dt-Encrypted'])
-                    if 'X-Dt-Modify-Password' in self.headers:
-                      dt_mpassword = self.headers['X-Dt-Modify-Password']
-                    if 'X-Dt-Encrypt-Password' in self.headers:
-                      dt_epassword = self.headers['X-Dt-Encrypt-Password']
-                    if 'X-Dt-Revision' in self.headers:
-                      dt_revision = int(self.headers['X-Dt-Revision'])
-
-                  if not self.ratelimit(remote_addr, 1, False):
-                    def authenticate_dt(rdt, r):
-                      mm = re.search(r'dt_mpassword: "(\S+)"', rdt)
-                      mo = re.search(r'dt_password: "(\S+)"', rdt)
-
-                      if mm != None or mo != None:
-                        if dt_password != '':
-                          rpassword = mm.group(1) if mm != None else mo.group(1)
-                          t = binascii.unhexlify(rpassword.encode('utf-8'))
-                          if t != self.derive_key(dt_password, t[2:int(t[1]) + 2], t[0]):
+  
+            elif fpath == '/get_link' or fpath == '/delete_link':
+              if aws_s3_url or github_url or repository:
+                if self.headers['Content-Type'] == 'application/json':
+                  try:
+                    dt_yml = ''
+                    dt_password = ''
+                    dt_opassword = ''
+                    dt_mpassword = ''
+                    dt_epassword = ''
+                    dt_revision = 1
+                    dt_protected = 0
+                    dt_encrypted = 0
+  
+                    if hasattr(self, 'headers'):
+                      if 'X-Dt-Protected' in self.headers:
+                        dt_protected = int(self.headers['X-Dt-Protected'])
+                      if 'X-Dt-Password' in self.headers:
+                        dt_password = self.headers['X-Dt-Password']
+                      if 'X-Dt-Open-Password' in self.headers:
+                        dt_opassword = self.headers['X-Dt-Open-Password']
+                      if 'X-Dt-Encrypted' in self.headers:
+                        dt_encrypted = int(self.headers['X-Dt-Encrypted'])
+                      if 'X-Dt-Modify-Password' in self.headers:
+                        dt_mpassword = self.headers['X-Dt-Modify-Password']
+                      if 'X-Dt-Encrypt-Password' in self.headers:
+                        dt_epassword = self.headers['X-Dt-Encrypt-Password']
+                      if 'X-Dt-Revision' in self.headers:
+                        dt_revision = int(self.headers['X-Dt-Revision'])
+  
+                    if not self.ratelimit(remote_addr, 1, False):
+                      def authenticate_dt(rdt, r):
+                        mm = re.search(r'dt_mpassword: "(\S+)"', rdt)
+                        mo = re.search(r'dt_password: "(\S+)"', rdt)
+  
+                        if mm != None or mo != None:
+                          if dt_password != '':
+                            rpassword = mm.group(1) if mm != None else mo.group(1)
+                            t = binascii.unhexlify(rpassword.encode('utf-8'))
+                            if t != self.derive_key(dt_password, t[2:int(t[1]) + 2], t[0]):
+                              cheaders['X-Dt-Authentication'] = 'Modify' if (mm != None) else 'Open'
+                              r = [ 'text/plain', 401, '401 Unauthorized\r\n', sys._getframe().f_lineno ]
+  
+                          else:
                             cheaders['X-Dt-Authentication'] = 'Modify' if (mm != None) else 'Open'
                             r = [ 'text/plain', 401, '401 Unauthorized\r\n', sys._getframe().f_lineno ]
-
-                        else:
-                          cheaders['X-Dt-Authentication'] = 'Modify' if (mm != None) else 'Open'
-                          r = [ 'text/plain', 401, '401 Unauthorized\r\n', sys._getframe().f_lineno ]
-
-                      return mm, mo, r
-
-                    if fpath == '/get_link':
-                      dt = json.loads(postdata.decode('utf-8'))
-
-                      vdt = {}
-                      dt_yml += '---\n'
-                      dt_yml += 'dt:\n'
-
-                      if 'datasets' in dt:
-                        if 'global' in dt:
-                          vdt['global'] = self.d(dt['global']).decode('utf-8') if 'global' in dt and len(dt['global'].strip()) > 0 else ''
-
-                          if vdt['global'] == '':
-                            dt_yml += '  global: ""\n\n'
-                          else:
-                            dt_yml += '  global: |2\n'
-                            dt_yml += re.sub('^', ' ' * 4, vdt['global'].rstrip(), flags=re.MULTILINE) + '\n\n'
-
-                        dt_yml += '  datasets:\n'
-
-                        for ds in dt['datasets']:
-                          vdt['data'] = self.d(dt['datasets'][ds]['data']).decode('utf-8') if 'data' in dt['datasets'][ds] and len(dt['datasets'][ds]['data'].strip()) > 0 else ''
-                          vdt['vars'] = self.d(dt['datasets'][ds]['vars']).decode('utf-8') if 'vars' in dt['datasets'][ds] and len(dt['datasets'][ds]['vars'].strip()) > 0 else ''
-
-                          dt_yml += '    "' + ds + '":\n'
-
-                          if vdt['data'] == '':
-                            dt_yml += '      data: ""\n'
-                          else:
-                            dt_yml += '      data: |2\n'
-                            dt_yml += re.sub('^', ' ' * 8, vdt['data'].rstrip(), flags=re.MULTILINE) + '\n\n'
-
-                          if vdt['vars'] == '':
-                            dt_yml += '      vars: ""\n\n'
-                          else:
-                            dt_yml += '      vars: |2\n'
-                            dt_yml += re.sub('^', ' ' * 8, vdt['vars'].rstrip(), flags=re.MULTILINE) + '\n\n'
-
-                      else :
-                        vdt['data'] = self.d(dt['data']).decode('utf-8') if 'data' in dt and len(dt['data'].strip()) > 0 else ''
-                        vdt['vars'] = self.d(dt['vars']).decode('utf-8') if 'vars' in dt and len(dt['vars'].strip()) > 0 else ''
-
-                        if vdt['data'] == '':
-                          dt_yml += '  data: ""\n'
-                        else:
-                          dt_yml += '  data: |2\n'
-                          dt_yml += re.sub('^', ' ' * 4, vdt['data'].rstrip(), flags=re.MULTILINE) + '\n\n'
-
-                        if vdt['vars'] == '':
-                          dt_yml += '  vars: ""\n\n'
-                        else:
-                          dt_yml += '  vars: |2\n'
-                          dt_yml += re.sub('^', ' ' * 4, vdt['vars'].rstrip(), flags=re.MULTILINE) + '\n\n'
-
-                      if isinstance(dt['template'], dict):
-                        dt_yml += '  template:\n'
-
-                        for t in dt['template']:
-                          te = self.d(dt['template'][t]).decode('utf-8') if len(dt['template'][t].strip()) > 0 else ''
-
-                          if te == '':
-                            dt_yml += '    "' + t + '": ""\n'
-                          else:
-                            dt_yml += '    "' + t + '": |2\n'
-                            dt_yml += re.sub('^', ' ' * 6, te, flags=re.MULTILINE) + '\n\n'
-
-                      else:
-                        te = self.d(dt['template']).decode('utf-8') if len(dt['template'].strip()) > 0 else ''
-
-                        if te == '':
-                          dt_yml += '  template: ""\n'
-                        else:
-                          dt_yml += '  template: |2\n'
-                          dt_yml += re.sub('^', ' ' * 4, te, flags=re.MULTILINE) + '\n\n'
-
-                      if not dt_yml.endswith('\n\n'):
-                        dt_yml += '\n'
-
-                      dt_yml += 'revision: ' + str(dt_revision) + '\n'
-                      dt_yml += 'dataset: "' + dt['dataset'] + '"\n'
-
-                      if 'show_global' in dt:
-                        dt_yml += 'show_global: ' + dt['show_global'] + '\n'
-
-                      if dt_encrypted:
-                        dt_yml += 'encrypted: 1\n'
-
-                      if dt_protected:
-                        dt_yml += 'protected: 1\n'
-
-                      def update_dt(rdt, dt_yml, r):
-                        mm, mo, r = authenticate_dt(rdt, r)
-
-                        if r[1] != 401:
-                          if dt_protected:
-                            if dt_opassword != '' or dt_mpassword != '':
-                              if dt_opassword != '':
-                                dt_yml += 'dt_password: "' + binascii.hexlify(self.derive_key(dt_opassword)).decode('utf-8') + '"\n'
-
-                              if dt_mpassword != '':
-                                dt_yml += 'dt_mpassword: "' + binascii.hexlify(self.derive_key(dt_mpassword)).decode('utf-8') + '"\n'
-
+  
+                        return mm, mo, r
+  
+                      if fpath == '/get_link':
+                        dt = json.loads(postdata.decode('utf-8'))
+  
+                        vdt = {}
+                        dt_yml += '---\n'
+                        dt_yml += 'dt:\n'
+  
+                        if 'datasets' in dt:
+                          if 'global' in dt:
+                            vdt['global'] = self.d(dt['global']).decode('utf-8') if 'global' in dt and len(dt['global'].strip()) > 0 else ''
+  
+                            if vdt['global'] == '':
+                              dt_yml += '  global: ""\n\n'
                             else:
-                              if mo != None:
-                                dt_yml += 'dt_password: "' + mo.group(1) + '"\n'
-
-                              if mm != None:
-                                dt_yml += 'dt_mpassword: "' + mm.group(1) + '"\n'
-
-                        return dt_yml, r
-
-                      def add_client_fields(dt_yml, remote_addr):
-                        dt_yml += 'remote_addr: "' + remote_addr + '"\n'
-                        dt_yml += 'updated: "' + str(int(time.time()))  + '"\n'
-                        return dt_yml
-
-                    if 'id' in params:
-                      if re.search(r'^[A-Za-z0-9_-]{1,24}$', params['id']):
-                        dt_link = params['id']
-
-                      else:
-                        raise Exception("invalid link format")
-
-                    elif fpath == '/delete_link':
-                      raise Exception("link id is required")
-
-                    else:
-                      dt_link = self.encode_link(hashlib.sha256((str(uuid.uuid1()) + ':' + dt_yml).encode('utf-8')).digest()[:6])
-
-                    dt_filename = 'jfx_' + dt_link + '.yml'
-
-                    if aws_s3_url:
-                      rr = aws_s3_get(aws_s3_url, dt_filename)
-                      if rr.status_code == 200:
-                        if rr.text.lstrip().startswith('$VAULTY;'):
-                          if dt_epassword != '':
-                            try:
-                              content = jinjafx.Vaulty().decrypt(rr.text, dt_epassword)
-
-                            except Exception:
-                              r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
-
+                              dt_yml += '  global: |2\n'
+                              dt_yml += re.sub('^', ' ' * 4, vdt['global'].rstrip(), flags=re.MULTILINE) + '\n\n'
+  
+                          dt_yml += '  datasets:\n'
+  
+                          for ds in dt['datasets']:
+                            vdt['data'] = self.d(dt['datasets'][ds]['data']).decode('utf-8') if 'data' in dt['datasets'][ds] and len(dt['datasets'][ds]['data'].strip()) > 0 else ''
+                            vdt['vars'] = self.d(dt['datasets'][ds]['vars']).decode('utf-8') if 'vars' in dt['datasets'][ds] and len(dt['datasets'][ds]['vars'].strip()) > 0 else ''
+  
+                            dt_yml += '    "' + ds + '":\n'
+  
+                            if vdt['data'] == '':
+                              dt_yml += '      data: ""\n'
+                            else:
+                              dt_yml += '      data: |2\n'
+                              dt_yml += re.sub('^', ' ' * 8, vdt['data'].rstrip(), flags=re.MULTILINE) + '\n\n'
+  
+                            if vdt['vars'] == '':
+                              dt_yml += '      vars: ""\n\n'
+                            else:
+                              dt_yml += '      vars: |2\n'
+                              dt_yml += re.sub('^', ' ' * 8, vdt['vars'].rstrip(), flags=re.MULTILINE) + '\n\n'
+  
+                        else :
+                          vdt['data'] = self.d(dt['data']).decode('utf-8') if 'data' in dt and len(dt['data'].strip()) > 0 else ''
+                          vdt['vars'] = self.d(dt['vars']).decode('utf-8') if 'vars' in dt and len(dt['vars'].strip()) > 0 else ''
+  
+                          if vdt['data'] == '':
+                            dt_yml += '  data: ""\n'
                           else:
-                            r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
-
+                            dt_yml += '  data: |2\n'
+                            dt_yml += re.sub('^', ' ' * 4, vdt['data'].rstrip(), flags=re.MULTILINE) + '\n\n'
+  
+                          if vdt['vars'] == '':
+                            dt_yml += '  vars: ""\n\n'
+                          else:
+                            dt_yml += '  vars: |2\n'
+                            dt_yml += re.sub('^', ' ' * 4, vdt['vars'].rstrip(), flags=re.MULTILINE) + '\n\n'
+  
+                        if isinstance(dt['template'], dict):
+                          dt_yml += '  template:\n'
+  
+                          for t in dt['template']:
+                            te = self.d(dt['template'][t]).decode('utf-8') if len(dt['template'][t].strip()) > 0 else ''
+  
+                            if te == '':
+                              dt_yml += '    "' + t + '": ""\n'
+                            else:
+                              dt_yml += '    "' + t + '": |2\n'
+                              dt_yml += re.sub('^', ' ' * 6, te, flags=re.MULTILINE) + '\n\n'
+  
                         else:
-                          content = rr.text
-
-                        if r[1] != 403:
-                          m = re.search(r'revision: (\d+)', rr.text)
-                          if m != None:
-                            if dt_revision <= int(m.group(1)):
-                              r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
-
-                          if r[1] != 409:
-                            if fpath == '/get_link':
-                              dt_yml, r = update_dt(rr.text, dt_yml, r)
-
-                            elif fpath == '/delete_link':
-                              mm, mo, r = authenticate_dt(rr.text, r)
-
-                              if r[1] != 401:
-                                rr = aws_s3_delete(aws_s3_url, dt_filename)
-
-                                if rr.status_code == 204:
-                                  r = [ 'text/plain', 200, '200 OK\r\n', sys._getframe().f_lineno ]
-
-                                elif rr.status_code == 403:
-                                  r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
-
-                      if fpath != '/delete_link' and (r[1] == 500 or r[1] == 200):
-                        dt_yml = add_client_fields(dt_yml, remote_addr)
-
-                        if dt_encrypted:
-                          if dt_opassword != '':
-                            dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_opassword) + '\n'
-
-                          elif dt_epassword != '':
-                            dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_epassword) + '\n'
-
+                          te = self.d(dt['template']).decode('utf-8') if len(dt['template'].strip()) > 0 else ''
+  
+                          if te == '':
+                            dt_yml += '  template: ""\n'
                           else:
-                            r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
-
-                        if r[1] != 400:
+                            dt_yml += '  template: |2\n'
+                            dt_yml += re.sub('^', ' ' * 4, te, flags=re.MULTILINE) + '\n\n'
+  
+                        if not dt_yml.endswith('\n\n'):
+                          dt_yml += '\n'
+  
+                        dt_yml += 'revision: ' + str(dt_revision) + '\n'
+                        dt_yml += 'dataset: "' + dt['dataset'] + '"\n'
+  
+                        if 'show_global' in dt:
+                          dt_yml += 'show_global: ' + dt['show_global'] + '\n'
+  
+                        if dt_encrypted:
+                          dt_yml += 'encrypted: 1\n'
+  
+                        if dt_protected:
+                          dt_yml += 'protected: 1\n'
+  
+                        def update_dt(rdt, dt_yml, r):
+                          mm, mo, r = authenticate_dt(rdt, r)
+  
+                          if r[1] != 401:
+                            if dt_protected:
+                              if dt_opassword != '' or dt_mpassword != '':
+                                if dt_opassword != '':
+                                  dt_yml += 'dt_password: "' + binascii.hexlify(self.derive_key(dt_opassword)).decode('utf-8') + '"\n'
+  
+                                if dt_mpassword != '':
+                                  dt_yml += 'dt_mpassword: "' + binascii.hexlify(self.derive_key(dt_mpassword)).decode('utf-8') + '"\n'
+  
+                              else:
+                                if mo != None:
+                                  dt_yml += 'dt_password: "' + mo.group(1) + '"\n'
+  
+                                if mm != None:
+                                  dt_yml += 'dt_mpassword: "' + mm.group(1) + '"\n'
+  
+                          return dt_yml, r
+  
+                        def add_client_fields(dt_yml, remote_addr):
+                          dt_yml += 'remote_addr: "' + remote_addr + '"\n'
+                          dt_yml += 'updated: "' + str(int(time.time()))  + '"\n'
+                          return dt_yml
+  
+                      if 'id' in params:
+                        if re.search(r'^[A-Za-z0-9_-]{1,24}$', params['id']):
+                          dt_link = params['id']
+  
+                        else:
+                          raise Exception("invalid link format")
+  
+                      elif fpath == '/delete_link':
+                        raise Exception("link id is required")
+  
+                      else:
+                        dt_link = self.encode_link(hashlib.sha256((str(uuid.uuid1()) + ':' + dt_yml).encode('utf-8')).digest()[:6])
+  
+                      dt_filename = 'jfx_' + dt_link + '.yml'
+  
+                      if aws_s3_url:
+                        rr = aws_s3_get(aws_s3_url, dt_filename)
+                        if rr.status_code == 200:
+                          if rr.text.lstrip().startswith('$VAULTY;'):
+                            if dt_epassword != '':
+                              try:
+                                content = jinjafx.Vaulty().decrypt(rr.text, dt_epassword)
+  
+                              except Exception:
+                                r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+  
+                            else:
+                              r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+  
+                          else:
+                            content = rr.text
+  
+                          if r[1] != 403:
+                            m = re.search(r'revision: (\d+)', rr.text)
+                            if m != None:
+                              if dt_revision <= int(m.group(1)):
+                                r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
+  
+                            if r[1] != 409:
+                              if fpath == '/get_link':
+                                dt_yml, r = update_dt(rr.text, dt_yml, r)
+  
+                              elif fpath == '/delete_link':
+                                mm, mo, r = authenticate_dt(rr.text, r)
+  
+                                if r[1] != 401:
+                                  rr = aws_s3_delete(aws_s3_url, dt_filename)
+  
+                                  if rr.status_code == 204:
+                                    r = [ 'text/plain', 200, '200 OK\r\n', sys._getframe().f_lineno ]
+  
+                                  elif rr.status_code == 403:
+                                    r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+  
+                        if fpath != '/delete_link' and (r[1] == 500 or r[1] == 200):
+                          dt_yml = add_client_fields(dt_yml, remote_addr)
+  
                           if dt_encrypted:
-                            rr = aws_s3_put(aws_s3_url, dt_filename, dt_yml, 'application/vaulty')
-
-                          else:
-                            rr = aws_s3_put(aws_s3_url, dt_filename, dt_yml, 'application/yaml')
-
-                          if rr.status_code == 200:
-                            r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
-
-                          elif rr.status_code == 403:
-                            r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
-
-                    elif github_url:
-                      sha = None
-
-                      rr = github_get(github_url, dt_filename)
-                      if rr.status_code == 200:
-                        jobj = rr.json()
-                        content = jobj['content']
-                        sha = jobj['sha']
-
-                        if jobj.get('encoding') and jobj.get('encoding') == 'base64':
-                          content = base64.b64decode(content).decode('utf-8')
-
-                        if content.lstrip().startswith('$VAULTY;'):
-                          if dt_epassword != '':
-                            try:
-                              content = jinjafx.Vaulty().decrypt(content, dt_epassword)
-
-                            except Exception:
+                            if dt_opassword != '':
+                              dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_opassword) + '\n'
+  
+                            elif dt_epassword != '':
+                              dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_epassword) + '\n'
+  
+                            else:
+                              r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
+  
+                          if r[1] != 400:
+                            if dt_encrypted:
+                              rr = aws_s3_put(aws_s3_url, dt_filename, dt_yml, 'application/vaulty')
+  
+                            else:
+                              rr = aws_s3_put(aws_s3_url, dt_filename, dt_yml, 'application/yaml')
+  
+                            if rr.status_code == 200:
+                              r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
+  
+                            elif rr.status_code == 403:
                               r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
-
-                          else:
-                            r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
-
-                        if r[1] != 403:
-                          m = re.search(r'revision: (\d+)', content)
-                          if m != None:
-                            if dt_revision <= int(m.group(1)):
-                              r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
-
-                          if r[1] != 409:
-                            if fpath == '/get_link':
-                              dt_yml, r = update_dt(content, dt_yml, r)
-
-                            elif fpath == '/delete_link':
-                              mm, mo, r = authenticate_dt(content, r)
-
-                              if r[1] != 401:
-                                rr = github_delete(github_url, dt_filename, sha)
-
-                                if str(rr.status_code).startswith('2'):
+  
+                      elif github_url:
+                        sha = None
+  
+                        rr = github_get(github_url, dt_filename)
+                        if rr.status_code == 200:
+                          jobj = rr.json()
+                          content = jobj['content']
+                          sha = jobj['sha']
+  
+                          if jobj.get('encoding') and jobj.get('encoding') == 'base64':
+                            content = base64.b64decode(content).decode('utf-8')
+  
+                          if content.lstrip().startswith('$VAULTY;'):
+                            if dt_epassword != '':
+                              try:
+                                content = jinjafx.Vaulty().decrypt(content, dt_epassword)
+  
+                              except Exception:
+                                r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+  
+                            else:
+                              r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+  
+                          if r[1] != 403:
+                            m = re.search(r'revision: (\d+)', content)
+                            if m != None:
+                              if dt_revision <= int(m.group(1)):
+                                r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
+  
+                            if r[1] != 409:
+                              if fpath == '/get_link':
+                                dt_yml, r = update_dt(content, dt_yml, r)
+  
+                              elif fpath == '/delete_link':
+                                mm, mo, r = authenticate_dt(content, r)
+  
+                                if r[1] != 401:
+                                  rr = github_delete(github_url, dt_filename, sha)
+  
+                                  if str(rr.status_code).startswith('2'):
+                                    r = [ 'text/plain', 200, '200 OK\r\n', sys._getframe().f_lineno ]
+  
+                                  elif rr.status_code == 401:
+                                    r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+  
+                        if fpath != '/delete_link' and (r[1] == 500 or r[1] == 200):
+                          dt_yml = add_client_fields(dt_yml, remote_addr)
+  
+                          if dt_encrypted:
+                            if dt_opassword != '':
+                              dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_opassword) + '\n'
+  
+                            elif dt_epassword != '':
+                              dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_epassword) + '\n'
+  
+                            else:
+                              r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
+  
+                          if r[1] != 400:
+                            rr = github_put(github_url, dt_filename, dt_yml, sha)
+  
+                            if str(rr.status_code).startswith('2'):
+                              r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
+  
+                            elif rr.status_code == 401:
+                              r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+  
+                      else:
+                        dt_filename = os.path.normpath(repository + '/' + dt_filename)
+  
+                        if os.path.isfile(dt_filename):
+                          with open(dt_filename, 'rb') as f:
+                            rr = f.read().decode('utf-8')
+  
+                          if rr.lstrip().startswith('$VAULTY'):
+                            if dt_epassword != '':
+                              try:
+                                rr = jinjafx.Vaulty().decrypt(rr, dt_epassword)
+  
+                              except Exception:
+                                r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+  
+                            else:
+                              r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
+  
+                          if r[1] != 403:
+                            m = re.search(r'revision: (\d+)', rr)
+                            if m != None:
+                              if dt_revision <= int(m.group(1)):
+                                r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
+  
+                            if r[1] != 409:
+                              if fpath == '/get_link':
+                                dt_yml, r = update_dt(rr, dt_yml, r)
+  
+                              elif fpath == '/delete_link':
+                                mm, mo, r = authenticate_dt(rr, r)
+  
+                                if r[1] != 401:
+                                  os.remove(dt_filename)
                                   r = [ 'text/plain', 200, '200 OK\r\n', sys._getframe().f_lineno ]
-
-                                elif rr.status_code == 401:
-                                  r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
-
-                      if fpath != '/delete_link' and (r[1] == 500 or r[1] == 200):
-                        dt_yml = add_client_fields(dt_yml, remote_addr)
-
-                        if dt_encrypted:
-                          if dt_opassword != '':
-                            dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_opassword) + '\n'
-
-                          elif dt_epassword != '':
-                            dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_epassword) + '\n'
-
-                          else:
-                            r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
-
-                        if r[1] != 400:
-                          rr = github_put(github_url, dt_filename, dt_yml, sha)
-
-                          if str(rr.status_code).startswith('2'):
-                            r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
-
-                          elif rr.status_code == 401:
-                            r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
-
+  
+                        if fpath != '/delete_link' and (r[1] == 500 or r[1] == 200):
+                          dt_yml = add_client_fields(dt_yml, remote_addr)
+  
+                          if dt_encrypted:
+                            if dt_opassword != '':
+                              dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_opassword) + '\n'
+  
+                            elif dt_epassword != '':
+                              dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_epassword) + '\n'
+  
+                            else:
+                              r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
+  
+                          if r[1] != 400:
+                            with open(dt_filename, 'w') as f:
+                              f.write(dt_yml)
+  
+                              r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
+  
                     else:
-                      dt_filename = os.path.normpath(repository + '/' + dt_filename)
-
-                      if os.path.isfile(dt_filename):
-                        with open(dt_filename, 'rb') as f:
-                          rr = f.read().decode('utf-8')
-
-                        if rr.lstrip().startswith('$VAULTY'):
-                          if dt_epassword != '':
-                            try:
-                              rr = jinjafx.Vaulty().decrypt(rr, dt_epassword)
-
-                            except Exception:
-                              r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
-
-                          else:
-                            r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
-
-                        if r[1] != 403:
-                          m = re.search(r'revision: (\d+)', rr)
-                          if m != None:
-                            if dt_revision <= int(m.group(1)):
-                              r = [ 'text/plain', 409, '409 Conflict\r\n', sys._getframe().f_lineno ]
-
-                          if r[1] != 409:
-                            if fpath == '/get_link':
-                              dt_yml, r = update_dt(rr, dt_yml, r)
-
-                            elif fpath == '/delete_link':
-                              mm, mo, r = authenticate_dt(rr, r)
-
-                              if r[1] != 401:
-                                os.remove(dt_filename)
-                                r = [ 'text/plain', 200, '200 OK\r\n', sys._getframe().f_lineno ]
-
-                      if fpath != '/delete_link' and (r[1] == 500 or r[1] == 200):
-                        dt_yml = add_client_fields(dt_yml, remote_addr)
-
-                        if dt_encrypted:
-                          if dt_opassword != '':
-                            dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_opassword) + '\n'
-
-                          elif dt_epassword != '':
-                            dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_epassword) + '\n'
-
-                          else:
-                            r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
-
-                        if r[1] != 400:
-                          with open(dt_filename, 'w') as f:
-                            f.write(dt_yml)
-
-                            r = [ 'text/plain', 200, dt_link + '\r\n', sys._getframe().f_lineno ]
-
-                  else:
-                    r = [ 'text/plain', 429, '429 Too Many Requests\r\n', sys._getframe().f_lineno ]
-
-                except Exception as e:
-                  log(traceback.format_exc())
+                      r = [ 'text/plain', 429, '429 Too Many Requests\r\n', sys._getframe().f_lineno ]
+  
+                  except Exception as e:
+                    log(traceback.format_exc())
+                    r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
+  
+                else:
                   r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
-
+  
               else:
-                r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
-
+                r = [ 'text/plain', 503, '503 Service Unavailable\r\n', sys._getframe().f_lineno ]
+  
             else:
-              r = [ 'text/plain', 503, '503 Service Unavailable\r\n', sys._getframe().f_lineno ]
-
-          else:
-            r = [ 'text/plain', 404, '404 Not Found\r\n', sys._getframe().f_lineno ]
-
+              r = [ 'text/plain', 404, '404 Not Found\r\n', sys._getframe().f_lineno ]
+  
+        else:
+          r = [ 'text/plain', 413, '413 Request Entity Too Large\r\n', sys._getframe().f_lineno ]
+  
       else:
-        r = [ 'text/plain', 413, '413 Request Entity Too Large\r\n', sys._getframe().f_lineno ]
+        r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
+  
+      self.send_response(r[1])
+  
+      r[2] = r[2].encode('utf-8')
+  
+      if r[1] == 200:
+        self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
+  
+        if len(r[2]) > 1024 and 'Accept-Encoding' in self.headers:
+          if 'gzip' in self.headers['Accept-Encoding']:
+            self.send_header('Content-Encoding', 'gzip')
+            r[2] = gzip.compress(r[2])
+  
+      self.send_header('Content-Type', r[0])
+      self.send_header('Content-Length', len(r[2]))
+      self.send_header('X-Content-Type-Options', 'nosniff')
+      self.send_header('Connection', 'close')
+  
+      for k in cheaders:
+        self.send_header(k, cheaders[k])
+  
+      self.end_headers()
+      self.wfile.write(r[2])
 
-    else:
-      r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
-
-    self.send_response(r[1])
-
-    r[2] = r[2].encode('utf-8')
-
-    if r[1] == 200:
-      self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
-
-      if len(r[2]) > 1024 and 'Accept-Encoding' in self.headers:
-        if 'gzip' in self.headers['Accept-Encoding']:
-          self.send_header('Content-Encoding', 'gzip')
-          r[2] = gzip.compress(r[2])
-
-    self.send_header('Content-Type', r[0])
-    self.send_header('Content-Length', len(r[2]))
-    self.send_header('X-Content-Type-Options', 'nosniff')
-    self.send_header('Connection', 'close')
-
-    for k in cheaders:
-      self.send_header(k, cheaders[k])
-
-    self.end_headers()
-    self.wfile.write(r[2])
+    except Exception as e:
+      log(traceback.format_exc())
 
 
 class JinjaFxThread(threading.Thread):
