@@ -62,7 +62,7 @@ class JinjaFxServer(HTTPServer):
 class ArgumentParser(argparse.ArgumentParser):
   def error(self, message):
     print('URL:\n  https://github.com/cmason3/jinjafx_server\n', file=sys.stderr)
-    print('Usage:\n ' + self.format_usage().replace('usage:', ''), file=sys.stderr)
+    print('Usage:\n ' + re.sub(r'(?:usage:| {7}(?=[^ ]))', '', self.format_usage()), file=sys.stderr)
     raise Exception(message)
 
 
