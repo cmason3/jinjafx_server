@@ -69,6 +69,11 @@ class ArgumentParser(argparse.ArgumentParser):
 class JinjaFxRequest(BaseHTTPRequestHandler):
   server_version = 'JinjaFx/' + __version__
   protocol_version = 'HTTP/1.1'
+  critical = False
+  elapsed = None
+  error = None
+  hide = False
+  length = 0
 
   def format_bytes(self, b):
     for u in [ '', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y' ]:
@@ -76,6 +81,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         b /= 1000
       else:
         return '{:.2f}'.format(b).rstrip('0').rstrip('.') + u + 'B'
+
 
   def log_message(self, format, *args):
     path = self.path if hasattr(self, 'path') else ''
@@ -128,6 +134,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             if (args[1] != '200' and args[1] != '304') or (not path.endswith('.js') and not path.endswith('.css') and not path.endswith('.png')) or verbose:
               log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path + proto_ver)
 
+
   def send_error(self, code, message=None, explain=None):
     body = f'{code} {code.phrase}\r\n'
     self.send_response(code)
@@ -136,6 +143,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     self.send_header('Connection', 'close')
     self.end_headers()
     self.wfile.write(body.encode('utf-8'))
+
 
   def encode_link(self, bhash):
     alphabet = b'rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz'
@@ -207,9 +215,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
   def do_GET(self, head=False, cache=True, versioned=False):
     try:
-      self.critical = False
-      self.hide = False
-      self.error = None
       cheaders = {}
 
       fpath = self.path.split('?', 1)[0]
@@ -448,25 +453,16 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
 
   def do_OPTIONS(self):
-    self.critical = False
-    self.hide = False
-    self.error = None
     self.send_response(204)
     self.send_header('Allow', 'OPTIONS, HEAD, GET, POST')
     self.end_headers()
 
 
   def do_HEAD(self):
-    self.error = None
     self.do_GET(True)
 
 
   def do_POST(self):
-    self.critical = False
-    self.hide = False
-    self.elapsed = None
-    self.error = None
-
     cheaders = {}
 
     uc = self.path.split('?', 1)
