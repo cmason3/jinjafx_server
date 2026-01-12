@@ -1,6 +1,7 @@
 ## CHANGELOG
 
 ### [26.1.1] - January 12, 2026
+- Fixed an issue with error handling for `jinjafx_schema`
 
 ### [26.1.0] - January 12, 2026
 - Replaced `setup.py` with `pyproject.toml`
