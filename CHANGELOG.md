@@ -2,6 +2,7 @@
 
 ### [26.1.0] - In Development
 - Replaced `setup.py` with `pyproject.toml`
+- Rewrote the error handling aspects of `http.server` as the defaults are garbage
 
 ### [25.9.3] - January 9, 2026
 - Pass through rendered outputs to HTML outputs as `jinjafx.outputs` to allow processing via JavaScript

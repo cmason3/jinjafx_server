@@ -19,7 +19,7 @@ import sys
 if sys.version_info < (3, 10):
   sys.exit('Requires Python >= 3.10')
 
-from http.server import HTTPServer, BaseHTTPRequestHandler, HTTPStatus
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from http.cookies import SimpleCookie
 from jinja2 import __version__ as jinja2_version
 from jinja2 import TemplateError
@@ -82,7 +82,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     path = path.replace('/jinjafx.html', '/')
 
     if not self.hide or verbose:
-      if not isinstance(args[0], int) and path != '/ping':
+      if path != '/ping':
         if self.error is not None:
           ansi = '31'
         elif args[1] == '200' or args[1] == '204':
@@ -128,6 +128,14 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             if (args[1] != '200' and args[1] != '304') or (not path.endswith('.js') and not path.endswith('.css') and not path.endswith('.png')) or verbose:
               log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path + proto_ver)
 
+  def send_error(self, code, message=None, explain=None):
+    body = f'{code} {code.phrase}\r\n'
+    self.send_response(code)
+    self.send_header('Content-Type', 'text/plain')
+    self.send_header('Content-Length', len(body))
+    self.send_header('Connection', 'close')
+    self.end_headers()
+    self.wfile.write(body.encode('utf-8'))
 
   def encode_link(self, bhash):
     alphabet = b'rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz'
@@ -1070,8 +1078,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           r[2] = gzip.compress(r[2])
 
     self.send_header('Content-Type', r[0])
-    self.send_header('Content-Length', str(len(r[2])))
+    self.send_header('Content-Length', len(r[2]))
     self.send_header('X-Content-Type-Options', 'nosniff')
+    self.send_header('Connection', 'close')
 
     for k in cheaders:
       self.send_header(k, cheaders[k])
