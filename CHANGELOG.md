@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [26.1.0] - In Development
+### [26.1.0] - January 12, 2026
 - Replaced `setup.py` with `pyproject.toml`
 - Rewrote the error handling aspects of `http.server` as the defaults are garbage
 
