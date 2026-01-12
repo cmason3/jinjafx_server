@@ -28,7 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji
 
-__version__ = '25.9.3'
+__version__ = '26.1.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -62,13 +62,18 @@ class JinjaFxServer(HTTPServer):
 class ArgumentParser(argparse.ArgumentParser):
   def error(self, message):
     print('URL:\n  https://github.com/cmason3/jinjafx_server\n', file=sys.stderr)
-    print('Usage:\n  ' + self.format_usage()[7:], file=sys.stderr)
+    print('Usage:\n ' + re.sub(r'(?:usage:| {7}(?=[^ ]))', '', self.format_usage()), file=sys.stderr)
     raise Exception(message)
 
 
 class JinjaFxRequest(BaseHTTPRequestHandler):
   server_version = 'JinjaFx/' + __version__
   protocol_version = 'HTTP/1.1'
+  critical = False
+  elapsed = None
+  error = None
+  hide = False
+  length = 0
 
   def format_bytes(self, b):
     for u in [ '', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y' ]:
@@ -77,12 +82,13 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       else:
         return '{:.2f}'.format(b).rstrip('0').rstrip('.') + u + 'B'
 
+
   def log_message(self, format, *args):
     path = self.path if hasattr(self, 'path') else ''
     path = path.replace('/jinjafx.html', '/')
 
     if not self.hide or verbose:
-      if not isinstance(args[0], int) and path != '/ping':
+      if path != '/ping':
         if self.error is not None:
           ansi = '31'
         elif args[1] == '200' or args[1] == '204':
@@ -127,6 +133,16 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           elif self.command != None:
             if (args[1] != '200' and args[1] != '304') or (not path.endswith('.js') and not path.endswith('.css') and not path.endswith('.png')) or verbose:
               log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path + proto_ver)
+
+
+  def send_error(self, code, message=None, explain=None):
+    body = f'{code} {code.phrase}\r\n'
+    self.send_response(code)
+    self.send_header('Content-Type', 'text/plain')
+    self.send_header('Content-Length', len(body))
+    self.send_header('Connection', 'close')
+    self.end_headers()
+    self.wfile.write(body.encode('utf-8'))
 
 
   def encode_link(self, bhash):
@@ -199,9 +215,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
   def do_GET(self, head=False, cache=True, versioned=False):
     try:
-      self.critical = False
-      self.hide = False
-      self.error = None
       cheaders = {}
 
       fpath = self.path.split('?', 1)[0]
@@ -440,25 +453,16 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
 
   def do_OPTIONS(self):
-    self.critical = False
-    self.hide = False
-    self.error = None
     self.send_response(204)
     self.send_header('Allow', 'OPTIONS, HEAD, GET, POST')
     self.end_headers()
 
 
   def do_HEAD(self):
-    self.error = None
     self.do_GET(True)
 
 
   def do_POST(self):
-    self.critical = False
-    self.hide = False
-    self.elapsed = None
-    self.error = None
-
     cheaders = {}
 
     uc = self.path.split('?', 1)
@@ -1070,8 +1074,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           r[2] = gzip.compress(r[2])
 
     self.send_header('Content-Type', r[0])
-    self.send_header('Content-Length', str(len(r[2])))
+    self.send_header('Content-Length', len(r[2]))
     self.send_header('X-Content-Type-Options', 'nosniff')
+    self.send_header('Connection', 'close')
 
     for k in cheaders:
       self.send_header(k, cheaders[k])

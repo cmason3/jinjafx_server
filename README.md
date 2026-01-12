@@ -1,15 +1,35 @@
 [![PyPI](https://img.shields.io/pypi/v/jinjafx-server.svg)](https://pypi.python.org/pypi/jinjafx-server/)
 ![Python](https://img.shields.io/badge/python-≥&nbsp;3.10-brightgreen)
 [<img src="https://img.shields.io/badge/url-https%3A%2F%2Fjinjafx.io-blue" align="right">](https://jinjafx.io)
-&nbsp;
-<h1 align="center">JinjaFx Server - Jinja2 Templating Tool</h1>
+
+# JinjaFx Server - Jinja2 Templating Tool
 
 JinjaFx Server is a lightweight web server that provides a Web UI to JinjaFx. It is a separate Python module which imports the "jinjafx" module to generate outputs from a web interface. Usage instructions are provided below, although it is considered an additional component and not part of the base JinjaFx tool, although it is probably a much easier way to use it. There is an AWS hosted version available at https://jinjafx.io, which is free to use and will always be running the latest development version.
 
 ### Installation
 
 ```
-python3 -m pip install --upgrade --user jinjafx-server
+python3 -m venv /opt/jinjafx
+/opt/jinjafx/bin/python3 -m pip install jinjafx_server
+```
+```
+tee /etc/systemd/system/jinjafx.service >/dev/null <<-EOF
+[Unit]
+Description=JinjaFx Server
+
+[Service]
+Environment="VIRTUAL_ENV=/opt/jinjafx"
+ExecStart=/opt/jinjafx/bin/python3 -u -m jinjafx_server -s -l 127.0.0.1 -p 8080
+SyslogIdentifier=jinjafx_server
+TimeoutStartSec=60
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+```
+systemctl enable --now jinjafx
 ```
 
 ### JinjaFx Server Usage
@@ -46,36 +66,6 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
    JFX_WEBLOG_KEY              - specify a key to allow access to web log interface
 ```
 
-For health checking purposes, if you specify the URL `/ping` then you should get an "OK" response if the JinaFx Server is up and working (these requests are omitted from the logs).
-
-The preferred method of running the JinjaFx Server is with HAProxy in front of it as it supports TLS termination and HTTP/2 (and more recently HTTP/3 using QUIC) or using a container orchestration tool like Kubernetes - please see the [kubernetes](/kubernetes) directory for more information about running JinjaFx as a container.
-
-If you don't want to go down the container route then you can also install it as a service using systemd - the following commands will install a Python Virtual Environment in `/opt/jinjafx` and start it via systemd:
-
-```
-sudo python3 -m venv /opt/jinjafx
-sudo /opt/jinjafx/bin/python3 -m pip install jinjafx_server lxml
-
-sudo tee /etc/systemd/system/jinjafx.service >/dev/null <<-EOF
-[Unit]
-Description=JinjaFx Server
-
-[Service]
-User=<USER>
-Environment="VIRTUAL_ENV=/opt/jinjafx"
-Environment="JFX_WEBLOG_KEY=<KEY>"
-ExecStart=/opt/jinjafx/bin/python3 -u -m jinjafx_server -s -l 127.0.0.1 -p 8080 -weblog
-SyslogIdentifier=jinjafx_server
-TimeoutStartSec=60
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-sudo systemctl enable --now jinjafx
-```
-
 The `-r`, `-s3` or `-github` arguments (mutually exclusive) allow you to specify a repository (`-r` is a local directory, `-s3` is an AWS S3 URL and `-github` is a GitHub repository) that will be used to store DataTemplates on the server via the "Get Link" and "Update Link" buttons. The generated link is guaranteed to be unique and a different link will be created every time. If you use an AWS S3 bucket then you will also need to provide some credentials via the two environment variables which has read and write permissions to the S3 URL.
 
 The `-rl` argument is used to provide an optional rate limit of the source IP - the "rate" is how many requests are permitted and the "limit" is the interval in which those requests are permitted - it can be specified in "s", "m" or "h" (e.g. "5/30s", "10/1m" or "30/1h"). This is currently only applied to "Get Link" and Web Log authentication.
@@ -83,6 +73,10 @@ The `-rl` argument is used to provide an optional rate limit of the source IP - 
 The `-weblog` argument in combination with the `JFX_WEBLOG_KEY` environment variable enables the Web Log interface to view the current application logs - this can be accessed from a web browser using the URL `/logs` - the user will be prompted for the key or they can provide it via a query string of `?key=<JFX_WEBLOG_KEY>`.
 
 If you specify `-allowjs` then this allows you to inject dynamic JavaScript into HTML outputs and JinjaFx Input modals, but this basically disables the scripting aspects of the Content Security Policy (use `-nocsp` to disable it completely), which protects you from XSS attacks. This is only advisable if you are hosting this internally and you trust your users.
+
+The preferred method of running the JinjaFx Server is with HAProxy in front of it as it supports TLS termination as well as HTTP/2 and HTTP/3 transports (QUIC). In addition to running it via systemd, you can also run it as a container using Docker, Podman or Kubernetes (the `Dockerfile` is within the [contrib](/contrib) directory). The container image will always be available at https://hub.docker.com/repository/docker/cmason3/jinjafx_server - the latest tag will always refer to the latest released version, although it is recommended to use explicit version tags.
+
+For health checking purposes, if you perform a GET request to `/ping` then you should get an "OK" response if the JinaFx Server is up and working (these requests are omitted from the logs).
 
 ### Shortcut Keys
 
@@ -197,7 +191,7 @@ jinjafx_input:
     });
 ```
 
-Within the script block, you can also use `jinjafx.rows` and `jinjafx.data()`, which have identical syntax to the Jinja2 versions and allows you to access `data.csv` from within a JinjaFx Input modal.
+Within the script block, you can also use `jinjafx.rows` and `jinjafx.data()`, which have identical syntax to the Jinja2 versions and allows you to access `data.csv` from within a JinjaFx Input modal. Similarly you can use `jinjafx.outputs` within script blocks of HTML outputs to access all the rendered outputs.
 
 You can also specify an optional `size` attribute alongside the `body` attribute which sets the width of the modal using the pre-defined Bootstrap sizes (i.e. "sm", "lg" and "xl"). The input form supports full native HTML validation using `required` and `pattern` attributes. The values which are input are then mapped to Jinja2 variables using the `data-var` custom attribute (e.g. `data-var="name"` would map to `jinjafx_input['name']` or `jinjafx_input.name`):
 

@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### [26.1.0] - January 12, 2026
+- Replaced `setup.py` with `pyproject.toml`
+- Rewrote the error handling aspects of `http.server` as the defaults are garbage
+
 ### [25.9.3] - January 9, 2026
 - Pass through rendered outputs to HTML outputs as `jinjafx.outputs` to allow processing via JavaScript
 
@@ -503,6 +507,7 @@
 - Initial release
 
 
+[26.1.0]: https://github.com/cmason3/jinjafx_server/compare/25.9.3...26.1.0
 [25.9.3]: https://github.com/cmason3/jinjafx_server/compare/25.9.2...25.9.3
 [25.9.2]: https://github.com/cmason3/jinjafx_server/compare/25.9.1...25.9.2
 [25.9.1]: https://github.com/cmason3/jinjafx_server/compare/25.9.0...25.9.1
