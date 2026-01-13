@@ -171,7 +171,11 @@ function getStatusText(code) {
   var csv_on = false;
   var cDataPos = null;
   var xsplit = null;
+  var hsplit = null;
+  var vsplit = null;
   var global_visible = true;
+  var data_visible = true;
+  var template_visible = true;
   var vault_visible = false;
 
   var jsyaml_schema = {
@@ -185,10 +189,10 @@ function getStatusText(code) {
   };
 
   function select_dataset(e) {
-    switch_dataset(e.currentTarget.ds_name, true/*, false*/);
+    switch_dataset(e.currentTarget.ds_name, true);
   }
 
-  function switch_dataset(ds, sflag/*, dflag*/) {
+  function switch_dataset(ds, sflag) {
     if (sflag) {
       datasets[current_ds][0] = window.cmData.getDoc();
       datasets[current_ds][1] = window.cmVars.getDoc();
@@ -198,12 +202,10 @@ function getStatusText(code) {
       window.cmData.swapDoc(datasets[ds][0]);
       window.cmVars.swapDoc(datasets[ds][1]);
 
-      // if (dflag) {
       window.addEventListener('beforeunload', onBeforeUnload);
       if (document.getElementById('get_link').value != 'false') {
         document.title = 'JinjaFx [unsaved]';
       }
-      // }
       dirty = true;
       toggle_vault();
       document.getElementById('selected_ds').innerHTML = ds;
@@ -275,6 +277,94 @@ function getStatusText(code) {
     dirty = true;
   }
 
+  function toggle_data() {
+    if (document.getElementById('toggle_data').checked) {
+      show_data();
+    }
+    else {
+      hide_data();
+    }
+    window.addEventListener('beforeunload', onBeforeUnload);
+    if (document.getElementById('get_link').value != 'false') {
+      document.title = 'JinjaFx [unsaved]';
+    }
+    dirty = true;
+  }
+
+  function toggle_template() {
+    if (document.getElementById('toggle_template').checked) {
+      show_template();
+    }
+    else {
+      hide_template();
+    }
+    window.addEventListener('beforeunload', onBeforeUnload);
+    if (document.getElementById('get_link').value != 'false') {
+      document.title = 'JinjaFx [unsaved]';
+    }
+    dirty = true;
+  }
+
+  function show_data() {
+    data_visible = true;
+    document.getElementById('cdata').classList.remove('d-none');
+    document.getElementById('cvars').classList.remove('w-100');
+
+    hsplit = Split(["#cdata", "#cvars"], {
+      direction: "horizontal",
+      cursor: "col-resize",
+      sizes: [50, 50],
+      snapOffset: 0,
+      minSize: 300,
+      onDragStart: remove_info
+    });
+
+    window.cmData.refresh();
+    window.cmData.focus();
+  }
+
+  function hide_data() {
+    data_visible = false;
+    document.getElementById('cdata').classList.add('d-none');
+    document.getElementById('cvars').classList.add('w-100');
+
+    if (hsplit != null) {
+      hsplit.destroy();
+      hsplit = null;
+    }
+    window.cmVars.focus();
+  }
+
+  function show_template() {
+    template_visible = true;
+    document.getElementById('ctemplate').classList.remove('d-none');
+    document.getElementById('top').classList.remove('h-100');
+
+    vsplit = Split(["#top", "#ctemplate"], {
+      direction: "vertical",
+      cursor: "row-resize",
+      sizes: [40, 60],
+      snapOffset: 0,
+      minSize: 120,
+      onDragStart: remove_info
+    });
+
+    window.cmTemplate.refresh();
+    window.cmTemplate.focus();
+  }
+
+  function hide_template() {
+    template_visible = false;
+    document.getElementById('ctemplate').classList.add('d-none');
+    document.getElementById('top').classList.add('h-100');
+
+    if (vsplit != null) {
+      vsplit.destroy();
+      vsplit = null;
+    }
+    window.cmVars.focus();
+  }
+
   function split_vars() {
     document.getElementById('xgvars').classList.remove('d-none');
     document.getElementById('xlvars').classList.remove('h-100');
@@ -314,16 +404,58 @@ function getStatusText(code) {
     document.getElementById('datasets').innerHTML = '';
 
     var cbl = document.createElement('label');
-    cbl.for = 'toggle_global';
+    cbl.for = 'toggle_data';
     cbl.classList.add('form-check-label');
-    cbl.innerHTML = 'Global.yml';
+    cbl.innerHTML = 'Data.csv';
 
     var cb = document.createElement('input');
     cb.classList.add('form-check-input', 'float-end');
     cb.type = 'checkbox';
-    cb.checked = global_visible ? 'checked' : '';
-    cb.addEventListener('change', toggle_global, false);
-    cb.id = 'toggle_global';
+    cb.checked = data_visible ? 'checked' : '';
+    cb.addEventListener('change', toggle_data, false);
+    cb.id = 'toggle_data';
+
+    var e = document.createElement('div');
+    e.classList.add('dropdown-item-nofocus', 'form-check', 'form-switch');
+    e.style.minWidth = '200px';
+    e.appendChild(cbl);
+    e.appendChild(cb);
+
+    document.getElementById('datasets').appendChild(e);
+
+    if (Object.keys(datasets).length > 1) {
+      var cbl = document.createElement('label');
+      cbl.for = 'toggle_global';
+      cbl.classList.add('form-check-label');
+      cbl.innerHTML = 'Global.yml';
+
+      var cb = document.createElement('input');
+      cb.classList.add('form-check-input', 'float-end');
+      cb.type = 'checkbox';
+      cb.checked = global_visible ? 'checked' : '';
+      cb.addEventListener('change', toggle_global, false);
+      cb.id = 'toggle_global';
+
+      var e = document.createElement('div');
+      e.classList.add('dropdown-item-nofocus', 'form-check', 'form-switch');
+      e.style.minWidth = '200px';
+      e.appendChild(cbl);
+      e.appendChild(cb);
+
+      document.getElementById('datasets').appendChild(e);
+    }
+
+    var cbl = document.createElement('label');
+    cbl.for = 'toggle_template';
+    cbl.classList.add('form-check-label');
+    cbl.innerHTML = 'Template.j2';
+
+    var cb = document.createElement('input');
+    cb.classList.add('form-check-input', 'float-end');
+    cb.type = 'checkbox';
+    cb.checked = template_visible ? 'checked' : '';
+    cb.addEventListener('change', toggle_template, false);
+    cb.id = 'toggle_template';
 
     var e = document.createElement('div');
     e.classList.add('dropdown-item-nofocus', 'form-check', 'form-switch');
@@ -346,6 +478,20 @@ function getStatusText(code) {
       document.getElementById('datasets').appendChild(e);
     });
 
+    if (data_visible && (hsplit == null)) {
+      show_data();
+    }
+    else if (!data_visible && (hsplit != null)) {
+      hide_data();
+    }
+
+    if (template_visible && (vsplit == null)) {
+      show_template();
+    }
+    else if (!template_visible && (vsplit != null)) {
+      hide_template();
+    }
+
     if (Object.keys(datasets).length > 1) {
       if (global_visible && (xsplit == null)) {
         split_vars();
@@ -355,14 +501,12 @@ function getStatusText(code) {
           unsplit_vars(true);
         }
       }
-      document.getElementById('select_ds').disabled = false;
       document.getElementById('delete_ds').disabled = false;
     }
     else {
       if (xsplit != null) {
         unsplit_vars(true);
       }
-      document.getElementById('select_ds').disabled = true;
       document.getElementById('delete_ds').disabled = true;
     }
     document.getElementById('selected_ds').innerHTML = current_ds;
@@ -394,7 +538,7 @@ function getStatusText(code) {
   function delete_dataset(ds) {
     delete datasets[ds];
     rebuild_datasets();
-    switch_dataset(Object.keys(datasets).sort(default_on_top)[0], false/*, true*/);
+    switch_dataset(Object.keys(datasets).sort(default_on_top)[0], false);
     toggle_vault();
     fe.focus();
   }
@@ -564,7 +708,7 @@ function getStatusText(code) {
       return false;
     }
 
-    if (document.getElementById('select_ds').disabled == false) {
+    if (Object.keys(datasets).length > 1) {
       var cgVars = window.cmgVars.getSearchCursor(nonASCIIRegex);
       if (cgVars.findNext()) {
         window.cmgVars.focus();
@@ -601,7 +745,7 @@ function getStatusText(code) {
 
         var vars = window.cmVars.getValue().replace(/\t/g, "  ");
 
-        if (document.getElementById('select_ds').disabled == false) {
+        if (Object.keys(datasets).length > 1) {
           var global = window.cmgVars.getValue().replace(/\t/g, "  ");
 
           if (global.match(/\S/)) {
@@ -787,11 +931,12 @@ function getStatusText(code) {
           return false;
         }
 
-        dt.dataset = current_ds;
-
         if (Object.keys(datasets).length > 1) {
+          dt.dataset = current_ds;
           dt.show_global = global_visible ? '1' : '0';
         }
+        dt.show_data = data.visible ? '1' : '0';
+        dt.show_template = template_visible ? '1' : '0';
 
         if (Object.keys(templates).length === 1) {
           dt.template = e(window.cmTemplate.getValue().replace(/\t/g, "  "));
@@ -815,7 +960,7 @@ function getStatusText(code) {
             dt.global = e(window.cmgVars.getValue().replace(/\t/g, "  "));
           }
 
-          switch_dataset(current_ds, true/*, false*/);
+          switch_dataset(current_ds, true);
           Object.keys(datasets).sort(default_on_top).forEach(function(ds) {
             dt.datasets[ds] = {};
             dt.datasets[ds].data = e(datasets[ds][0].getValue());
@@ -1062,6 +1207,8 @@ function getStatusText(code) {
               }
 
               global_visible = (!dt.hasOwnProperty('show_global') || dt['show_global']) ? true : false;
+              data_visible = (!dt.hasOwnProperty('show_data') || dt['show_data']) ? true : false;
+              template_visible = (!dt.hasOwnProperty('show_template') || dt['show_template']) ? true : false;
 
               if (qs.hasOwnProperty('ds')) {
                 load_datatemplate(dt['dt'], qs, qs['ds']);
@@ -1218,6 +1365,8 @@ function getStatusText(code) {
               if (obj != null) {
                 pending_dt = obj['dt'];
                 global_visible = true;
+                data_visible = true;
+                template_visible = true;
                 document.getElementById("vault-password").value = '';
                 apply_dt(false);
                 return true;
@@ -1245,6 +1394,8 @@ function getStatusText(code) {
               if (obj != null) {
                 pending_dt = obj['dt'];
                 global_visible = true;
+                data_visible = true;
+                template_visible = true;
                 document.getElementById("vault-password").value = '';
                 apply_dt(false);
                 return true;
@@ -1513,16 +1664,16 @@ function getStatusText(code) {
       window.cmgVars.on("change", onChange);
       window.cmTemplate.on("change", onChange);
 
-      var hsplit = Split(["#cdata", "#cvars"], {
+      hsplit = Split(["#cdata", "#cvars"], {
         direction: "horizontal",
         cursor: "col-resize",
-        sizes: [60, 40],
+        sizes: [50, 50],
         snapOffset: 0,
         minSize: 300,
         onDragStart: remove_info
       });
 
-      var vsplit = Split(["#top", "#ctemplate"], {
+      vsplit = Split(["#top", "#ctemplate"], {
         direction: "vertical",
         cursor: "row-resize",
         sizes: [40, 60],
@@ -1837,10 +1988,10 @@ function getStatusText(code) {
           if (existing == '') {
             datasets[new_ds] = [CodeMirror.Doc('', 'data'), CodeMirror.Doc('', 'yaml')];
             rebuild_datasets();
-            switch_dataset(new_ds, true/*, true*/);
+            switch_dataset(new_ds, true);
           }
           else {
-            switch_dataset(existing, true/*, true*/);
+            switch_dataset(existing, true);
           }
         }
         else {
@@ -2055,6 +2206,7 @@ function getStatusText(code) {
         }
       }
       else {
+        rebuild_datasets();
         reset_location('');
         document.getElementById('buttons').classList.remove('d-none');
         document.getElementById('stemplates').style.visibility = 'hidden';
@@ -2202,12 +2354,16 @@ function getStatusText(code) {
           if (dirty) {
             if (confirm("Are You Sure?") === true) {
               global_visible = true;
+              data_visible = true;
+              template_visible = true;
               document.getElementById("vault-password").value = '';
               apply_dt(false);
             }
           }
           else {
             global_visible = true;
+            data_visible = true;
+            template_visible = true;
             document.getElementById("vault-password").value = '';
             apply_dt(false);
           }
