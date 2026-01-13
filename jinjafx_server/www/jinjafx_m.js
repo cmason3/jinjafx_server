@@ -935,7 +935,7 @@ function getStatusText(code) {
           dt.dataset = current_ds;
           dt.show_global = global_visible ? '1' : '0';
         }
-        dt.show_data = data.visible ? '1' : '0';
+        dt.show_data = data_visible ? '1' : '0';
         dt.show_template = template_visible ? '1' : '0';
 
         if (Object.keys(templates).length === 1) {

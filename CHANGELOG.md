@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [26.2.0] - In Development
+### [26.2.0] - January 13, 2026
 - Added the ability to selectively hide `data.csv` and `template.j2`
 
 ### [26.1.1] - January 12, 2026
