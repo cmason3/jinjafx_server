@@ -306,9 +306,9 @@ function getStatusText(code) {
   }
 
   function show_data() {
-    data_visible = true;
     document.getElementById('cdata').classList.remove('d-none');
     document.getElementById('cvars').classList.remove('w-100');
+    data_visible = true;
 
     hsplit = Split(["#cdata", "#cvars"], {
       direction: "horizontal",
@@ -320,13 +320,14 @@ function getStatusText(code) {
     });
 
     window.cmData.refresh();
+    window.cmData.setOption('readOnly', false)
     window.cmData.focus();
   }
 
   function hide_data() {
-    data_visible = false;
     document.getElementById('cdata').classList.add('d-none');
     document.getElementById('cvars').classList.add('w-100');
+    data_visible = false;
 
     if (hsplit != null) {
       hsplit.destroy();
@@ -336,9 +337,9 @@ function getStatusText(code) {
   }
 
   function show_template() {
-    template_visible = true;
     document.getElementById('ctemplate').classList.remove('d-none');
     document.getElementById('top').classList.remove('h-100');
+    template_visible = true;
 
     vsplit = Split(["#top", "#ctemplate"], {
       direction: "vertical",
@@ -350,13 +351,14 @@ function getStatusText(code) {
     });
 
     window.cmTemplate.refresh();
+    window.cmTemplate.setOption('readOnly', false)
     window.cmTemplate.focus();
   }
 
   function hide_template() {
-    template_visible = false;
     document.getElementById('ctemplate').classList.add('d-none');
     document.getElementById('top').classList.add('h-100');
+    template_visible = false;
 
     if (vsplit != null) {
       vsplit.destroy();
@@ -377,7 +379,10 @@ function getStatusText(code) {
       minSize: 50,
       onDragStart: remove_info
     });
+
     window.cmgVars.refresh();
+    window.cmgVars.setOption('readOnly', false)
+    window.cmgVars.focus();
   }
 
   function unsplit_vars(copy) {
