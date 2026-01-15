@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [26.2.1] - January 15, 2026
+- Fixed an issue where editor panes go read-only when being unhidden
+
 ### [26.2.0] - January 13, 2026
 - Added the ability to selectively hide `data.csv` and `template.j2`
 
@@ -513,6 +516,7 @@
 - Initial release
 
 
+[26.2.1]: https://github.com/cmason3/jinjafx_server/compare/26.2.0...26.2.1
 [26.2.0]: https://github.com/cmason3/jinjafx_server/compare/26.1.1...26.2.0
 [26.1.1]: https://github.com/cmason3/jinjafx_server/compare/26.1.0...26.1.1
 [26.1.0]: https://github.com/cmason3/jinjafx_server/compare/25.9.3...26.1.0
