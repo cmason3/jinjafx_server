@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [26.2.2] - In Development
+### [26.2.2] - January 17, 2026
 - Added the ability to toggle fullscreen mode via a button for `template.j2`
 
 ### [26.2.1] - January 15, 2026
