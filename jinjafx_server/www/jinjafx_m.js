@@ -1334,6 +1334,27 @@ function getStatusText(code) {
       document.getElementById('protect').onclick = function() { _jinjafx('protect'); };
       document.getElementById('delete').onclick = function() { _jinjafx('delete'); };
 
+      document.getElementById('fullscreen_t').onclick = function() {
+        if (cmTemplate.getOption("fullScreen")) {
+          cmTemplate.setOption("fullScreen", false);
+          document.getElementById('stemplates').style.position = 'absolute';
+          document.getElementById('min').classList.add('d-none');
+          document.getElementById('max').classList.remove('d-none');
+          cmTemplate.focus();
+        }
+        else {
+          if (tinfo) {
+            remove_info();
+            tinfo = false;
+          }
+          cmTemplate.setOption("fullScreen", true);
+          document.getElementById('stemplates').style.position = 'fixed';
+          document.getElementById('max').classList.add('d-none');
+          document.getElementById('min').classList.remove('d-none');
+          cmTemplate.focus();
+        }
+      };
+
       if (window.crypto.subtle) {
         document.getElementById('encrypt').classList.remove('d-none');
       }
@@ -1434,14 +1455,43 @@ function getStatusText(code) {
         "Ctrl-F": "findPersistent",
         "Cmd-F": "findPersistent",
         "F11": function(cm) {
-          cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+          if (cm === cmTemplate) {
+            document.getElementById('fullscreen_t').click();
+          }
+          else if (cm.getOption("fullScreen")) {
+            cm.setOption("fullScreen", false);
+            document.getElementById('stemplates').classList.remove('d-none');
+          }
+          else {
+            cm.setOption("fullScreen", true);
+            document.getElementById('stemplates').classList.add('d-none');
+          }
         },
         "Cmd-Enter": function(cm) {
-          cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+          if (cm === cmTemplate) {
+            document.getElementById('fullscreen_t').click();
+          }
+          else if (cm.getOption("fullScreen")) {
+            cm.setOption("fullScreen", false);
+            document.getElementById('stemplates').classList.remove('d-none');
+          }
+          else {
+            cm.setOption("fullScreen", true);
+            document.getElementById('stemplates').classList.add('d-none');
+          }
         },
         "Esc": function(cm) {
           if (cm.getOption("fullScreen")) {
-            cm.setOption("fullScreen", false);
+            if (cm === cmTemplate) {
+              cmTemplate.setOption("fullScreen", false);
+              document.getElementById('stemplates').style.position = 'absolute';
+              document.getElementById('min').classList.add('d-none');
+              document.getElementById('max').classList.remove('d-none');
+            }
+            else {
+              cm.setOption("fullScreen", false);
+              document.getElementById('stemplates').classList.remove('d-none');
+            }
           }
         },
         "Ctrl-S": function(cm) {
