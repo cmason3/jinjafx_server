@@ -2258,7 +2258,6 @@ function getStatusText(code) {
         }
       }
       else {
-        rebuild_datasets();
         reset_location('');
         document.getElementById('buttons').classList.remove('d-none');
         document.getElementById('stemplates').style.visibility = 'hidden';
@@ -2269,6 +2268,7 @@ function getStatusText(code) {
         }
         loaded = true;
       }
+      rebuild_datasets();
     }
     catch (e) {
       if (e.stack.includes(e.name)) {

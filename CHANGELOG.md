@@ -2,6 +2,7 @@
 
 ### [26.2.3] - In Development
 - Fixed true root cause of read-only editor panes
+- Fixed an issue where the DataSet dropdown wasn't built if a non-existent DataTemplate was specified
 
 ### [26.2.2] - January 17, 2026
 - Added the ability to toggle fullscreen mode via a button for `template.j2`
