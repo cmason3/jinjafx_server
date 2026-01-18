@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [26.2.3] - In Development
+- Fixed true root cause of read-only editor panes
+
 ### [26.2.2] - January 17, 2026
 - Added the ability to toggle fullscreen mode via a button for `template.j2`
 
@@ -519,6 +522,7 @@
 - Initial release
 
 
+[26.2.3]: https://github.com/cmason3/jinjafx_server/compare/26.2.2...26.2.3
 [26.2.2]: https://github.com/cmason3/jinjafx_server/compare/26.2.1...26.2.2
 [26.2.1]: https://github.com/cmason3/jinjafx_server/compare/26.2.0...26.2.1
 [26.2.0]: https://github.com/cmason3/jinjafx_server/compare/26.1.1...26.2.0
