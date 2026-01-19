@@ -320,8 +320,7 @@ function getStatusText(code) {
     });
 
     window.cmData.refresh();
-    window.cmData.setOption('readOnly', false)
-    window.cmData.focus();
+    fe.focus();
   }
 
   function hide_data() {
@@ -351,8 +350,7 @@ function getStatusText(code) {
     });
 
     window.cmTemplate.refresh();
-    window.cmTemplate.setOption('readOnly', false)
-    window.cmTemplate.focus();
+    fe.focus();
   }
 
   function hide_template() {
@@ -381,8 +379,7 @@ function getStatusText(code) {
     });
 
     window.cmgVars.refresh();
-    window.cmgVars.setOption('readOnly', false)
-    window.cmgVars.focus();
+    fe.focus();
   }
 
   function unsplit_vars(copy) {
@@ -1336,9 +1333,9 @@ function getStatusText(code) {
 
       document.getElementById('fullscreen_t').onclick = function() {
         if (cmTemplate.getOption("fullScreen")) {
+          document.getElementById('min').classList.add('d-none');
           cmTemplate.setOption("fullScreen", false);
           document.getElementById('stemplates').style.position = 'absolute';
-          document.getElementById('min').classList.add('d-none');
           document.getElementById('max').classList.remove('d-none');
           cmTemplate.focus();
         }
@@ -1347,9 +1344,9 @@ function getStatusText(code) {
             remove_info();
             tinfo = false;
           }
-          cmTemplate.setOption("fullScreen", true);
-          document.getElementById('stemplates').style.position = 'fixed';
           document.getElementById('max').classList.add('d-none');
+          document.getElementById('stemplates').style.position = 'fixed';
+          cmTemplate.setOption("fullScreen", true);
           document.getElementById('min').classList.remove('d-none');
           cmTemplate.focus();
         }
@@ -1463,8 +1460,8 @@ function getStatusText(code) {
             document.getElementById('stemplates').classList.remove('d-none');
           }
           else {
-            cm.setOption("fullScreen", true);
             document.getElementById('stemplates').classList.add('d-none');
+            cm.setOption("fullScreen", true);
           }
         },
         "Cmd-Enter": function(cm) {
@@ -1476,16 +1473,16 @@ function getStatusText(code) {
             document.getElementById('stemplates').classList.remove('d-none');
           }
           else {
-            cm.setOption("fullScreen", true);
             document.getElementById('stemplates').classList.add('d-none');
+            cm.setOption("fullScreen", true);
           }
         },
         "Esc": function(cm) {
           if (cm.getOption("fullScreen")) {
             if (cm === cmTemplate) {
+              document.getElementById('min').classList.add('d-none');
               cmTemplate.setOption("fullScreen", false);
               document.getElementById('stemplates').style.position = 'absolute';
-              document.getElementById('min').classList.add('d-none');
               document.getElementById('max').classList.remove('d-none');
             }
             else {
@@ -2261,7 +2258,6 @@ function getStatusText(code) {
         }
       }
       else {
-        rebuild_datasets();
         reset_location('');
         document.getElementById('buttons').classList.remove('d-none');
         document.getElementById('stemplates').style.visibility = 'hidden';
@@ -2272,6 +2268,7 @@ function getStatusText(code) {
         }
         loaded = true;
       }
+      rebuild_datasets();
     }
     catch (e) {
       if (e.stack.includes(e.name)) {
@@ -2290,7 +2287,11 @@ function getStatusText(code) {
   }
 
   function set_wait() {
-    fe.setOption('readOnly', 'nocursor');
+    cmData.setOption('readOnly', 'nocursor');
+    cmgVars.setOption('readOnly', 'nocursor');
+    cmVars.setOption('readOnly', 'nocursor');
+    cmTemplate.setOption('readOnly', 'nocursor');
+
     var e = document.getElementById("csv").getElementsByTagName("th");
     for (var i = 0; i < e.length; i++) {
       e[i].style.background = '#eee';
@@ -2310,11 +2311,16 @@ function getStatusText(code) {
     window.cmTemplate.getWrapperElement().style.background = '';
     window.cmData.getWrapperElement().style.background = '';
     document.getElementById("csv").style.background = '#fff';
+
     var e = document.getElementById("csv").getElementsByTagName("th");
     for (var i = 0; i < e.length; i++) {
       e[i].style.background = 'none';
     }
-    fe.setOption('readOnly', false);
+
+    cmData.setOption('readOnly', false);
+    cmgVars.setOption('readOnly', false);
+    cmVars.setOption('readOnly', false);
+    cmTemplate.setOption('readOnly', false);
     fe.focus();
   }
 
