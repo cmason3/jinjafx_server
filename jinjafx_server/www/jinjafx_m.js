@@ -1333,9 +1333,9 @@ function getStatusText(code) {
 
       document.getElementById('fullscreen_t').onclick = function() {
         if (cmTemplate.getOption("fullScreen")) {
+          document.getElementById('min').classList.add('d-none');
           cmTemplate.setOption("fullScreen", false);
           document.getElementById('stemplates').style.position = 'absolute';
-          document.getElementById('min').classList.add('d-none');
           document.getElementById('max').classList.remove('d-none');
           cmTemplate.focus();
         }
@@ -1344,9 +1344,9 @@ function getStatusText(code) {
             remove_info();
             tinfo = false;
           }
-          cmTemplate.setOption("fullScreen", true);
-          document.getElementById('stemplates').style.position = 'fixed';
           document.getElementById('max').classList.add('d-none');
+          document.getElementById('stemplates').style.position = 'fixed';
+          cmTemplate.setOption("fullScreen", true);
           document.getElementById('min').classList.remove('d-none');
           cmTemplate.focus();
         }
@@ -1460,8 +1460,8 @@ function getStatusText(code) {
             document.getElementById('stemplates').classList.remove('d-none');
           }
           else {
-            cm.setOption("fullScreen", true);
             document.getElementById('stemplates').classList.add('d-none');
+            cm.setOption("fullScreen", true);
           }
         },
         "Cmd-Enter": function(cm) {
@@ -1473,16 +1473,16 @@ function getStatusText(code) {
             document.getElementById('stemplates').classList.remove('d-none');
           }
           else {
-            cm.setOption("fullScreen", true);
             document.getElementById('stemplates').classList.add('d-none');
+            cm.setOption("fullScreen", true);
           }
         },
         "Esc": function(cm) {
           if (cm.getOption("fullScreen")) {
             if (cm === cmTemplate) {
+              document.getElementById('min').classList.add('d-none');
               cmTemplate.setOption("fullScreen", false);
               document.getElementById('stemplates').style.position = 'absolute';
-              document.getElementById('min').classList.add('d-none');
               document.getElementById('max').classList.remove('d-none');
             }
             else {
