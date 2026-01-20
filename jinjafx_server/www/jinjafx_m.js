@@ -2291,11 +2291,6 @@ function getStatusText(code) {
     cmgVars.setOption('readOnly', 'nocursor');
     cmVars.setOption('readOnly', 'nocursor');
     cmTemplate.setOption('readOnly', 'nocursor');
-
-    var e = document.getElementById("csv").getElementsByTagName("th");
-    for (var i = 0; i < e.length; i++) {
-      e[i].style.background = '#eee';
-    }
     document.getElementById("csv").style.background = '#eee';
     window.cmData.getWrapperElement().style.background = '#eee';
     window.cmTemplate.getWrapperElement().style.background = '#eee';
@@ -2311,12 +2306,6 @@ function getStatusText(code) {
     window.cmTemplate.getWrapperElement().style.background = '';
     window.cmData.getWrapperElement().style.background = '';
     document.getElementById("csv").style.background = '#fff';
-
-    var e = document.getElementById("csv").getElementsByTagName("th");
-    for (var i = 0; i < e.length; i++) {
-      e[i].style.background = 'none';
-    }
-
     cmData.setOption('readOnly', false);
     cmgVars.setOption('readOnly', false);
     cmVars.setOption('readOnly', false);

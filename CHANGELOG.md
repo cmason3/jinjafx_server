@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [26.2.4] - In Development
+- Downgraded Bootstrap to 5.a.32 due to https://github.com/twbs/bootstrap/issues/38779
+
 ### [26.2.3] - January 19, 2026
 - Fixed real root cause of read-only editor panes
 - Fixed an issue where the DataSet dropdown wasn't built if a non-existent DataTemplate was specified
@@ -523,6 +526,7 @@
 - Initial release
 
 
+[26.2.4]: https://github.com/cmason3/jinjafx_server/compare/26.2.3...26.2.4
 [26.2.3]: https://github.com/cmason3/jinjafx_server/compare/26.2.2...26.2.3
 [26.2.2]: https://github.com/cmason3/jinjafx_server/compare/26.2.1...26.2.2
 [26.2.1]: https://github.com/cmason3/jinjafx_server/compare/26.2.0...26.2.1
