@@ -74,6 +74,9 @@ textarea {
   border-top-left-radius: 0.3rem !important;
   border-bottom-left-radius: 0.3rem !important;
 }
+.table {
+  --bs-table-bg: transparent;
+}
 .dropdown-item-nofocus {
   display: block;
   width: 100%;
