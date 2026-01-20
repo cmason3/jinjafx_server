@@ -1,7 +1,7 @@
 ## CHANGELOG
 
-### [26.2.4] - In Development
-- Downgraded Bootstrap to 5.a.32 due to https://github.com/twbs/bootstrap/issues/38779
+### [26.2.4] - January 20, 2026
+- Implemented a workaround for https://github.com/twbs/bootstrap/issues/38779
 
 ### [26.2.3] - January 19, 2026
 - Fixed real root cause of read-only editor panes
