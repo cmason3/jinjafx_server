@@ -37,6 +37,7 @@ base = os.path.abspath(os.path.dirname(__file__))
 aws_s3_url = None
 aws_access_key = None
 aws_secret_key = None
+aws_region_name = None
 github_url = None
 github_token = None
 jfx_weblog_key = None
@@ -1143,6 +1144,7 @@ def main(rflag=[0]):
   global aws_s3_url
   global aws_access_key
   global aws_secret_key
+  global aws_region_name
   global github_url
   global github_token
   global jfx_weblog_key
@@ -1201,12 +1203,13 @@ def main(rflag=[0]):
         parser.error("argument -weblog: environment variable 'JFX_WEBLOG_KEY' is mandatory")
 
     if args.s3 is not None:
-      aws_s3_url = args.s3
-      aws_access_key = os.getenv('AWS_ACCESS_KEY')
-      aws_secret_key = os.getenv('AWS_SECRET_KEY')
+      aws_s3_url = args.s3.rstrip('/')
+      aws_access_key = os.getenv('S3_ACCESS_KEY') or os.getenv('AWS_ACCESS_KEY')
+      aws_secret_key = os.getenv('S3_SECRET_KEY') or os.getenv('AWS_SECRET_KEY')
+      aws_region_name = os.getenv('S3_REGION_NAME')
 
-      if aws_access_key == None or aws_secret_key == None:
-        parser.error("argument -s3: environment variables 'AWS_ACCESS_KEY' and 'AWS_SECRET_KEY' are mandatory")
+      if aws_access_key is None or aws_secret_key is None or aws_region_name is None:
+        parser.error("argument -s3: environment variables 'S3_ACCESS_KEY', 'S3_SECRET_KEY' and 'S3_REGION_NAME' are mandatory")
 
     if args.github is not None:
       github_url = args.github
@@ -1343,14 +1346,15 @@ def rlimit(rl):
   return rl
 
 
-def aws_s3_authorization(method, fname, region, headers):
+def aws_s3_authorization(method, s3_url, fname, headers):
+  prefix = s3_url.split('/', 1)[-1] + '/' if '/' in s3_url else ''
   sheaders = ';'.join(map(lambda k: k.lower(), sorted(headers.keys())))
-  srequest = headers['x-amz-date'][:8] + '/' + region + '/s3/aws4_request'
-  cr = method.upper() + '\n/' + fname + '\n\n' + '\n'.join([ k.lower() + ':' + v for k, v in sorted(headers.items()) ]) + '\n\n' + sheaders + '\n' + headers['x-amz-content-sha256']
+  srequest = headers['x-amz-date'][:8] + '/' + aws_region_name + '/s3/aws4_request'
+  cr = method.upper() + '\n/' + prefix + fname + '\n\n' + '\n'.join([ k.lower() + ':' + v for k, v in sorted(headers.items()) ]) + '\n\n' + sheaders + '\n' + headers['x-amz-content-sha256']
   s2s = 'AWS4-HMAC-SHA256\n' + headers['x-amz-date'] + '\n' + srequest + '\n' + hashlib.sha256(cr.encode('utf-8')).hexdigest()
 
   dkey = hmac.new(('AWS4' + aws_secret_key).encode('utf-8'), headers['x-amz-date'][:8].encode('utf-8'), hashlib.sha256).digest()
-  drkey = hmac.new(dkey, region.encode('utf-8'), hashlib.sha256).digest()
+  drkey = hmac.new(dkey, aws_region_name.encode('utf-8'), hashlib.sha256).digest()
   drskey = hmac.new(drkey, b's3', hashlib.sha256).digest()
   skey = hmac.new(drskey, b'aws4_request', hashlib.sha256).digest()
 
@@ -1361,37 +1365,37 @@ def aws_s3_authorization(method, fname, region, headers):
 
 def aws_s3_delete(s3_url, fname):
   headers = {
-    'Host': s3_url,
+    'Host': s3_url.split('/')[0],
     'Content-Type': 'text/plain',
     'x-amz-content-sha256': hashlib.sha256(b'').hexdigest(),
     'x-amz-date': datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
   }
-  headers = aws_s3_authorization('DELETE', fname, s3_url.split('.')[2], headers)
+  headers = aws_s3_authorization('DELETE', s3_url, fname, headers)
   return requests.delete('https://' + s3_url + '/' + fname, headers=headers)
 
 
 def aws_s3_put(s3_url, fname, content, ctype):
   content = gzip.compress(content.encode('utf-8'))
   headers = {
-    'Host': s3_url,
+    'Host': s3_url.split('/')[0],
     'Content-Length': str(len(content)),
     'Content-Type': ctype,
     'Content-Encoding': 'gzip',
     'x-amz-content-sha256': hashlib.sha256(content).hexdigest(),
     'x-amz-date': datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
   }
-  headers = aws_s3_authorization('PUT', fname, s3_url.split('.')[2], headers)
+  headers = aws_s3_authorization('PUT', s3_url, fname, headers)
   return requests.put('https://' + s3_url + '/' + fname, headers=headers, data=content)
 
 
 def aws_s3_get(s3_url, fname):
   headers = {
-    'Host': s3_url,
+    'Host': s3_url.split('/')[0],
     'Accept-Encoding': 'gzip',
     'x-amz-content-sha256': hashlib.sha256(b'').hexdigest(),
     'x-amz-date': datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
   }
-  headers = aws_s3_authorization('GET', fname, s3_url.split('.')[2], headers)
+  headers = aws_s3_authorization('GET', s3_url, fname, headers)
   return requests.get('https://' + s3_url + '/' + fname, headers=headers)
 
 

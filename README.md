@@ -46,7 +46,7 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
    -l <address>                       - specify a listen address (default is '127.0.0.1')
    -p <port>                          - specify a listen port (default is 8080)
    -r <directory>                     - specify a local repository directory (allows 'Get Link')
-   -s3 <aws s3 url>                   - specify a repository using aws s3 buckets (allows 'Get Link')
+   -s3 <s3 url>                       - specify a repository using s3 buckets (allows 'Get Link')
    -github <owner>/<repo>[:<branch>]  - specify a repository using github (allows 'Get Link')
    -rl <rate/limit>                   - specify a rate limit (i.e. '5/30s' for 5 requests in 30 seconds)
    -tl <time limit>                   - specify a time limit per request (seconds)
@@ -60,13 +60,19 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
    -v                                 - log all http requests
 
  Environment Variables:
-   AWS_ACCESS_KEY              - specify an aws access key to authenticate for '-s3'
-   AWS_SECRET_KEY              - specify an aws secret key to authenticate for '-s3'
-   GITHUB_TOKEN                - specify a github personal access token for '-github'
-   JFX_WEBLOG_KEY              - specify a key to allow access to web log interface
+   S3_REGION_NAME             - specify a s3 region name for '-s3' (i.e. 'eu-west-2')
+   S3_ACCESS_KEY              - specify an access key to authenticate for '-s3'
+   S3_SECRET_KEY              - specify a secret key to authenticate for '-s3'
+   GITHUB_TOKEN               - specify a github personal access token for '-github'
+   JFX_WEBLOG_KEY             - specify a key to allow access to web log interface
 ```
 
-The `-r`, `-s3` or `-github` arguments (mutually exclusive) allow you to specify a repository (`-r` is a local directory, `-s3` is an AWS S3 URL and `-github` is a GitHub repository) that will be used to store DataTemplates on the server via the "Get Link" and "Update Link" buttons. The generated link is guaranteed to be unique and a different link will be created every time. If you use an AWS S3 bucket then you will also need to provide some credentials via the two environment variables which has read and write permissions to the S3 URL.
+The `-r`, `-s3` or `-github` arguments (mutually exclusive) allow you to specify a repository (`-r` is a local directory, `-s3` is an S3 URL and `-github` is a GitHub repository) that will be used to store DataTemplates on the server via the "Get Link" and "Update Link" buttons. The generated link is guaranteed to be unique and a different link will be created every time.
+
+If you use an S3 bucket then you will also need to provide some credentials and the region via the "S3_" environment variables, which has read and write permissions to the S3 bucket. It supports both AWS S3 as well as Generic S3 via the following URL formats (HTTPS is assumed):
+
+- AWS S3 - <bucket>.s3.<region>.amazonaws.com
+- Generic S3 - <url>/<bucket>
 
 The `-rl` argument is used to provide an optional rate limit of the source IP - the "rate" is how many requests are permitted and the "limit" is the interval in which those requests are permitted - it can be specified in "s", "m" or "h" (e.g. "5/30s", "10/1m" or "30/1h"). This is currently only applied to "Get Link" and Web Log authentication.
 
