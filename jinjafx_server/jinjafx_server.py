@@ -1170,7 +1170,7 @@ def main(rflag=[0]):
     parser.add_argument('-p', metavar='<port>', default=8080, type=int)
     group_ex = parser.add_mutually_exclusive_group()
     group_ex.add_argument('-r', metavar='<directory>', type=w_directory)
-    group_ex.add_argument('-s3', metavar='<aws s3 url>', type=str)
+    group_ex.add_argument('-s3', metavar='<s3 url>', type=str)
     group_ex.add_argument('-github', metavar='<owner>/<repo>[:<branch>]', type=str)
     parser.add_argument('-rl', metavar='<rate/limit>', type=rlimit)
     parser.add_argument('-tl', metavar='<time limit>', type=int, default=0)
