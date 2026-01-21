@@ -24,7 +24,7 @@ from http.cookies import SimpleCookie
 from jinja2 import __version__ as jinja2_version
 from jinja2 import TemplateError
 
-import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, datetime, resource
+import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, datetime, resource, urllib3
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji, jsonschema
 
@@ -42,6 +42,7 @@ github_url = None
 github_token = None
 jfx_weblog_key = None
 repository = None
+verify = True
 verbose = False
 nocache = False
 pandoc = None
@@ -1153,6 +1154,7 @@ def main(rflag=[0]):
   global rl_limit
   global timelimit
   global logfile
+  global verify
   global allowjs
   global nocsp
   global nocache
@@ -1177,6 +1179,7 @@ def main(rflag=[0]):
     parser.add_argument('-ml', metavar='<memory limit>', type=int, default=0)
     parser.add_argument('-logfile', metavar='<logfile>', type=str)
     parser.add_argument('-weblog', action='store_true', default=False)
+    parser.add_argument('-insecure', action='store_true', default=False)
     parser.add_argument('-pandoc', action='store_true', default=False)
     group2_ex = parser.add_mutually_exclusive_group()
     group2_ex.add_argument('-allowjs', action='store_true', default=False)
@@ -1187,7 +1190,11 @@ def main(rflag=[0]):
     allowjs = args.allowjs
     nocsp = args.nocsp
     nocache = args.nocache
+    verify = not args.insecure
     verbose = args.v
+
+    if not verify:
+      urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     if args.pandoc:
       from shutil import which
@@ -1201,6 +1208,9 @@ def main(rflag=[0]):
 
       if jfx_weblog_key is None:
         parser.error("argument -weblog: environment variable 'JFX_WEBLOG_KEY' is mandatory")
+
+    if not args.s3 and args.insecure:
+      parser.error("argument -insecure: requires argument '-s3'")
 
     if args.s3 is not None:
       aws_s3_url = args.s3.rstrip('/')
@@ -1371,7 +1381,7 @@ def aws_s3_delete(s3_url, fname):
     'x-amz-date': datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
   }
   headers = aws_s3_authorization('DELETE', s3_url, fname, headers)
-  return requests.delete('https://' + s3_url + '/' + fname, headers=headers)
+  return requests.delete('https://' + s3_url + '/' + fname, headers=headers, verify=verify)
 
 
 def aws_s3_put(s3_url, fname, content, ctype):
@@ -1385,7 +1395,7 @@ def aws_s3_put(s3_url, fname, content, ctype):
     'x-amz-date': datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
   }
   headers = aws_s3_authorization('PUT', s3_url, fname, headers)
-  return requests.put('https://' + s3_url + '/' + fname, headers=headers, data=content)
+  return requests.put('https://' + s3_url + '/' + fname, headers=headers, data=content, verify=verify)
 
 
 def aws_s3_get(s3_url, fname):
@@ -1396,7 +1406,7 @@ def aws_s3_get(s3_url, fname):
     'x-amz-date': datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
   }
   headers = aws_s3_authorization('GET', s3_url, fname, headers)
-  return requests.get('https://' + s3_url + '/' + fname, headers=headers)
+  return requests.get('https://' + s3_url + '/' + fname, headers=headers, verify=verify)
 
 
 def github_delete(github_url, fname, sha=None):
