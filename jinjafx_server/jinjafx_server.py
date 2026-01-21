@@ -1285,7 +1285,7 @@ def log(t, ae=''):
     timestamp = datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19]
 
     if os.getenv('JOURNAL_STREAM'):
-      print(re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t + ae))
+      print(re.sub(r'\033\[(?:(?:[01];)?[0-9][0-9]|0)m', '', t + ae))
 
     else:
       print('[' + timestamp + '] ' + t + ae)
@@ -1296,7 +1296,7 @@ def log(t, ae=''):
     if logfile is not None:
       try:
         with open(logfile, 'at') as f:
-          f.write('[' + timestamp + '] ' + re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t + ae) + '\n')
+          f.write('[' + timestamp + '] ' + re.sub(r'\033\[(?:(?:[01];)?[0-9][0-9]|0)m', '', t + ae) + '\n')
 
       except Exception as e:
         traceback.print_exc()
