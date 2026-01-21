@@ -71,8 +71,8 @@ The `-r`, `-s3` or `-github` arguments (mutually exclusive) allow you to specify
 
 If you use an S3 bucket then you will also need to provide some credentials (and the region via the "S3_" environment variables), which has read and write permissions to the S3 bucket. It supports both AWS S3 as well as Generic S3 via the following URL formats (https is assumed):
 
-- AWS S3 - &lt;bucket&gt;.s3.&lt;region&gt;.amazonaws.com
-- Generic S3 - &lt;url&gt;/&lt;bucket&gt;
+- AWS S3 - `&lt;bucket&gt;.s3.&lt;region&gt;.amazonaws.com`
+- Generic S3 - `&lt;url&gt;/&lt;bucket&gt;`
 
 The `-rl` argument is used to provide an optional rate limit of the source IP - the "rate" is how many requests are permitted and the "limit" is the interval in which those requests are permitted - it can be specified in "s", "m" or "h" (e.g. "5/30s", "10/1m" or "30/1h"). This is currently only applied to "Get Link" and Web Log authentication.
 
