@@ -69,7 +69,7 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
 
 The `-r`, `-s3` or `-github` arguments (mutually exclusive) allow you to specify a repository (`-r` is a local directory, `-s3` is an S3 URL and `-github` is a GitHub repository) that will be used to store DataTemplates on the server via the "Get Link" and "Update Link" buttons. The generated link is guaranteed to be unique and a different link will be created every time.
 
-If you use an S3 bucket then you will also need to provide some credentials (and the region via the "S3_" environment variables), which has read and write permissions to the S3 bucket. It supports both AWS S3 as well as Generic S3 via the following URL formats (https is assumed):
+If you use an S3 bucket then you will also need to provide some credentials (and the region) via the "S3_" environment variables, which has read and write permissions to the S3 bucket. It supports both AWS S3 as well as Generic S3 via the following URL formats (https is assumed):
 
 - AWS S3 - `<bucket>.s3.<region>.amazonaws.com`
 - Generic S3 - `<url>/<bucket>`
