@@ -3,7 +3,7 @@
 ### [26.3.0] - In Development
 - Added support for Generic S3, so we can use providers like MinIO alongside AWS S3
 - Removed `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` in favour of `S3_ACCESS_KEY` and `S3_SECRET_KEY`
-- Added `S3_REGION_NAME`, which is mandatory for S3
+- Added `S3_REGION_NAME`, which is now mandatory for S3
 
 ### [26.2.4] - January 20, 2026
 - Implemented a workaround for https://github.com/twbs/bootstrap/issues/38779
