@@ -1,8 +1,9 @@
 ## CHANGELOG
 
-### [26.2.5] - In Development
-- Added support for Generic S3, so we can use providers like MinIO
-- Deprecated `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` in favour of `S3_ACCESS_KEY` and `S3_SECRET_KEY`
+### [26.3.0] - In Development
+- Added support for Generic S3, so we can use providers like MinIO alongside AWS S3
+- Removed `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` in favour of `S3_ACCESS_KEY` and `S3_SECRET_KEY`
+- Added `S3_REGION_NAME`, which is mandatory for S3
 
 ### [26.2.4] - January 20, 2026
 - Implemented a workaround for https://github.com/twbs/bootstrap/issues/38779
@@ -530,7 +531,7 @@
 - Initial release
 
 
-[26.2.5]: https://github.com/cmason3/jinjafx_server/compare/26.2.4...26.2.5
+[26.3.0]: https://github.com/cmason3/jinjafx_server/compare/26.2.4...26.3.0
 [26.2.4]: https://github.com/cmason3/jinjafx_server/compare/26.2.3...26.2.4
 [26.2.3]: https://github.com/cmason3/jinjafx_server/compare/26.2.2...26.2.3
 [26.2.2]: https://github.com/cmason3/jinjafx_server/compare/26.2.1...26.2.2

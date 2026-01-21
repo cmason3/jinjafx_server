@@ -1204,12 +1204,12 @@ def main(rflag=[0]):
 
     if args.s3 is not None:
       aws_s3_url = args.s3.rstrip('/')
-      aws_access_key = os.getenv('S3_ACCESS_KEY') or os.getenv('AWS_ACCESS_KEY')
-      aws_secret_key = os.getenv('S3_SECRET_KEY') or os.getenv('AWS_SECRET_KEY')
       aws_region_name = os.getenv('S3_REGION_NAME')
+      aws_access_key = os.getenv('S3_ACCESS_KEY')
+      aws_secret_key = os.getenv('S3_SECRET_KEY')
 
       if aws_access_key is None or aws_secret_key is None or aws_region_name is None:
-        parser.error("argument -s3: environment variables 'S3_ACCESS_KEY', 'S3_SECRET_KEY' and 'S3_REGION_NAME' are mandatory")
+        parser.error("argument -s3: environment variables 'S3_REGION_NAME', 'S3_ACCESS_KEY' and 'S3_SECRET_KEY' are mandatory")
 
     if args.github is not None:
       github_url = args.github

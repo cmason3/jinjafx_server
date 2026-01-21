@@ -38,7 +38,7 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
 
 ```
  jinjafx_server -s [-l <address>] [-p <port>]
-                [-r <directory> | -s3 <aws s3 url> | -github <owner>/<repo>[:<branch>]]
+                [-r <directory> | -s3 <s3 url> | -github <owner>/<repo>[:<branch>]]
                 [-rl <rate/limit>] [-tl <time limit>] [-ml <memory limit>]
                 [-logfile <logfile>] [-weblog] [-pandoc] [-allowjs | -nocsp] [-nocache] [-v]
 
@@ -60,7 +60,7 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
    -v                                 - log all http requests
 
  Environment Variables:
-   S3_REGION_NAME             - specify a s3 region name for '-s3' (i.e. 'eu-west-2')
+   S3_REGION_NAME             - specify a region name for '-s3' (i.e. 'eu-west-2')
    S3_ACCESS_KEY              - specify an access key to authenticate for '-s3'
    S3_SECRET_KEY              - specify a secret key to authenticate for '-s3'
    GITHUB_TOKEN               - specify a github personal access token for '-github'
@@ -69,7 +69,7 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
 
 The `-r`, `-s3` or `-github` arguments (mutually exclusive) allow you to specify a repository (`-r` is a local directory, `-s3` is an S3 URL and `-github` is a GitHub repository) that will be used to store DataTemplates on the server via the "Get Link" and "Update Link" buttons. The generated link is guaranteed to be unique and a different link will be created every time.
 
-If you use an S3 bucket then you will also need to provide some credentials and the region via the "S3_" environment variables, which has read and write permissions to the S3 bucket. It supports both AWS S3 as well as Generic S3 via the following URL formats (HTTPS is assumed):
+If you use an S3 bucket then you will also need to provide some credentials (and the region via the "S3_" environment variables), which has read and write permissions to the S3 bucket. It supports both AWS S3 as well as Generic S3 via the following URL formats (https is assumed):
 
 - AWS S3 - <bucket>.s3.<region>.amazonaws.com
 - Generic S3 - <url>/<bucket>
