@@ -24,11 +24,11 @@ from http.cookies import SimpleCookie
 from jinja2 import __version__ as jinja2_version
 from jinja2 import TemplateError
 
-import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, datetime, resource
+import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, datetime, resource, urllib3
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji, jsonschema
 
-__version__ = '26.2.4'
+__version__ = '26.3.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -37,10 +37,12 @@ base = os.path.abspath(os.path.dirname(__file__))
 aws_s3_url = None
 aws_access_key = None
 aws_secret_key = None
+aws_region_name = None
 github_url = None
 github_token = None
 jfx_weblog_key = None
 repository = None
+verify = True
 verbose = False
 nocache = False
 pandoc = None
@@ -465,9 +467,15 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   def do_POST(self):
     try:
       cheaders = {}
+      params = {}
       
       uc = self.path.split('?', 1)
-      params = { x[0]: x[1] for x in [x.split('=') for x in uc[1].split('&') ] } if len(uc) > 1 else { }
+      if len(uc) > 1 and len(uc[1]) > 0:
+        for x in uc[1].split('&'):
+          e = x.split('=')
+          if len(e[0]) > 0:
+            params.update({ e[0]: e[1] if len(e) > 1 else '' })
+
       fpath = uc[0]
   
       if hasattr(self, 'headers') and 'X-Forwarded-For' in self.headers:
@@ -1143,6 +1151,7 @@ def main(rflag=[0]):
   global aws_s3_url
   global aws_access_key
   global aws_secret_key
+  global aws_region_name
   global github_url
   global github_token
   global jfx_weblog_key
@@ -1151,6 +1160,7 @@ def main(rflag=[0]):
   global rl_limit
   global timelimit
   global logfile
+  global verify
   global allowjs
   global nocsp
   global nocache
@@ -1168,13 +1178,14 @@ def main(rflag=[0]):
     parser.add_argument('-p', metavar='<port>', default=8080, type=int)
     group_ex = parser.add_mutually_exclusive_group()
     group_ex.add_argument('-r', metavar='<directory>', type=w_directory)
-    group_ex.add_argument('-s3', metavar='<aws s3 url>', type=str)
+    group_ex.add_argument('-s3', metavar='<s3 url>', type=str)
     group_ex.add_argument('-github', metavar='<owner>/<repo>[:<branch>]', type=str)
     parser.add_argument('-rl', metavar='<rate/limit>', type=rlimit)
     parser.add_argument('-tl', metavar='<time limit>', type=int, default=0)
     parser.add_argument('-ml', metavar='<memory limit>', type=int, default=0)
     parser.add_argument('-logfile', metavar='<logfile>', type=str)
     parser.add_argument('-weblog', action='store_true', default=False)
+    parser.add_argument('-insecure', action='store_true', default=False)
     parser.add_argument('-pandoc', action='store_true', default=False)
     group2_ex = parser.add_mutually_exclusive_group()
     group2_ex.add_argument('-allowjs', action='store_true', default=False)
@@ -1185,7 +1196,11 @@ def main(rflag=[0]):
     allowjs = args.allowjs
     nocsp = args.nocsp
     nocache = args.nocache
+    verify = not args.insecure
     verbose = args.v
+
+    if not verify:
+      urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     if args.pandoc:
       from shutil import which
@@ -1200,13 +1215,17 @@ def main(rflag=[0]):
       if jfx_weblog_key is None:
         parser.error("argument -weblog: environment variable 'JFX_WEBLOG_KEY' is mandatory")
 
-    if args.s3 is not None:
-      aws_s3_url = args.s3
-      aws_access_key = os.getenv('AWS_ACCESS_KEY')
-      aws_secret_key = os.getenv('AWS_SECRET_KEY')
+    if not args.s3 and args.insecure:
+      parser.error("argument -insecure: requires argument '-s3'")
 
-      if aws_access_key == None or aws_secret_key == None:
-        parser.error("argument -s3: environment variables 'AWS_ACCESS_KEY' and 'AWS_SECRET_KEY' are mandatory")
+    if args.s3 is not None:
+      aws_s3_url = args.s3.rstrip('/')
+      aws_region_name = os.getenv('S3_REGION_NAME')
+      aws_access_key = os.getenv('S3_ACCESS_KEY')
+      aws_secret_key = os.getenv('S3_SECRET_KEY')
+
+      if aws_access_key is None or aws_secret_key is None or aws_region_name is None:
+        parser.error("argument -s3: environment variables 'S3_REGION_NAME', 'S3_ACCESS_KEY' and 'S3_SECRET_KEY' are mandatory")
 
     if args.github is not None:
       github_url = args.github
@@ -1282,7 +1301,7 @@ def log(t, ae=''):
     timestamp = datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19]
 
     if os.getenv('JOURNAL_STREAM'):
-      print(re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t + ae))
+      print(re.sub(r'\033\[(?:(?:[01];)?[0-9][0-9]|0)m', '', t + ae))
 
     else:
       print('[' + timestamp + '] ' + t + ae)
@@ -1293,7 +1312,7 @@ def log(t, ae=''):
     if logfile is not None:
       try:
         with open(logfile, 'at') as f:
-          f.write('[' + timestamp + '] ' + re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t + ae) + '\n')
+          f.write('[' + timestamp + '] ' + re.sub(r'\033\[(?:(?:[01];)?[0-9][0-9]|0)m', '', t + ae) + '\n')
 
       except Exception as e:
         traceback.print_exc()
@@ -1343,14 +1362,15 @@ def rlimit(rl):
   return rl
 
 
-def aws_s3_authorization(method, fname, region, headers):
+def aws_s3_authorization(method, s3_url, fname, headers):
+  prefix = s3_url.split('/', 1)[-1] + '/' if '/' in s3_url else ''
   sheaders = ';'.join(map(lambda k: k.lower(), sorted(headers.keys())))
-  srequest = headers['x-amz-date'][:8] + '/' + region + '/s3/aws4_request'
-  cr = method.upper() + '\n/' + fname + '\n\n' + '\n'.join([ k.lower() + ':' + v for k, v in sorted(headers.items()) ]) + '\n\n' + sheaders + '\n' + headers['x-amz-content-sha256']
+  srequest = headers['x-amz-date'][:8] + '/' + aws_region_name + '/s3/aws4_request'
+  cr = method.upper() + '\n/' + prefix + fname + '\n\n' + '\n'.join([ k.lower() + ':' + v for k, v in sorted(headers.items()) ]) + '\n\n' + sheaders + '\n' + headers['x-amz-content-sha256']
   s2s = 'AWS4-HMAC-SHA256\n' + headers['x-amz-date'] + '\n' + srequest + '\n' + hashlib.sha256(cr.encode('utf-8')).hexdigest()
 
   dkey = hmac.new(('AWS4' + aws_secret_key).encode('utf-8'), headers['x-amz-date'][:8].encode('utf-8'), hashlib.sha256).digest()
-  drkey = hmac.new(dkey, region.encode('utf-8'), hashlib.sha256).digest()
+  drkey = hmac.new(dkey, aws_region_name.encode('utf-8'), hashlib.sha256).digest()
   drskey = hmac.new(drkey, b's3', hashlib.sha256).digest()
   skey = hmac.new(drskey, b'aws4_request', hashlib.sha256).digest()
 
@@ -1361,38 +1381,38 @@ def aws_s3_authorization(method, fname, region, headers):
 
 def aws_s3_delete(s3_url, fname):
   headers = {
-    'Host': s3_url,
+    'Host': s3_url.split('/')[0],
     'Content-Type': 'text/plain',
     'x-amz-content-sha256': hashlib.sha256(b'').hexdigest(),
     'x-amz-date': datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
   }
-  headers = aws_s3_authorization('DELETE', fname, s3_url.split('.')[2], headers)
-  return requests.delete('https://' + s3_url + '/' + fname, headers=headers)
+  headers = aws_s3_authorization('DELETE', s3_url, fname, headers)
+  return requests.delete('https://' + s3_url + '/' + fname, headers=headers, verify=verify)
 
 
 def aws_s3_put(s3_url, fname, content, ctype):
   content = gzip.compress(content.encode('utf-8'))
   headers = {
-    'Host': s3_url,
+    'Host': s3_url.split('/')[0],
     'Content-Length': str(len(content)),
     'Content-Type': ctype,
     'Content-Encoding': 'gzip',
     'x-amz-content-sha256': hashlib.sha256(content).hexdigest(),
     'x-amz-date': datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
   }
-  headers = aws_s3_authorization('PUT', fname, s3_url.split('.')[2], headers)
-  return requests.put('https://' + s3_url + '/' + fname, headers=headers, data=content)
+  headers = aws_s3_authorization('PUT', s3_url, fname, headers)
+  return requests.put('https://' + s3_url + '/' + fname, headers=headers, data=content, verify=verify)
 
 
 def aws_s3_get(s3_url, fname):
   headers = {
-    'Host': s3_url,
+    'Host': s3_url.split('/')[0],
     'Accept-Encoding': 'gzip',
     'x-amz-content-sha256': hashlib.sha256(b'').hexdigest(),
     'x-amz-date': datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
   }
-  headers = aws_s3_authorization('GET', fname, s3_url.split('.')[2], headers)
-  return requests.get('https://' + s3_url + '/' + fname, headers=headers)
+  headers = aws_s3_authorization('GET', s3_url, fname, headers)
+  return requests.get('https://' + s3_url + '/' + fname, headers=headers, verify=verify)
 
 
 def github_delete(github_url, fname, sha=None):

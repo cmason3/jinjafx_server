@@ -1,10 +1,17 @@
 ## CHANGELOG
 
+### [26.3.0] - January 27, 2026
+- [BREAKING CHANGE] Removed `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` in favour of `S3_ACCESS_KEY` and `S3_SECRET_KEY`
+- [BREAKING CHANGE] Added `S3_REGION_NAME`, which is now mandatory for S3
+- Added support for Generic S3, so we can use providers like MinIO alongside AWS S3
+- Fixed an issue with POST requests when the query string was malformed
+- Fixed an issue with ANSI colours appearing in the logfile
+
 ### [26.2.4] - January 20, 2026
 - Implemented a workaround for https://github.com/twbs/bootstrap/issues/38779
 
 ### [26.2.3] - January 19, 2026
-- Fixed real root cause of read-only editor panes
+- Fixed the real root cause of read-only editor panes
 - Fixed an issue where the DataSet dropdown wasn't built if a non-existent DataTemplate was specified
 
 ### [26.2.2] - January 17, 2026
@@ -526,6 +533,7 @@
 - Initial release
 
 
+[26.3.0]: https://github.com/cmason3/jinjafx_server/compare/26.2.4...26.3.0
 [26.2.4]: https://github.com/cmason3/jinjafx_server/compare/26.2.3...26.2.4
 [26.2.3]: https://github.com/cmason3/jinjafx_server/compare/26.2.2...26.2.3
 [26.2.2]: https://github.com/cmason3/jinjafx_server/compare/26.2.1...26.2.2
