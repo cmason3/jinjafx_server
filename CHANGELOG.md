@@ -4,6 +4,7 @@
 - [BREAKING CHANGE] Removed `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` in favour of `S3_ACCESS_KEY` and `S3_SECRET_KEY`
 - [BREAKING CHANGE] Added `S3_REGION_NAME`, which is now mandatory for S3
 - Added support for Generic S3, so we can use providers like MinIO alongside AWS S3
+- Fixed an issue with POST requests when the query string was malformed
 - Fixed an issue with ANSI colours appearing in the logfile
 
 ### [26.2.4] - January 20, 2026

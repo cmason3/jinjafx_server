@@ -467,9 +467,15 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   def do_POST(self):
     try:
       cheaders = {}
+      params = {}
       
       uc = self.path.split('?', 1)
-      params = { x[0]: x[1] for x in [x.split('=') for x in uc[1].split('&') ] } if len(uc) > 1 else { }
+      if len(uc) > 1 and len(uc[1]) > 0:
+        for x in uc[1].split('&'):
+          e = x.split('=')
+          if len(e[0]) > 0:
+            params.update({ e[0]: e[1] if len(e) > 1 else '' })
+
       fpath = uc[0]
   
       if hasattr(self, 'headers') and 'X-Forwarded-For' in self.headers:
