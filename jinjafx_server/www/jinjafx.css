@@ -75,3 +75,9 @@ a:hover {
   outline: none !important;
   box-shadow: none !important;
 }
+.topright {
+  position: absolute;
+  z-index: 10;
+  right: 8px;
+  top: 8px;
+}

@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [26.3.1] - February 25, 2026
+- Added a "Refresh" button to Web Logs to refresh immediately without reloading the whole page
+
 ### [26.3.0] - January 27, 2026
 - [BREAKING CHANGE] Removed `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` in favour of `S3_ACCESS_KEY` and `S3_SECRET_KEY`
 - [BREAKING CHANGE] Added `S3_REGION_NAME`, which is now mandatory for S3
@@ -533,6 +536,7 @@
 - Initial release
 
 
+[26.3.1]: https://github.com/cmason3/jinjafx_server/compare/26.3.0...26.3.1
 [26.3.0]: https://github.com/cmason3/jinjafx_server/compare/26.2.4...26.3.0
 [26.2.4]: https://github.com/cmason3/jinjafx_server/compare/26.2.3...26.2.4
 [26.2.3]: https://github.com/cmason3/jinjafx_server/compare/26.2.2...26.2.3

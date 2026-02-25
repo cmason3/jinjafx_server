@@ -26,6 +26,7 @@
       if (this.status == 200) {
         document.querySelector('pre').innerHTML = ansiToRGB(quote(xHR.responseText));
         window.scrollTo({ 'left': 0, 'top': document.body.scrollHeight, 'behavior': 'instant' });
+        document.getElementById('refresh').classList.remove('d-none');
         setTimeout(update, interval * 1000);
       }
       else if (this.status == 401) {
@@ -77,6 +78,10 @@
       if (e.key === 'Enter') {
         document.getElementById('ml-password-ok').click();
       }
+    });
+
+    document.getElementById('refresh').addEventListener('click', function (e) {
+      update();
     });
 
     let qs = new URLSearchParams(window.location.search);
