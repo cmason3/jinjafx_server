@@ -15,3 +15,9 @@ pre::-webkit-scrollbar {
   width: 0;
   height: 0;
 }
+.topright {
+  position: fixed;
+  z-index: 10;
+  right: 8px;
+  top: 8px;
+}

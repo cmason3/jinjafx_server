@@ -97,6 +97,12 @@ textarea {
   border-radius: 0.5rem;
   padding: 10px;
 }
+.topright {
+  position: absolute;
+  z-index: 10;
+  right: 8px;
+  top: 8px;
+}
 .zi-2 {
   z-index: 2 !important;
 }

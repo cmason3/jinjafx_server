@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [26.3.2] - February 25, 2026
+- Changed "Refresh" button positioning from absolute to fixed
+
 ### [26.3.1] - February 25, 2026
 - Added a "Refresh" button to Web Logs to refresh immediately without reloading the whole page
 
@@ -536,6 +539,7 @@
 - Initial release
 
 
+[26.3.2]: https://github.com/cmason3/jinjafx_server/compare/26.3.1...26.3.2
 [26.3.1]: https://github.com/cmason3/jinjafx_server/compare/26.3.0...26.3.1
 [26.3.0]: https://github.com/cmason3/jinjafx_server/compare/26.2.4...26.3.0
 [26.2.4]: https://github.com/cmason3/jinjafx_server/compare/26.2.3...26.2.4
