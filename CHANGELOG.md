@@ -1,7 +1,7 @@
 ## CHANGELOG
 
 ### [26.3.2] - February 25, 2026
-- Changed "Refresh" button positioning from relative to fixed
+- Changed "Refresh" button positioning from absolute to fixed
 
 ### [26.3.1] - February 25, 2026
 - Added a "Refresh" button to Web Logs to refresh immediately without reloading the whole page
