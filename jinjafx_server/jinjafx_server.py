@@ -70,6 +70,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   protocol_version = 'HTTP/1.1'
 
   def initialise(self):
+    self.exception = False
     self.elapsed = None
     self.error = None
     self.hide = False
@@ -120,6 +121,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             ctype = ' (' + self.headers['Content-Type'] + ':' + self.headers['Content-Encoding'] + ')'
           else:
             ctype = ' (' + self.headers['Content-Type'] + ')'
+
+      if self.exception:
+        src = src + '/\033[31m!\033[0m'
 
       if self.command == 'POST':
         if self.error is not None:
@@ -445,15 +449,27 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       if not head:
         self.wfile.write(r[2])
 
+    except ConnectionResetError as e:
+      self.exception = True
+
     except Exception as e:
       log(traceback.format_exc())
+      self.exception = True
 
   def do_OPTIONS(self):
     self.initialise()
 
-    self.send_response(204)
-    self.send_header('Allow', 'OPTIONS, HEAD, GET, POST')
-    self.end_headers()
+    try:
+      self.send_response(204)
+      self.send_header('Allow', 'OPTIONS, HEAD, GET, POST')
+      self.end_headers()
+
+    except ConnectionResetError as e:
+      self.exception = True
+
+    except Exception as e:
+      log(traceback.format_exc())
+      self.exception = True
 
   def do_HEAD(self):
     self.do_GET(True)
@@ -1101,8 +1117,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       self.end_headers()
       self.wfile.write(r[2])
 
+    except ConnectionResetError as e:
+      self.exception = True
+
     except Exception as e:
       log(traceback.format_exc())
+      self.exception = True
 
 class JinjaFxThread(threading.Thread):
   def __init__(self, s, addr):
