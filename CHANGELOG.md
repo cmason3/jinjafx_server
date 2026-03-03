@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [26.3.3] - In Development
+### [26.3.3] - March 3, 2026
 - Cleaned up the `log_message` function and masked `/logs` unless verbose
 
 ### [26.3.2] - February 25, 2026
