@@ -257,7 +257,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
       else:
-        if fpath == '/':
+        if fpath == '/' or fpath == '/index.html':
           self.hide = not verbose
           fpath = '/index.html'
 
