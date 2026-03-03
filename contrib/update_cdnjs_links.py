@@ -37,7 +37,6 @@ def update_file(cdnjs_url, sri, f):
     with open(f, 'wt') as fh:
       fh.writelines(data)
 
-
 for lib in libraries:
   www = os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + '/../jinjafx_server/www/')
   cdnjs = re.compile(r'https://cdnjs.cloudflare.com/ajax/libs/' + re.escape(lib) + '/(.+?)/(.+?)"')

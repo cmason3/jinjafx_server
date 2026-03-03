@@ -28,7 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji, jsonschema
 
-__version__ = '26.3.2'
+__version__ = '26.3.3'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -55,11 +55,9 @@ timelimit = 0
 n_threads = 4
 logring = []
 
-
 class JinjaFxServer(HTTPServer):
   def handle_error(self, request, client_address):
     pass
-
 
 class ArgumentParser(argparse.ArgumentParser):
   def error(self, message):
@@ -67,15 +65,16 @@ class ArgumentParser(argparse.ArgumentParser):
     print('Usage:\n ' + re.sub(r'(?:usage:| {7}(?=[^ ]))', '', self.format_usage()), file=sys.stderr)
     raise Exception(message)
 
-
 class JinjaFxRequest(BaseHTTPRequestHandler):
   server_version = 'JinjaFx/' + __version__
   protocol_version = 'HTTP/1.1'
-  critical = False
-  elapsed = None
-  error = None
-  hide = False
-  length = 0
+
+  def initialise(self):
+    self.exception = False
+    self.elapsed = None
+    self.error = None
+    self.hide = False
+    self.length = 0
 
   def format_bytes(self, b):
     for u in [ '', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y' ]:
@@ -84,58 +83,61 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       else:
         return '{:.2f}'.format(b).rstrip('0').rstrip('.') + u + 'B'
 
-
   def log_message(self, format, *args):
     path = self.path if hasattr(self, 'path') else ''
-    path = path.replace('/jinjafx.html', '/')
 
-    if not self.hide or verbose:
-      if path != '/ping':
+    if not verbose:
+      path = path.replace('/jinjafx.html', '/')
+
+    if path.startswith(('/logs', '/get_logs', '/logs.html', '/output.html', '/dt/')) and (args[1] == '200' or args[1] == '304'):
+      self.hide = not verbose
+
+    elif path.endswith(('.js', '.css', '.png')) and (args[1] == '200' or args[1] == '304'):
+      self.hide = not verbose
+
+    if not self.hide:
+      if self.error is not None:
+        ansi = '31'
+      elif args[1] == '200' or args[1] == '204' or (path == '/get_logs' and args[1] == '302'):
+        ansi = '32'
+      elif args[1] == '304':
+        ansi = '33'
+      else:
+        ansi = '31'
+
+      src = str(self.client_address[0])
+      proto_ver = ''
+      ctype = ''
+
+      if hasattr(self, 'headers'):
+        if 'X-Forwarded-For' in self.headers:
+          src = self.headers['X-Forwarded-For']
+
+        if 'X-Forwarded-ProtoVer' in self.headers:
+          proto_ver = ' HTTP/' + re.sub(r'([23]).0', '\\1', self.headers['X-Forwarded-ProtoVer'])
+
+        if 'Content-Type' in self.headers:
+          if 'Content-Encoding' in self.headers:
+            ctype = ' (' + self.headers['Content-Type'] + ':' + self.headers['Content-Encoding'] + ')'
+          else:
+            ctype = ' (' + self.headers['Content-Type'] + ')'
+
+      if self.exception:
+        src = src + '/\033[31m!\033[0m'
+
+      if self.command == 'POST':
         if self.error is not None:
-          ansi = '31'
-        elif args[1] == '200' or args[1] == '204':
-          ansi = '32'
-        elif args[1] == '304':
-          ansi = '33'
+          ae = ' ->\033[' + ansi + 'm ' + str(self.error)[5:] + '\033[0m'
         else:
-          ansi = '31'
+          ae = ''
 
-        if (args[1] != '204' and args[1] != '404' and args[1] != '501' and not path.startswith('/output.html') and not '/dt/' in path and (path != '/get_logs' or (args[1] != '200' and args[1] != '304'))) or self.critical or verbose:
-          src = str(self.client_address[0])
-          proto_ver = ''
-          ctype = ''
+        if self.elapsed is not None:
+          log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[34m' + self.command + '\033[0m ' + path + proto_ver + ctype + ' [' + self.format_bytes(self.length) + '] in ' + str(self.elapsed) + 'ms', ae)
+        else:
+          log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[34m' + self.command + '\033[0m ' + path + proto_ver + ctype + ' [' + self.format_bytes(self.length) + ']', ae)
 
-          if path == '/get_logs' and args[1] == '302':
-            ansi = '32'
-
-          if hasattr(self, 'headers'):
-            if 'X-Forwarded-For' in self.headers:
-              src = self.headers['X-Forwarded-For']
-
-            if 'X-Forwarded-ProtoVer' in self.headers:
-              proto_ver = ' HTTP/' + re.sub(r'([23]).0', '\\1', self.headers['X-Forwarded-ProtoVer'])
-
-            if 'Content-Type' in self.headers:
-              if 'Content-Encoding' in self.headers:
-                ctype = ' (' + self.headers['Content-Type'] + ':' + self.headers['Content-Encoding'] + ')'
-              else:
-                ctype = ' (' + self.headers['Content-Type'] + ')'
-
-          if self.command == 'POST':
-            if self.error is not None:
-              ae = ' ->\033[' + ansi + 'm ' + str(self.error)[5:] + '\033[0m'
-            else:
-              ae = ''
-
-            if self.elapsed is not None:
-              log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[34m' + self.command + '\033[0m ' + path + proto_ver + ctype + ' [' + self.format_bytes(self.length) + '] in ' + str(self.elapsed) + 'ms', ae)
-            else:
-              log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[34m' + self.command + '\033[0m ' + path + proto_ver + ctype + ' [' + self.format_bytes(self.length) + ']', ae)
-
-          elif self.command != None:
-            if (args[1] != '200' and args[1] != '304') or (not path.endswith('.js') and not path.endswith('.css') and not path.endswith('.png')) or verbose:
-              log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path + proto_ver)
-
+      elif self.command != None:
+        log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path + proto_ver)
 
   def send_error(self, code, message=None, explain=None):
     body = f'{code} {code.phrase}\r\n'
@@ -145,7 +147,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     self.send_header('Connection', 'close')
     self.end_headers()
     self.wfile.write(body.encode('utf-8'))
-
 
   def encode_link(self, bhash):
     alphabet = b'rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz'
@@ -161,27 +162,22 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
     return string
 
-
   def derive_key(self, password, salt=None, version=1):
     pbkdf2_iterations = 251001
     if salt == None:
       salt = os.urandom(32)
     return struct.pack('B', version) + struct.pack('B', len(salt)) + salt + hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, pbkdf2_iterations)
 
-
   def rot47(self, data):
     std_rot47chars = b" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}"
     mod_rot47chars = b"OPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|} !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMN"
     return data.translate(bytes.maketrans(std_rot47chars, mod_rot47chars))
 
-
   def e(self, data):
     return base64.b64encode(self.rot47(data))
 
-
   def d(self, data):
     return self.rot47(base64.b64decode(data))
-
 
   def ratelimit(self, remote_addr, n=0, check_only=False):
     if rl_rate != 0:
@@ -214,8 +210,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
     return False
 
-
   def do_GET(self, head=False, cache=True, versioned=False):
+    self.initialise()
+
     try:
       cheaders = {}
 
@@ -229,6 +226,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       r = [ 'text/plain', 500, '500 Internal Server Error\r\n', sys._getframe().f_lineno ]
 
       if fpath == '/ping':
+        self.hide = True
         cache = False
         r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
@@ -237,6 +235,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
         with open(base + '/www/logs.html', 'rb') as f:
           r = [ 'text/html', 200, f.read(), sys._getframe().f_lineno ]
+
+      elif fpath == '/logs.html' and jfx_weblog_key is None:
+        r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
       elif fpath == '/get_logs' and jfx_weblog_key is not None:
         if cookies := SimpleCookie(self.headers.get('Cookie')):
@@ -256,9 +257,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
       else:
-        if fpath == '/':
-          fpath = '/index.html'
+        if fpath == '/' or fpath == '/index.html':
           self.hide = not verbose
+          fpath = '/index.html'
 
         if re.search(r'^/dt/[A-Za-z0-9_-]{1,24}(?:/[A-Za-z][A-Za-z0-9_ %-]*)?$', fpath):
           fpath = '/index.html'
@@ -269,7 +270,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
         if re.search(r'^/get_dt/[A-Za-z0-9_-]{1,24}$', fpath):
           dt = ''
-          self.critical = True
 
           def sanitise_dt(dt):
             fields = ('dt_password:', 'dt_mpassword:', 'remote_addr:')
@@ -375,7 +375,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
           if fpath == '/jinjafx.html':
             r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-            self.hide = verbose
 
           else:
             with open(base + '/www' + fpath, 'rb') as f:
@@ -450,21 +449,34 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       if not head:
         self.wfile.write(r[2])
 
+    except ConnectionResetError as e:
+      self.exception = True
+
     except Exception as e:
       log(traceback.format_exc())
-
+      self.exception = True
 
   def do_OPTIONS(self):
-    self.send_response(204)
-    self.send_header('Allow', 'OPTIONS, HEAD, GET, POST')
-    self.end_headers()
+    self.initialise()
 
+    try:
+      self.send_response(204)
+      self.send_header('Allow', 'OPTIONS, HEAD, GET, POST')
+      self.end_headers()
+
+    except ConnectionResetError as e:
+      self.exception = True
+
+    except Exception as e:
+      log(traceback.format_exc())
+      self.exception = True
 
   def do_HEAD(self):
     self.do_GET(True)
 
-
   def do_POST(self):
+    self.initialise()
+
     try:
       cheaders = {}
       params = {}
@@ -1105,9 +1117,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       self.end_headers()
       self.wfile.write(r[2])
 
+    except ConnectionResetError as e:
+      self.exception = True
+
     except Exception as e:
       log(traceback.format_exc())
-
+      self.exception = True
 
 class JinjaFxThread(threading.Thread):
   def __init__(self, s, addr):
@@ -1122,7 +1137,6 @@ class JinjaFxThread(threading.Thread):
     httpd.socket = self.s
     httpd.server_bind = self.server_close = lambda self: None
     httpd.serve_forever()
-
 
 class StoppableJinjaFx(threading.Thread):
   def __init__(self, jinjafx, template, data, gvars, ret):
@@ -1145,7 +1159,6 @@ class StoppableJinjaFx(threading.Thread):
 
   def stop(self):
     ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.ident), ctypes.py_object(SystemExit))
-
 
 def main(rflag=[0]):
   global aws_s3_url
@@ -1283,7 +1296,6 @@ def main(rflag=[0]):
 
     log(f'Terminating JinjaFx Server...')
 
-
   except Exception as e:
     error = jinjafx._format_error(e)
     print(error.replace('__init__.py:', 'jinjafx_server.py:'), file=sys.stderr)
@@ -1292,7 +1304,6 @@ def main(rflag=[0]):
   finally:
     if rflag[0] > 0:
       s.close()
-
 
 def log(t, ae=''):
   global logring
@@ -1317,7 +1328,6 @@ def log(t, ae=''):
       except Exception as e:
         traceback.print_exc()
         print('[' + timestamp + '] ' + str(e))
-
 
 def update_versioned_links(d):
   for fn in os.listdir(d):
@@ -1347,7 +1357,6 @@ def update_versioned_links(d):
         with open(d + '/' + fn, 'wt') as fh:
           fh.writelines(html)
 
-
 def w_directory(d):
   if not os.path.isdir(d):
     raise argparse.ArgumentTypeError("repository directory '" + d + "' must exist")
@@ -1355,12 +1364,10 @@ def w_directory(d):
     raise argparse.ArgumentTypeError("repository directory '" + d + "' must be writable")
   return d
 
-
 def rlimit(rl):
   if not re.match(r'(?i)^\d+/\d+[smh]$', rl):
     raise argparse.ArgumentTypeError("value must be rate/limit, e.g. 5/30s or 30/1h")
   return rl
-
 
 def aws_s3_authorization(method, s3_url, fname, headers):
   prefix = s3_url.split('/', 1)[-1] + '/' if '/' in s3_url else ''
@@ -1378,7 +1385,6 @@ def aws_s3_authorization(method, s3_url, fname, headers):
   headers['Authorization'] = 'AWS4-HMAC-SHA256 Credential=' + aws_access_key + '/' + srequest + ', SignedHeaders=' + sheaders + ', Signature=' + signature
   return headers
 
-
 def aws_s3_delete(s3_url, fname):
   headers = {
     'Host': s3_url.split('/')[0],
@@ -1388,7 +1394,6 @@ def aws_s3_delete(s3_url, fname):
   }
   headers = aws_s3_authorization('DELETE', s3_url, fname, headers)
   return requests.delete('https://' + s3_url + '/' + fname, headers=headers, verify=verify)
-
 
 def aws_s3_put(s3_url, fname, content, ctype):
   content = gzip.compress(content.encode('utf-8'))
@@ -1403,7 +1408,6 @@ def aws_s3_put(s3_url, fname, content, ctype):
   headers = aws_s3_authorization('PUT', s3_url, fname, headers)
   return requests.put('https://' + s3_url + '/' + fname, headers=headers, data=content, verify=verify)
 
-
 def aws_s3_get(s3_url, fname):
   headers = {
     'Host': s3_url.split('/')[0],
@@ -1413,7 +1417,6 @@ def aws_s3_get(s3_url, fname):
   }
   headers = aws_s3_authorization('GET', s3_url, fname, headers)
   return requests.get('https://' + s3_url + '/' + fname, headers=headers, verify=verify)
-
 
 def github_delete(github_url, fname, sha=None):
   headers = {
@@ -1432,7 +1435,6 @@ def github_delete(github_url, fname, sha=None):
     data['sha'] = sha
 
   return requests.delete('https://api.github.com/repos/' + github_url + '/contents/' + fname, headers=headers, data=json.dumps(data))
-
 
 def github_put(github_url, fname, content, sha=None):
   headers = {
@@ -1453,7 +1455,6 @@ def github_put(github_url, fname, content, sha=None):
 
   return requests.put('https://api.github.com/repos/' + github_url + '/contents/' + fname, headers=headers, data=json.dumps(data))
 
-
 def github_get(github_url, fname):
   headers = {
     'Authorization': 'Token ' + github_token
@@ -1465,7 +1466,6 @@ def github_get(github_url, fname):
 
   else:
     return requests.get('https://api.github.com/repos/' + github_url + '/contents/' + fname, headers=headers)
-
 
 if __name__ == '__main__':
   main()
