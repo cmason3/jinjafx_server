@@ -28,7 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji, jsonschema
 
-__version__ = '26.3.4'
+__version__ = '26.3.5'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -507,7 +507,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         remote_addr = str(self.client_address[0])
   
       r = [ 'text/plain', 500, '500 Internal Server Error\r\n', sys._getframe().f_lineno ]
-  
+
       if 'Content-Length' in self.headers:
         if int(self.headers['Content-Length']) < (25 * 1024 * 1024):
           postdata = self.rfile.read(int(self.headers['Content-Length']))
@@ -1103,6 +1103,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           r = [ 'text/plain', 413, '413 Request Entity Too Large\r\n', sys._getframe().f_lineno ]
   
       else:
+        self.hide = not verbose
         r = [ 'text/plain', 400, '400 Bad Request\r\n', sys._getframe().f_lineno ]
   
       self.send_response(r[1])
