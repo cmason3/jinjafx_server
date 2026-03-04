@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [26.3.4] - March 4, 2026
+- Mask out additional log messages (i.e. 404, 501) unless verbose
+
 ### [26.3.3] - March 3, 2026
 - Cleaned up the `log_message` function and masked `/logs` unless verbose
 
@@ -542,6 +545,7 @@
 - Initial release
 
 
+[26.3.4]: https://github.com/cmason3/jinjafx_server/compare/26.3.3...26.3.4
 [26.3.3]: https://github.com/cmason3/jinjafx_server/compare/26.3.2...26.3.3
 [26.3.2]: https://github.com/cmason3/jinjafx_server/compare/26.3.1...26.3.2
 [26.3.1]: https://github.com/cmason3/jinjafx_server/compare/26.3.0...26.3.1

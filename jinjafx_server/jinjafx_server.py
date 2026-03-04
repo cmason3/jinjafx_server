@@ -28,7 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji, jsonschema
 
-__version__ = '26.3.3'
+__version__ = '26.3.4'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -89,9 +89,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     if not verbose:
       path = path.replace('/jinjafx.html', '/')
 
-    if path.startswith(('/logs', '/get_logs', '/logs.html', '/output.html', '/dt/')) and (args[1] == '200' or args[1] == '304'):
+    if args[1] == '204' or args[1] == '404' or args[1] == '501':
       self.hide = not verbose
-
+    elif path.startswith(('/logs', '/get_logs', '/logs.html', '/output.html', '/dt/')) and (args[1] == '200' or args[1] == '304'):
+      self.hide = not verbose
     elif path.endswith(('.js', '.css', '.png')) and (args[1] == '200' or args[1] == '304'):
       self.hide = not verbose
 
@@ -140,13 +141,23 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path + proto_ver)
 
   def send_error(self, code, message=None, explain=None):
-    body = f'{code} {code.phrase}\r\n'
-    self.send_response(code)
-    self.send_header('Content-Type', 'text/plain')
-    self.send_header('Content-Length', len(body))
-    self.send_header('Connection', 'close')
-    self.end_headers()
-    self.wfile.write(body.encode('utf-8'))
+    self.initialise()
+
+    try:
+      body = f'{code} {code.phrase}\r\n'
+      self.send_response(code)
+      self.send_header('Content-Type', 'text/plain')
+      self.send_header('Content-Length', len(body))
+      self.send_header('Connection', 'close')
+      self.end_headers()
+      self.wfile.write(body.encode('utf-8'))
+
+    except ConnectionResetError as e:
+      self.exception = True
+
+    except Exception as e:
+      log(traceback.format_exc())
+      self.exception = True
 
   def encode_link(self, bhash):
     alphabet = b'rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz'
