@@ -28,7 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji, jsonschema
 
-__version__ = '26.3.5'
+__version__ = '26.4.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -761,7 +761,18 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   
                       if fpath == '/get_link':
                         dt = json.loads(postdata.decode('utf-8'))
-  
+
+                        dt_hash_data = {
+                          'global': dt.get('global', ''),
+                          'datasets': dt.get('datasets', {}),
+                          'data': dt.get('data', ''),
+                          'vars': dt.get('vars', ''),
+                          'template': dt.get('template', '')
+                        }
+
+                        dt_hash = hashlib.sha256(json.dumps(dt_hash_data).encode('utf-8')).hexdigest()
+                        last_updated = None
+
                         vdt = {}
                         dt_yml += '---\n'
                         dt_yml += 'dt:\n'
@@ -835,8 +846,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   
                         if not dt_yml.endswith('\n\n'):
                           dt_yml += '\n'
-  
+
                         dt_yml += 'revision: ' + str(dt_revision) + '\n'
+                        dt_yml += 'dt_hash: ' + dt_hash + '\n'
 
                         if 'dataset' in dt:
                           dt_yml += 'dataset: "' + dt['dataset'] + '"\n'
@@ -877,9 +889,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
   
                           return dt_yml, r
   
-                        def add_client_fields(dt_yml, remote_addr):
+                        def add_client_fields(dt_yml, remote_addr, last_updated):
                           dt_yml += 'remote_addr: "' + remote_addr + '"\n'
-                          dt_yml += 'updated: "' + str(int(time.time()))  + '"\n'
+                          if last_updated is not None:
+                            dt_yml += 'updated: "' + last_updated + '"\n'
+                          else:
+                            dt_yml += 'updated: "' + str(int(time.time()))  + '"\n'
                           return dt_yml
   
                       if 'id' in params:
@@ -915,6 +930,11 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                             content = rr.text
   
                           if r[1] != 403:
+                            if m := re.search(r'dt_hash: (\S+)', rr.text):
+                              if dt_hash == m.group(1):
+                                if m := re.search(r'updated: "(\d+)"', rr.text):
+                                  last_updated = m.group(1)
+
                             m = re.search(r'revision: (\d+)', rr.text)
                             if m != None:
                               if dt_revision <= int(m.group(1)):
@@ -937,8 +957,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                                     r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
   
                         if fpath != '/delete_link' and (r[1] == 500 or r[1] == 200):
-                          dt_yml = add_client_fields(dt_yml, remote_addr)
-  
+                          dt_yml = add_client_fields(dt_yml, remote_addr, last_updated)
+
                           if dt_encrypted:
                             if dt_opassword != '':
                               dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_opassword) + '\n'
@@ -986,6 +1006,11 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                               r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
   
                           if r[1] != 403:
+                            if m := re.search(r'dt_hash: (\S+)', content):
+                              if dt_hash == m.group(1):
+                                if m := re.search(r'updated: "(\d+)"', content):
+                                  last_updated = m.group(1)
+
                             m = re.search(r'revision: (\d+)', content)
                             if m != None:
                               if dt_revision <= int(m.group(1)):
@@ -1008,7 +1033,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                                     r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
   
                         if fpath != '/delete_link' and (r[1] == 500 or r[1] == 200):
-                          dt_yml = add_client_fields(dt_yml, remote_addr)
+                          dt_yml = add_client_fields(dt_yml, remote_addr, last_updated)
   
                           if dt_encrypted:
                             if dt_opassword != '':
@@ -1048,6 +1073,11 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                               r = [ 'text/plain', 403, '403 Forbidden\r\n', sys._getframe().f_lineno ]
   
                           if r[1] != 403:
+                            if m := re.search(r'dt_hash: (\S+)', rr):
+                              if dt_hash == m.group(1):
+                                if m := re.search(r'updated: "(\d+)"', rr):
+                                  last_updated = m.group(1)
+  
                             m = re.search(r'revision: (\d+)', rr)
                             if m != None:
                               if dt_revision <= int(m.group(1)):
@@ -1065,8 +1095,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                                   r = [ 'text/plain', 200, '200 OK\r\n', sys._getframe().f_lineno ]
   
                         if fpath != '/delete_link' and (r[1] == 500 or r[1] == 200):
-                          dt_yml = add_client_fields(dt_yml, remote_addr)
-  
+                          dt_yml = add_client_fields(dt_yml, remote_addr, last_updated)
+
                           if dt_encrypted:
                             if dt_opassword != '':
                               dt_yml = jinjafx.Vaulty().encrypt(dt_yml, dt_opassword) + '\n'
