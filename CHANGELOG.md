@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### [26.4.0] - March 17, 2026
+- Don't update `updated` if no actual data changes detected within the DataTemplate
+- Ensure that all CodeMirror panes are terminated with a newline character
+
 ### [26.3.5] - March 4, 2026
 - Masked out `Content-Length` issues with POST requests
 
@@ -548,6 +552,7 @@
 - Initial release
 
 
+[26.4.0]: https://github.com/cmason3/jinjafx_server/compare/26.3.5...26.4.0
 [26.3.5]: https://github.com/cmason3/jinjafx_server/compare/26.3.4...26.3.5
 [26.3.4]: https://github.com/cmason3/jinjafx_server/compare/26.3.3...26.3.4
 [26.3.3]: https://github.com/cmason3/jinjafx_server/compare/26.3.2...26.3.3

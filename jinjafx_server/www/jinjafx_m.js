@@ -2485,6 +2485,13 @@ function getStatusText(code) {
       if ((editor == window.cmgVars) || (editor == window.cmVars))  {
         toggle_vault();
       }
+      if (!editor.getValue().endsWith('\n')) {
+        if (editor.getValue().length != 0) {
+          var c = editor.getCursor();
+          editor.replaceRange('\n', CodeMirror.Pos(editor.lastLine()));
+          editor.setCursor({ line: c.line, ch: c.ch });
+        }
+      }
     }
   }
 
