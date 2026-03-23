@@ -1,7 +1,7 @@
 ## CHANGELOG
 
-### [26.4.1] - In Development
-- Moved selected DataSet from DataTemplate to browser local storage
+### [26.4.1] - March 23, 2026
+- The selected DataSet is now saved in browser local storage as opposed to the DataTemplate
 
 ### [26.4.0] - March 17, 2026
 - Don't update `updated` if no actual data changes detected within the DataTemplate
