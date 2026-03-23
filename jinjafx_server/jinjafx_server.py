@@ -850,9 +850,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                         dt_yml += 'revision: ' + str(dt_revision) + '\n'
                         dt_yml += 'dt_hash: ' + dt_hash + '\n'
 
-                        #if 'dataset' in dt:
-                        #  dt_yml += 'dataset: "' + dt['dataset'] + '"\n'
-  
                         if 'show_global' in dt:
                           dt_yml += 'show_global: ' + dt['show_global'] + '\n'
 
