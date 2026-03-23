@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [26.4.1] - March 23, 2026
+- The selected DataSet is now saved in browser local storage as opposed to the DataTemplate
+
 ### [26.4.0] - March 17, 2026
 - Don't update `updated` if no actual data changes detected within the DataTemplate
 - Ensure that all CodeMirror panes are terminated with a newline character
@@ -552,6 +555,7 @@
 - Initial release
 
 
+[26.4.1]: https://github.com/cmason3/jinjafx_server/compare/26.4.0...26.4.1
 [26.4.0]: https://github.com/cmason3/jinjafx_server/compare/26.3.5...26.4.0
 [26.3.5]: https://github.com/cmason3/jinjafx_server/compare/26.3.4...26.3.5
 [26.3.4]: https://github.com/cmason3/jinjafx_server/compare/26.3.3...26.3.4

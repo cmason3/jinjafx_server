@@ -189,10 +189,10 @@ function getStatusText(code) {
   };
 
   function select_dataset(e) {
-    switch_dataset(e.currentTarget.ds_name, true);
+    switch_dataset(e.currentTarget.ds_name, true, false);
   }
 
-  function switch_dataset(ds, sflag) {
+  function switch_dataset(ds, sflag, mflag) {
     if (sflag) {
       datasets[current_ds][0] = window.cmData.getDoc();
       datasets[current_ds][1] = window.cmVars.getDoc();
@@ -202,13 +202,19 @@ function getStatusText(code) {
       window.cmData.swapDoc(datasets[ds][0]);
       window.cmVars.swapDoc(datasets[ds][1]);
 
-      window.addEventListener('beforeunload', onBeforeUnload);
-      if (document.getElementById('get_link').value != 'false') {
-        document.title = 'JinjaFx [unsaved]';
+      if (mflag) {
+        window.addEventListener('beforeunload', onBeforeUnload);
+        if (document.getElementById('get_link').value != 'false') {
+          document.title = 'JinjaFx [unsaved]';
+        }
+        dirty = true;
       }
-      dirty = true;
+
       toggle_vault();
       document.getElementById('selected_ds').innerHTML = ds;
+      if (dt_id != '') {
+        localStorage.setItem('dataset_' + dt_id, ds);
+      }
       current_ds = ds;
       onDataBlur();
     }
@@ -540,7 +546,7 @@ function getStatusText(code) {
   function delete_dataset(ds) {
     delete datasets[ds];
     rebuild_datasets();
-    switch_dataset(Object.keys(datasets).sort(default_on_top)[0], false);
+    switch_dataset(Object.keys(datasets).sort(default_on_top)[0], false, true);
     toggle_vault();
     fe.focus();
   }
@@ -934,7 +940,6 @@ function getStatusText(code) {
         }
 
         if (Object.keys(datasets).length > 1) {
-          dt.dataset = current_ds;
           dt.show_global = global_visible ? '1' : '0';
         }
         dt.show_data = data_visible ? '1' : '0';
@@ -962,7 +967,7 @@ function getStatusText(code) {
             dt.global = e(window.cmgVars.getValue().replace(/\t/g, "  "));
           }
 
-          switch_dataset(current_ds, true);
+          switch_dataset(current_ds, true, false);
           Object.keys(datasets).sort(default_on_top).forEach(function(ds) {
             dt.datasets[ds] = {};
             dt.datasets[ds].data = e(datasets[ds][0].getValue());
@@ -1090,6 +1095,7 @@ function getStatusText(code) {
             delete_pending = false;
             document.title = 'JinjaFx [unsaved]';
             localStorage.removeItem('modify_' + dt_id);
+            localStorage.removeItem('dataset_' + dt_id);
             dirty = true;
             set_status("green", "OK", "Link Deleted", 10000);
             window.addEventListener('beforeunload', onBeforeUnload);
@@ -1215,8 +1221,8 @@ function getStatusText(code) {
               if (qs.hasOwnProperty('ds')) {
                 load_datatemplate(dt['dt'], qs, qs['ds']);
               }
-              else if (dt.hasOwnProperty('dataset')) {
-                load_datatemplate(dt['dt'], qs, dt['dataset']);
+              else if (localStorage.getItem('dataset_' + qs.dt)) {
+                load_datatemplate(dt['dt'], qs, localStorage.getItem('dataset_' + qs.dt));
               }
               else {
                 load_datatemplate(dt['dt'], qs, null);
@@ -2040,10 +2046,10 @@ function getStatusText(code) {
           if (existing == '') {
             datasets[new_ds] = [CodeMirror.Doc('', 'data'), CodeMirror.Doc('', 'yaml')];
             rebuild_datasets();
-            switch_dataset(new_ds, true);
+            switch_dataset(new_ds, true, true);
           }
           else {
-            switch_dataset(existing, true);
+            switch_dataset(existing, true, false);
           }
         }
         else {
