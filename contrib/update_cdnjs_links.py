@@ -4,13 +4,13 @@ import sys, os, re, requests
 
 libraries = {
   'bootstrap': '5.3.8',
-  'codemirror': '5.65.20',
+  'codemirror': '5.65.21',
   'split.js': '1.6.5',
-  'js-yaml': '4.1.0',
-  'dayjs': '1.11.18',
-  'pako': '2.1.0',
+  'js-yaml': '4.1.1',
+  'dayjs': '1.11.23',
+  'pako': '2.2.0',
   'jszip': '3.10.1',
-  'github-markdown-css': '5.8.1'
+  'github-markdown-css': '5.9.0'
 }
 
 def update_file(cdnjs_url, sri, f):
