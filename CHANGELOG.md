@@ -1,5 +1,14 @@
 ## CHANGELOG
 
+### [26.5.0] - September 2, 2026
+- Dropped support for Python 3.10
+- Updated Pandoc to 3.11 in Dockerfile
+- Updated `codemirror` to 5.65.21
+- Updated `js-yaml` to 4.1.1
+- Updated `dayjs` to 1.11.23
+- Updated `pako` to 2.2.0
+- Updated `github-markdown-css` to 5.9.0
+
 ### [26.4.1] - March 23, 2026
 - The selected DataSet is now saved in browser local storage as opposed to the DataTemplate
 
@@ -555,6 +564,7 @@
 - Initial release
 
 
+[26.5.0]: https://github.com/cmason3/jinjafx_server/compare/26.4.1...26.5.0
 [26.4.1]: https://github.com/cmason3/jinjafx_server/compare/26.4.0...26.4.1
 [26.4.0]: https://github.com/cmason3/jinjafx_server/compare/26.3.5...26.4.0
 [26.3.5]: https://github.com/cmason3/jinjafx_server/compare/26.3.4...26.3.5

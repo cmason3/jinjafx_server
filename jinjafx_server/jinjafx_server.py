@@ -633,7 +633,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                         output = re.sub('{(' + style + ')}(.+?){/\\1}', r'<span class="\1">\2</span>', output, flags=re.DOTALL | re.IGNORECASE)
   
                       head = '<!DOCTYPE html>\n<html>\n<head>\n'
-                      head += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown.min.css" crossorigin="anonymous">\n'
+                      head += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.9.0/github-markdown.min.css" crossorigin="anonymous">\n'
                       head += '<style>\n  pre, code { white-space: pre-wrap !important; word-wrap: break-word !important; }\n'
                       head += '  .red { color: red; }\n  .green { color: green; }\n  .blue { color: blue; }\n  .highlight { background: yellow !important; print-color-adjust: exact; }\n</style>\n</head>\n'
                       output = emoji.emojize(output, language='alias').encode('ascii', 'xmlcharrefreplace').decode('utf-8')
