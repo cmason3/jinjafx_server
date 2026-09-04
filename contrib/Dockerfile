@@ -1,6 +1,7 @@
 FROM docker.io/library/python:3.14-slim AS BUILD
 
 ARG BRANCH main
+ARG JFX_BRANCH main
 
 RUN set -eux; \
 
@@ -11,7 +12,7 @@ wget -P /tmp https://github.com/jgm/pandoc/releases/download/3.11/pandoc-3.11-1-
 dpkg -i /tmp/pandoc-3.11-1-amd64.deb; \
 
 python3 -m venv /opt/jinjafx; \
-/opt/jinjafx/bin/python3 -m pip install --upgrade git+https://github.com/cmason3/jinjafx.git; \
+/opt/jinjafx/bin/python3 -m pip install --upgrade git+https://github.com/cmason3/jinjafx.git@${JFX_BRANCH}; \
 /opt/jinjafx/bin/python3 -m pip install --upgrade git+https://github.com/cmason3/jinjafx_server.git@${BRANCH}; \
 /opt/jinjafx/bin/python3 -m pip uninstall -y pip
 
