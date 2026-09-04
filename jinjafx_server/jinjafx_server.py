@@ -28,7 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji, jsonschema
 
-__version__ = '26.5.0'
+__version__ = '26.5.1'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -538,10 +538,15 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   vpw = self.d(dt['vpw']).decode('utf-8') if 'vpw' in dt else ''
                   vault_undef = False
   
-                  if 'jinjafx_vault_undefined' in gyaml:
+                  if 'jinjafx_vault_undefined' in gyaml: # DEPRECATED
                     yaml.add_constructor('!vault', lambda x, y: None, yaml.SafeLoader)
                     if y := yaml.load(gyaml, Loader=yaml.SafeLoader):
                       vault_undef = y.get('jinjafx_vault_undefined', vault_undef)
+
+                  if 'jinjafx_ansible_vault_undef_nopass' in gyaml:
+                    yaml.add_constructor('!vault', lambda x, y: None, yaml.SafeLoader)
+                    if y := yaml.load(gyaml, Loader=yaml.SafeLoader):
+                      vault_undef = y.get('jinjafx_ansible_vault_undef_nopass', vault_undef)
   
                   if vpw.strip():
                     vault_undef = False

@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [26.5.1] - September 3, 2026
+- Deprecated `jinjafx_vault_undefined` in favour of `jinjafx_ansible_vault_undef_nopass`
+
 ### [26.5.0] - September 2, 2026
 - Dropped support for Python 3.10
 - Updated Pandoc to 3.11 in Dockerfile
@@ -564,6 +567,7 @@
 - Initial release
 
 
+[26.5.1]: https://github.com/cmason3/jinjafx_server/compare/26.5.0...26.5.1
 [26.5.0]: https://github.com/cmason3/jinjafx_server/compare/26.4.1...26.5.0
 [26.4.1]: https://github.com/cmason3/jinjafx_server/compare/26.4.0...26.4.1
 [26.4.0]: https://github.com/cmason3/jinjafx_server/compare/26.3.5...26.4.0
