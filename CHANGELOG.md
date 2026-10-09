@@ -2,6 +2,8 @@
 
 ### [26.5.2] - In Development
 - Fixed a race condition where the `jinjafx` JavaScript object wasn't accessible in Safari
+- Updated JavaScript library `jszip` to 3.10.2
+- Updated Pandoc to 3.12.1 in Dockerfile
 
 ### [26.5.1] - September 3, 2026
 - Deprecated `jinjafx_vault_undefined` in favour of `jinjafx_ansible_vault_undef_nopass`
