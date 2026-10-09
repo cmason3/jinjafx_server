@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [26.5.2] - In Development
+- Fixed a race condition where the `jinjafx` JavaScript object wasn't accessible in Safari
+
 ### [26.5.1] - September 3, 2026
 - Deprecated `jinjafx_vault_undefined` in favour of `jinjafx_ansible_vault_undef_nopass`
 
@@ -567,6 +570,7 @@
 - Initial release
 
 
+[26.5.2]: https://github.com/cmason3/jinjafx_server/compare/26.5.1...26.5.2
 [26.5.1]: https://github.com/cmason3/jinjafx_server/compare/26.5.0...26.5.1
 [26.5.0]: https://github.com/cmason3/jinjafx_server/compare/26.4.1...26.5.0
 [26.4.1]: https://github.com/cmason3/jinjafx_server/compare/26.4.0...26.4.1
