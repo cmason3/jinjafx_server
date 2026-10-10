@@ -239,7 +239,8 @@
 
                   var tc = window.opener.d(obj.outputs[output]);
                   if (oformat == 'html') {
-                    tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + tc.replace(/&/g, '&amp;').replace(/"/g, "&quot;") + '"></iframe>';
+                    let x = '<script>var jinjafx = { \'outputs\': JSON.parse(sessionStorage.getItem(\'jinjafx.outputs\')) };</script>';
+                    tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + x + tc.replace(/&/g, '&amp;').replace(/"/g, "&quot;") + '"></iframe>';
                   }
                   else {
                     tabs += '<textarea id="t_o' + oid + '" class="output" readonly>' + window.opener.quote(tc) + '</textarea>';
@@ -271,17 +272,12 @@
                   oid += 1;
                 });
 
+                sessionStorage.setItem('jinjafx.outputs', JSON.stringify(outputs));
+
                 document.body.style.display = 'none';
                 document.getElementById('status').style.display = 'none';
                 document.getElementById('summary').innerHTML = 'Generated at ' + dayjs().format('HH:mm') + ' on ' + dayjs().format('Do MMMM YYYY') + '<br />in ' + Math.ceil(obj.elapsed).toLocaleString() + ' milliseconds';
                 document.getElementById('tabs').innerHTML = tabs;
-
-                var iframes = document.getElementsByTagName('iframe');
-                for (var i = 0; i < iframes.length; i++) {
-                  iframes[i].contentWindow.jinjafx = {};
-                  iframes[i].contentWindow.jinjafx['outputs'] = outputs;
-                }
-
                 document.getElementById('nav-links').innerHTML = links;
                 document.getElementById('wrap').classList.remove('d-none');
                 document.getElementById('footer').classList.remove('d-none');

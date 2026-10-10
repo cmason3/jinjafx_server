@@ -9,7 +9,7 @@ libraries = {
   'js-yaml': '4.1.1',
   'dayjs': '1.11.23',
   'pako': '2.2.0',
-  'jszip': '3.10.1',
+  'jszip': '3.10.2',
   'github-markdown-css': '5.9.0'
 }
 
