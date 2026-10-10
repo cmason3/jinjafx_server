@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [26.5.2] - In Development
+### [26.5.2] - October 10, 2026
 - Fixed a race condition where the `jinjafx` JavaScript object wasn't accessible in Safari
 - Updated JavaScript library `jszip` to 3.10.2
 - Updated Pandoc to 3.12.1 in Dockerfile
