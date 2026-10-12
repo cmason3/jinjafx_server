@@ -2,6 +2,7 @@
 
 ### [26.6.0] - In Development
 - Updated Web Logs to use Server Sent Events (SSE) to provide real-time updates
+- Updated Python to 3.15 in Dockerfile
 
 ### [26.5.2] - October 10, 2026
 - Fixed a race condition where the `jinjafx` JavaScript object wasn't accessible in Safari
