@@ -42,6 +42,10 @@
       }).show();
     });
 
+    es.addEventListener('message', (e) => {
+      console.log(e.data);
+    });
+
     es.addEventListener('log', (e) => {
       add(e.data);
     });

@@ -280,7 +280,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                 self.wfile.write(b'data: keepalive\n\n')
                 time.sleep(5)
 
-            except Exception:
+            except Exception as e:
+              print(str(e))
               pass
 
             return
