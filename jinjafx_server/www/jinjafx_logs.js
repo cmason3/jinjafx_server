@@ -42,9 +42,7 @@
       }).show();
     });
 
-    es.addEventListener('message', (e) => {
-      add(e.data); // FIXME
-    });
+    es.addEventListener('message', (e) => {});
 
     es.addEventListener('log', (e) => {
       add(e.data);

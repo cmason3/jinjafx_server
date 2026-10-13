@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [26.6.0] - In Development
+### [26.6.0] - October 13, 2026
 - Updated Web Logs to use Server Sent Events (SSE) to provide real-time updates
 - Updated Python to 3.15 in Dockerfile
 
