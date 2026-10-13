@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### [26.6.0] - October 13, 2026
+- Updated Web Logs to use Server Sent Events (SSE) to provide real-time updates
+- Updated Python to 3.15 in Dockerfile
+
 ### [26.5.2] - October 10, 2026
 - Fixed a race condition where the `jinjafx` JavaScript object wasn't accessible in Safari
 - Updated JavaScript library `jszip` to 3.10.2
@@ -572,6 +576,7 @@
 - Initial release
 
 
+[26.6.0]: https://github.com/cmason3/jinjafx_server/compare/26.5.2...26.6.0
 [26.5.2]: https://github.com/cmason3/jinjafx_server/compare/26.5.1...26.5.2
 [26.5.1]: https://github.com/cmason3/jinjafx_server/compare/26.5.0...26.5.1
 [26.5.0]: https://github.com/cmason3/jinjafx_server/compare/26.4.1...26.5.0

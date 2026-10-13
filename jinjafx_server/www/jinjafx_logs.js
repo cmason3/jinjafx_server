@@ -1,7 +1,4 @@
 (function() {
-  var interval = 60;
-  var m = undefined;
-
   function quote(str) {
     str = str.replaceAll(/&/g, '&amp;');
     str = str.replaceAll(/>/g, '&gt;');
@@ -18,56 +15,47 @@
     return str.replaceAll('\033[0m', '</span>');
   }
 
-  function update() {
-    var xHR = new XMLHttpRequest();
-    xHR.open("GET", '/get_logs', true);
-
-    xHR.onload = function() {
-      if (this.status == 200) {
-        document.querySelector('pre').innerHTML = ansiToRGB(quote(xHR.responseText));
-        window.scrollTo({ 'left': 0, 'top': document.body.scrollHeight, 'behavior': 'instant' });
-        document.getElementById('refresh').classList.remove('d-none');
-        setTimeout(update, interval * 1000);
-      }
-      else if (this.status == 401) {
-        m = new bootstrap.Modal(document.getElementById('password_input'), {
-          keyboard: false
-        });
-        m.show();
-      }
-      else {
-        document.querySelector('pre').innerHTML = 'HTTP ERROR ' + this.status;
-      }
-    };
-
-    xHR.onerror = function() {
-      document.querySelector('pre').innerHTML = 'XMLHttpRequest ERROR';
-      setTimeout(update, interval * 1000);
-    };
-
-    xHR.ontimeout = function() {
-      document.querySelector('pre').innerHTML = 'XMLHttpRequest TIMEOUT';
-      setTimeout(update, interval * 1000);
-    };
-
-    xHR.timeout = 3000;
-    xHR.send();
+  function add(str) {
+    document.querySelector('pre').innerHTML += ansiToRGB(quote(str)) + '<br />';
+    window.scrollTo({ 'left': 0, 'top': document.body.scrollHeight, 'behavior': 'instant' });
   }
 
-  window.onload = function() {
+  window.addEventListener('load', () => {
+    let qs = new URLSearchParams(window.location.search);
+
+    if (qs.has('key')) {
+      document.cookie = 'JinjaFx-WebLog-Key=' + qs.get('key') + '; max-age=86400; path=/';
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    const es = new EventSource('/_logs');
+
+    es.addEventListener('error', (e) => {
+      es.close();
+      add('\033[31mError: Unable to Connect to Event Source\033[0m');
+    });
+
+    es.addEventListener('401', (e) => {
+      es.close();
+      new bootstrap.Modal(document.getElementById('password_input'), {
+        keyboard: false
+      }).show();
+    });
+
+    es.addEventListener('message', (e) => {});
+
+    es.addEventListener('log', (e) => {
+      add(e.data);
+    });
+
     document.getElementById('password_input').addEventListener('shown.bs.modal', function (e) {
       document.getElementById("in_password").focus();
-    });
-  
-    document.getElementById('password_input').addEventListener('hidden.bs.modal', function (e) {
-      document.getElementById("in_password").value = '';
     });
   
     document.getElementById('ml-password-ok').addEventListener('click', function (e) {
       if (document.getElementById("in_password").value.trim().length) {
         document.cookie = 'JinjaFx-WebLog-Key=' + document.getElementById("in_password").value + '; max-age=86400; path=/';
-        m.hide();
-        update();
+        window.location.reload();
       }
       else {
         document.getElementById("in_password").focus();
@@ -79,17 +67,5 @@
         document.getElementById('ml-password-ok').click();
       }
     });
-
-    document.getElementById('refresh').addEventListener('click', function (e) {
-      update();
-    });
-
-    let qs = new URLSearchParams(window.location.search);
-
-    if (qs.has('key')) {
-      document.cookie = 'JinjaFx-WebLog-Key=' + qs.get('key') + '; max-age=86400; path=/';
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-    update();
-  };
+  });
 })();

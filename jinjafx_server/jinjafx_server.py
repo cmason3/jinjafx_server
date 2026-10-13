@@ -28,7 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji, jsonschema
 
-__version__ = '26.5.2'
+__version__ = '26.6.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -54,6 +54,7 @@ logfile = None
 timelimit = 0
 n_threads = 4
 logring = []
+logcount = 0
 
 class JinjaFxServer(HTTPServer):
   def handle_error(self, request, client_address):
@@ -74,6 +75,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     self.elapsed = None
     self.error = None
     self.hide = False
+    self.unauth = False
     self.length = 0
 
   def format_bytes(self, b):
@@ -85,23 +87,27 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
   def log_message(self, format, *args):
     path = self.path if hasattr(self, 'path') else ''
+    code = args[1]
 
     if not verbose:
       path = path.replace('/jinjafx.html', '/')
 
-    if args[1] == '204' or args[1] == '404' or args[1] == '501':
+    if self.unauth:
+      code = '401'
+
+    if code == '204' or code == '404' or code == '501':
       self.hide = not verbose
-    elif path.startswith(('/logs', '/get_logs', '/logs.html', '/output.html', '/dt/')) and (args[1] == '200' or args[1] == '304'):
+    elif path.startswith(('/logs', '/_logs', '/logs.html', '/output.html', '/dt/')) and (code == '200' or code == '304'):
       self.hide = not verbose
-    elif path.endswith(('.js', '.css', '.png')) and (args[1] == '200' or args[1] == '304'):
+    elif path.endswith(('.js', '.css', '.png')) and (code == '200' or code == '304'):
       self.hide = not verbose
 
     if not self.hide:
       if self.error is not None:
         ansi = '31'
-      elif args[1] == '200' or args[1] == '204' or (path == '/get_logs' and args[1] == '302'):
+      elif code == '200' or code == '204' or (path == '/_logs' and code == '302'):
         ansi = '32'
-      elif args[1] == '304':
+      elif code == '304':
         ansi = '33'
       else:
         ansi = '31'
@@ -133,12 +139,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
           ae = ''
 
         if self.elapsed is not None:
-          log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[34m' + self.command + '\033[0m ' + path + proto_ver + ctype + ' [' + self.format_bytes(self.length) + '] in ' + str(self.elapsed) + 'ms', ae)
+          log('[' + src + '] [\033[' + ansi + 'm' + str(code) + '\033[0m]' + ' \033[34m' + self.command + '\033[0m ' + path + proto_ver + ctype + ' [' + self.format_bytes(self.length) + '] in ' + str(self.elapsed) + 'ms', ae)
         else:
-          log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' \033[34m' + self.command + '\033[0m ' + path + proto_ver + ctype + ' [' + self.format_bytes(self.length) + ']', ae)
+          log('[' + src + '] [\033[' + ansi + 'm' + str(code) + '\033[0m]' + ' \033[34m' + self.command + '\033[0m ' + path + proto_ver + ctype + ' [' + self.format_bytes(self.length) + ']', ae)
 
       elif self.command != None:
-        log('[' + src + '] [\033[' + ansi + 'm' + str(args[1]) + '\033[0m]' + ' ' + self.command + ' ' + path + proto_ver)
+        log('[' + src + '] [\033[' + ansi + 'm' + str(code) + '\033[0m]' + ' ' + self.command + ' ' + path + proto_ver)
 
   def send_error(self, code, message=None, explain=None):
     self.initialise()
@@ -250,22 +256,47 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       elif fpath == '/logs.html' and jfx_weblog_key is None:
         r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
-      elif fpath == '/get_logs' and jfx_weblog_key is not None:
+      elif fpath == '/_logs' and jfx_weblog_key is not None:
         if cookies := SimpleCookie(self.headers.get('Cookie')):
           if 'JinjaFx-WebLog-Key' in cookies and cookies['JinjaFx-WebLog-Key'].value == jfx_weblog_key:
-            with llock:
-              logs = '\r\n'.join(logring)
+            self.send_response(200);
+            self.send_header('Content-Type', 'text/event-stream')
+            self.send_header('Cache-Control', 'no-cache')
+            self.send_header('Connection', 'keep-alive');
+            self.end_headers()
 
-            r = [ 'text/plain', 200, logs.encode('utf-8'), sys._getframe().f_lineno ]
+            try:
+              lc = 0
 
-          else:
-            if not self.ratelimit(remote_addr, 3, False):
-              r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
-            else:
-              r = [ 'text/plain', 429, '429 Too Many Requests\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+              while True:
+                with llock:
+                  n = logring[0][0]
+                  spos = (lc - n) + 1
 
-        else:
-          r = [ 'text/plain', 401, '401 Unauthorized\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+                  if (spos != len(logring)):
+                    for i in range(spos, len(logring)):
+                      self.wfile.write(b'event: log\ndata: ' + logring[i][1].encode('utf-8') + b'\n\n')
+
+                    lc = logring[-1][0]
+
+                  else:
+                    self.wfile.write(b'data: keepalive\n\n')
+
+                time.sleep(5)
+
+            except Exception:
+              pass
+
+            return
+
+        self.unauth = True
+        self.send_response(200);
+        self.send_header('Content-Type', 'text/event-stream')
+        self.send_header('Cache-Control', 'no-cache')
+        self.send_header('Connection', 'close');
+        self.end_headers()
+        self.wfile.write(b'event: 401\ndata: Unauthorized\n\n')
+        return
 
       else:
         if fpath == '/' or fpath == '/index.html':
@@ -460,10 +491,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       if not head:
         self.wfile.write(r[2])
 
-    except ConnectionResetError as e:
+    except ConnectionResetError:
       self.exception = True
 
-    except Exception as e:
+    except Exception:
       log(traceback.format_exc())
       self.exception = True
 
@@ -1351,18 +1382,20 @@ def main(rflag=[0]):
 
 def log(t, ae=''):
   global logring
+  global logcount
+
+  timestamp = datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19]
 
   with llock:
-    timestamp = datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19]
-
     if os.getenv('JOURNAL_STREAM'):
       print(re.sub(r'\033\[(?:(?:[01];)?[0-9][0-9]|0)m', '', t + ae))
 
     else:
       print('[' + timestamp + '] ' + t + ae)
 
-    logring.append('[' + timestamp + '] ' + t + ae)
-    logring = logring[-1024:]
+    logcount += 1
+    logring.append([logcount, '[' + timestamp + '] ' + t + ae])
+    logring = logring[-512:]
 
     if logfile is not None:
       try:
