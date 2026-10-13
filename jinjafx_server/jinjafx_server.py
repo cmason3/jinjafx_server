@@ -284,7 +284,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
                 time.sleep(5)
 
-            except Exception as e:
+            except Exception:
               pass
 
             return
