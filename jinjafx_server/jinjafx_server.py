@@ -270,18 +270,21 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
               while True:
                 with llock:
-                  for log in logring:
-                    e = log.split(':', 1)
+                  n = logring[0][0]
+                  spos = (lc - n) + 1
 
-                    if int(e[0]) > lc:
-                      self.wfile.write(b'event: log\ndata: ' + e[1].encode('utf-8') + b'\n\n')
-                      lc = int(e[0])
+                  if (spos != len(logring)):
+                    for i in range(spos, len(logring)):
+                      self.wfile.write(b'event: log\ndata: ' + logring[i][1].encode('utf-8') + b'\n\n')
 
-                self.wfile.write(b'data: keepalive\n\n')
+                    lc = logring[-1][0]
+
+                  else:
+                    self.wfile.write(b'data: keepalive\n\n')
+
                 time.sleep(5)
 
             except Exception as e:
-              print(str(e))
               pass
 
             return
@@ -290,6 +293,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         self.send_response(200);
         self.send_header('Content-Type', 'text/event-stream')
         self.send_header('Cache-Control', 'no-cache')
+        self.send_header('Connection', 'close');
         self.end_headers()
         self.wfile.write(b'event: 401\ndata: Unauthorized\n\n')
         return
@@ -1380,9 +1384,9 @@ def log(t, ae=''):
   global logring
   global logcount
 
-  with llock:
-    timestamp = datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19]
+  timestamp = datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19]
 
+  with llock:
     if os.getenv('JOURNAL_STREAM'):
       print(re.sub(r'\033\[(?:(?:[01];)?[0-9][0-9]|0)m', '', t + ae))
 
@@ -1390,8 +1394,8 @@ def log(t, ae=''):
       print('[' + timestamp + '] ' + t + ae)
 
     logcount += 1
-    logring.append(str(logcount) + ':[' + timestamp + '] ' + t + ae)
-    logring = logring[-256:]
+    logring.append([logcount, '[' + timestamp + '] ' + t + ae])
+    logring = logring[-512:]
 
     if logfile is not None:
       try:

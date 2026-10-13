@@ -32,7 +32,7 @@
 
     es.addEventListener('error', (e) => {
       es.close();
-      add('Error: Unable to Connect to Event Source');
+      add('\033[31mError: Unable to Connect to Event Source\033[0m');
     });
 
     es.addEventListener('401', (e) => {
@@ -43,7 +43,7 @@
     });
 
     es.addEventListener('message', (e) => {
-      console.log(e.data);
+      add(e.data); // FIXME
     });
 
     es.addEventListener('log', (e) => {
