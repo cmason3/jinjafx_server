@@ -28,7 +28,7 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji, jsonschema
 
-__version__ = '26.6.1'
+__version__ = '26.6.2'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -159,10 +159,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       self.end_headers()
       self.wfile.write(body.encode('utf-8'))
 
-    except ConnectionResetError as e:
+    except ConnectionResetError, BrokenPipeError:
       self.exception = True
 
-    except Exception as e:
+    except Exception:
       log(traceback.format_exc())
       self.exception = True
 
@@ -282,7 +282,8 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
                   if (spos != len(logring)):
                     for i in range(spos, len(logring)):
-                      self.wfile.write(f'event: log\nid: {stime}/{logring[i][0]}\ndata: {logring[i][1]}\n\n'.encode('utf-8'))
+                      data = base64.b64encode(logring[i][1].encode('utf-8')).decode('utf-8')
+                      self.wfile.write(f'event: log\nid: {stime}/{logring[i][0]}\ndata: {data}\n\n'.encode('utf-8'))
 
                     lc = logring[-1][0]
 
@@ -498,7 +499,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       if not head:
         self.wfile.write(r[2])
 
-    except ConnectionResetError:
+    except ConnectionResetError, BrokenPipeError:
       self.exception = True
 
     except Exception:
@@ -513,10 +514,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       self.send_header('Allow', 'OPTIONS, HEAD, GET, POST')
       self.end_headers()
 
-    except ConnectionResetError as e:
+    except ConnectionResetError, BrokenPipeError:
       self.exception = True
 
-    except Exception as e:
+    except Exception:
       log(traceback.format_exc())
       self.exception = True
 
@@ -1199,10 +1200,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       self.end_headers()
       self.wfile.write(r[2])
 
-    except ConnectionResetError as e:
+    except ConnectionResetError, BrokenPipeError:
       self.exception = True
 
-    except Exception as e:
+    except Exception:
       log(traceback.format_exc())
       self.exception = True
 

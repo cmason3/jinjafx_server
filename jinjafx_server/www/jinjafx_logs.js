@@ -58,7 +58,7 @@
         container.innerHTML = '';
         lastEventId = stime;
       }
-      add(e.data);
+      add(atob(e.data));
     });
 
     document.getElementById('password_input').addEventListener('shown.bs.modal', function (e) {
