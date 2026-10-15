@@ -1,4 +1,6 @@
 (function() {
+  var lastEventId = null;
+
   function quote(str) {
     str = str.replaceAll(/&/g, '&amp;');
     str = str.replaceAll(/>/g, '&gt;');
@@ -30,8 +32,12 @@
 
     const es = new EventSource('/_logs');
 
+    es.addEventListener('open', (e) => {
+      add('connected');
+    });
+
     es.addEventListener('error', (e) => {
-      es.close();
+      //es.close();
       add('\033[31mError: Unable to Connect to Event Source\033[0m');
     });
 
@@ -45,7 +51,13 @@
     es.addEventListener('message', (e) => {});
 
     es.addEventListener('log', (e) => {
-      add(e.data);
+      let stime = e.lastEventId.split('/')[0];
+
+      if (stime !== lastEventId) {
+        document.querySelector('pre').innerHTML = '';
+        lastEventId = stime;
+      }
+      add(e.lastEventId + '---' + e.data);
     });
 
     document.getElementById('password_input').addEventListener('shown.bs.modal', function (e) {
