@@ -28,11 +28,12 @@ import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, dat
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji, jsonschema
 
-__version__ = '26.6.0'
+__version__ = '26.6.1'
 
 llock = threading.RLock()
 rlock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
+stime = str(int(time.time()))
 
 aws_s3_url = None
 aws_access_key = None
@@ -268,6 +269,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             try:
               lc = 0
 
+              if id := self.headers.get('Last-Event-ID', ''):
+                _stime, _lc = id.split('/')
+
+                if _stime == stime:
+                  lc = int(_lc)
+
               while True:
                 with llock:
                   n = logring[0][0]
@@ -275,7 +282,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
                   if (spos != len(logring)):
                     for i in range(spos, len(logring)):
-                      self.wfile.write(b'event: log\ndata: ' + logring[i][1].encode('utf-8') + b'\n\n')
+                      self.wfile.write(f'event: log\nid: {stime}/{logring[i][0]}\ndata: {logring[i][1]}\n\n'.encode('utf-8'))
 
                     lc = logring[-1][0]
 
