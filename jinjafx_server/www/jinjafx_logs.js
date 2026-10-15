@@ -1,4 +1,5 @@
 (function() {
+  var container = document.querySelector('pre');
   var lastEventId = null;
 
   function quote(str) {
@@ -18,7 +19,7 @@
   }
 
   function add(str) {
-    document.querySelector('pre').innerHTML += ansiToRGB(quote(str)) + '<br />';
+    container.innerHTML += ansiToRGB(quote(str)) + '<br />';
     window.scrollTo({ 'left': 0, 'top': document.body.scrollHeight, 'behavior': 'instant' });
   }
 
@@ -33,15 +34,15 @@
     const es = new EventSource('/_logs');
 
     es.addEventListener('open', (e) => {
-      add('connected');
+      document.getElementById('status').classList.add('d-none');
     });
 
     es.addEventListener('error', (e) => {
-      //es.close();
-      add('\033[31mError: Unable to Connect to Event Source\033[0m');
+      document.getElementById('status').classList.remove('d-none');
     });
 
     es.addEventListener('401', (e) => {
+      container.innerHTML = '';
       es.close();
       new bootstrap.Modal(document.getElementById('password_input'), {
         keyboard: false
@@ -54,10 +55,10 @@
       let stime = e.lastEventId.split('/')[0];
 
       if (stime !== lastEventId) {
-        document.querySelector('pre').innerHTML = '';
+        container.innerHTML = '';
         lastEventId = stime;
       }
-      add(e.lastEventId + '---' + e.data);
+      add(e.data);
     });
 
     document.getElementById('password_input').addEventListener('shown.bs.modal', function (e) {

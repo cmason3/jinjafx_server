@@ -1,7 +1,7 @@
 ## CHANGELOG
 
 ### [26.6.1] - In Development
-- Updated Web Logs to support auto-reconnection for Server-Sent Events
+- Updated Web Logs to support auto-reconnection for Server-Sent Events using `Last-Event-ID`
 
 ### [26.6.0] - October 13, 2026
 - Updated Web Logs to use Server Sent-Events (SSE) to provide real-time updates

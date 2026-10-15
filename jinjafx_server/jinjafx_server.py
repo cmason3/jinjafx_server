@@ -33,7 +33,7 @@ __version__ = '26.6.1'
 llock = threading.RLock()
 rlock = threading.RLock()
 base = os.path.abspath(os.path.dirname(__file__))
-stime = int(time.time())
+stime = str(int(time.time()))
 
 aws_s3_url = None
 aws_access_key = None
@@ -282,7 +282,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
                   if (spos != len(logring)):
                     for i in range(spos, len(logring)):
-                      self.wfile.write(f'event: log\nid: {stime}/{i}\ndata: {logring[i][1]}\n\n'.encode('utf-8'))
+                      self.wfile.write(f'event: log\nid: {stime}/{logring[i][0]}\ndata: {logring[i][1]}\n\n'.encode('utf-8'))
 
                     lc = logring[-1][0]
 
