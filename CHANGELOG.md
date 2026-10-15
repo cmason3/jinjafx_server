@@ -2,6 +2,7 @@
 
 ### [26.6.2] - October 15, 2026
 - Fixed an issue where multi-line Web Logs weren't being sent
+- Treat BrokenPipeErrors the same as ConnectionResetErrors
 
 ### [26.6.1] - October 15, 2026
 - Updated Web Logs to support auto-reconnection for Server-Sent Events using `Last-Event-ID`
