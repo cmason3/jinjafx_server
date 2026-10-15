@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [26.6.2] - October 15, 2026
+- Fixed an issue where multi-line Web Logs weren't being sent
+
 ### [26.6.1] - October 15, 2026
 - Updated Web Logs to support auto-reconnection for Server-Sent Events using `Last-Event-ID`
 
@@ -579,6 +582,7 @@
 - Initial release
 
 
+[26.6.2]: https://github.com/cmason3/jinjafx_server/compare/26.6.1...26.6.2
 [26.6.1]: https://github.com/cmason3/jinjafx_server/compare/26.6.0...26.6.1
 [26.6.0]: https://github.com/cmason3/jinjafx_server/compare/26.5.2...26.6.0
 [26.5.2]: https://github.com/cmason3/jinjafx_server/compare/26.5.1...26.5.2
