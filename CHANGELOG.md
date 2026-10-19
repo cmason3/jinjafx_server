@@ -2,6 +2,7 @@
 
 ### [26.7.0] - In Development
 - Fixed an issue where clients could use up all the listener threads - moved to `ThreadingHTTPServer`
+- Removed `-nocache` argument as it wasn't really needed with `If-None-Else` headers
 - Moved all external JavaScript dependencies local to avoid CDN requirement
 - Moved CSS Style Sheets into `www/css`
 - Moved JavaScript files into `www/js`
