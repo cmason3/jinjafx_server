@@ -1,5 +1,11 @@
 ## CHANGELOG
 
+### [26.7.0] - In Development
+- Fixed an issue where clients could use up all the listener threads - moved to `ThreadingHTTPServer`
+- Moved all external JavaScript dependencies local to avoid CDN requirement
+- Moved CSS Style Sheets into `www/css`
+- Moved JavaScript files into `www/js`
+
 ### [26.6.2] - October 15, 2026
 - Fixed an issue where multi-line Web Logs weren't being sent
 - Treat BrokenPipeErrors the same as ConnectionResetErrors
@@ -583,6 +589,7 @@
 - Initial release
 
 
+[26.7.0]: https://github.com/cmason3/jinjafx_server/compare/26.6.2...26.7.0
 [26.6.2]: https://github.com/cmason3/jinjafx_server/compare/26.6.1...26.6.2
 [26.6.1]: https://github.com/cmason3/jinjafx_server/compare/26.6.0...26.6.1
 [26.6.0]: https://github.com/cmason3/jinjafx_server/compare/26.5.2...26.6.0
