@@ -45,7 +45,6 @@ jfx_weblog_key = None
 repository = None
 verify = True
 verbose = False
-#nocache = False
 pandoc = None
 
 rtable = {}
@@ -53,7 +52,6 @@ rl_rate = 0
 rl_limit = 0
 logfile = None
 timelimit = 0
-#n_threads = 1
 logring = []
 logcount = 0
 
@@ -447,11 +445,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         else:
           r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
-      #script_src = "'self' https://cdnjs.cloudflare.com"
-
-      #if allowjs:
-      #  script_src += " 'unsafe-inline'"
-
       headers = {
         'X-Content-Type-Options': 'nosniff',
         'Referrer-Policy': 'strict-origin-when-cross-origin'
@@ -460,9 +453,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       if not nocsp:
         if allowjs:
           headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src data: *; frame-ancestors 'none'"
-
         else:
-          #headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src " + script_src + "; connect-src 'self' https://cdnjs.cloudflare.com; img-src data: *; frame-ancestors 'none'"
           headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; img-src data: *; frame-ancestors 'none'"
 
       etag = '"' + hashlib.sha224(repr(headers).encode('utf-8') + b'|' + r[0].encode('utf-8') + b'; ' + r[2]).hexdigest() + '"'
@@ -483,10 +474,10 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         self.send_header('Content-Type', r[0])
         self.send_header('Content-Length', str(len(r[2])))
 
-      if versioned: # and not nocache:
+      if versioned:
         self.send_header('Cache-Control', 'public, max-age=31536000')
 
-      elif not cache: # or nocache:
+      elif not cache:
         self.send_header('Cache-Control', 'no-store, max-age=0')
 
       elif r[1] == 200 or r[1] == 304:
