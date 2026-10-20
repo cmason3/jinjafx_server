@@ -24,7 +24,7 @@ from http.cookies import SimpleCookie
 from jinja2 import __version__ as jinja2_version
 from jinja2 import TemplateError
 
-import jinjafx, os, io, threading, yaml, json, base64, time, datetime, resource, urllib3, signal
+import jinjafx, os, io, signal, threading, yaml, json, base64, time, datetime, resource, urllib3
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji, jsonschema
 
