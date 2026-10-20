@@ -458,7 +458,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
       etag = '"' + hashlib.sha224(repr(headers).encode('utf-8') + b'|' + r[0].encode('utf-8') + b'; ' + r[2]).hexdigest() + '"'
 
-      if 'If-None-Match' in self.headers: # and not nocache:
+      if 'If-None-Match' in self.headers:
         if self.headers['If-None-Match'] == etag:
           head = True
           r = [ None, 304, None, sys._getframe().f_lineno ]
@@ -1203,20 +1203,6 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       log(traceback.format_exc())
       self.exception = True
 
-#class JinjaFxThread(threading.Thread):
-#  def __init__(self, s, addr):
-#    threading.Thread.__init__(self)
-#    self.s = s
-#    self.addr = addr
-#    self.daemon = True
-#    self.start()
-
-#  def run(self):
-#    httpd = JinjaFxServer(self.addr, JinjaFxRequest, False)
-#    httpd.socket = self.s
-#    httpd.server_bind = self.server_close = lambda self: None
-#    httpd.serve_forever()
-
 class StoppableJinjaFx(threading.Thread):
   def __init__(self, jinjafx, template, data, gvars, ret):
     threading.Thread.__init__(self)
@@ -1255,7 +1241,6 @@ def main():
   global verify
   global allowjs
   global nocsp
-  #global nocache
   global verbose
   global pandoc
 
@@ -1282,12 +1267,10 @@ def main():
     group2_ex = parser.add_mutually_exclusive_group()
     group2_ex.add_argument('-allowjs', action='store_true', default=False)
     group2_ex.add_argument('-nocsp', action='store_true', default=False)
-    #parser.add_argument('-nocache', action='store_true', default=False)
     parser.add_argument('-v', action='store_true', default=False)
     args = parser.parse_args()
     allowjs = args.allowjs
     nocsp = args.nocsp
-    #nocache = args.nocache
     verify = not args.insecure
     repository = args.r
     verbose = args.v
@@ -1403,11 +1386,6 @@ def update_versioned_links(d):
       with open(d + '/' + fn, 'rt') as fh:
         for ln in fh:
           if m := re.search(r'(?:href|src)="/([a-f0-9]{8})/(.+?)"', ln):
-            #if nocache:
-            #  if m.group(1) != '00000000':
-            #    ln = re.sub(m.group(1), '00000000', ln)
-            #    changed = True
-            #else:
             with open(d + '/' + m.group(2), 'rb') as fh2:
               h = hashlib.sha256(fh2.read()).hexdigest()[:8]
 
