@@ -157,7 +157,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       self.end_headers()
       self.wfile.write(body.encode('utf-8'))
 
-    except ConnectionResetError, BrokenPipeError:
+    except (ConnectionResetError, BrokenPipeError):
       self.exception = True
 
     except Exception:
@@ -495,7 +495,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       if not head:
         self.wfile.write(r[2])
 
-    except ConnectionResetError, BrokenPipeError:
+    except (ConnectionResetError, BrokenPipeError):
       self.exception = True
 
     except Exception:
@@ -510,7 +510,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       self.send_header('Allow', 'OPTIONS, HEAD, GET, POST')
       self.end_headers()
 
-    except ConnectionResetError, BrokenPipeError:
+    except (ConnectionResetError, BrokenPipeError):
       self.exception = True
 
     except Exception:
@@ -1196,7 +1196,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       self.end_headers()
       self.wfile.write(r[2])
 
-    except ConnectionResetError, BrokenPipeError:
+    except (ConnectionResetError, BrokenPipeError):
       self.exception = True
 
     except Exception:
