@@ -40,7 +40,7 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
  jinjafx_server -s [-l <address>] [-p <port>]
                 [-r <directory> | -s3 <s3 url> | -github <owner>/<repo>[:<branch>]] [-insecure]
                 [-rl <rate/limit>] [-tl <time limit>] [-ml <memory limit>]
-                [-logfile <logfile>] [-weblog] [-pandoc] [-allowjs | -nocsp] [-nocache] [-v]
+                [-logfile <logfile>] [-weblog] [-pandoc] [-allowjs | -nocsp] [-v]
 
    -s                                 - start the JinjaFx Server
    -l <address>                       - specify a listen address (default is '127.0.0.1')
@@ -57,7 +57,6 @@ Once JinjaFx Server has been started with the `-s` argument then point your web 
    -pandoc                            - enable support for DOCX using pandoc (requires pandoc)
    -allowjs                           - allows javascript in `jinjafx_input` and html output
    -nocsp                             - disables 'content-security-policy' (implies '-allowjs')
-   -nocache                           - disables versioned urls for internal development
    -v                                 - log all http requests
 
  Environment Variables:

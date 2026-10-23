@@ -19,16 +19,16 @@ import sys
 if sys.version_info < (3, 11):
   sys.exit('Requires Python >= 3.11')
 
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from http.cookies import SimpleCookie
 from jinja2 import __version__ as jinja2_version
 from jinja2 import TemplateError
 
-import jinjafx, os, io, socket, signal, threading, yaml, json, base64, time, datetime, resource, urllib3
+import jinjafx, os, io, signal, threading, yaml, json, base64, time, datetime, resource, urllib3
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji, jsonschema
 
-__version__ = '26.6.2'
+__version__ = '26.7.0'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -45,7 +45,6 @@ jfx_weblog_key = None
 repository = None
 verify = True
 verbose = False
-nocache = False
 pandoc = None
 
 rtable = {}
@@ -53,11 +52,10 @@ rl_rate = 0
 rl_limit = 0
 logfile = None
 timelimit = 0
-n_threads = 4
 logring = []
 logcount = 0
 
-class JinjaFxServer(HTTPServer):
+class JinjaFxServer(ThreadingHTTPServer):
   def handle_error(self, request, client_address):
     pass
 
@@ -159,7 +157,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       self.end_headers()
       self.wfile.write(body.encode('utf-8'))
 
-    except ConnectionResetError, BrokenPipeError:
+    except (ConnectionResetError, BrokenPipeError):
       self.exception = True
 
     except Exception:
@@ -234,7 +232,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
     try:
       cheaders = {}
 
-      fpath = self.path.split('?', 1)[0]
+      fpath = os.path.normpath(self.path.split('?', 1)[0])
 
       if hasattr(self, 'headers') and 'X-Forwarded-For' in self.headers:
         remote_addr = self.headers['X-Forwarded-For']
@@ -413,7 +411,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             else:
               r = [ 'text/plain', 429, '429 Too Many Requests\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
-        elif re.search(r'^/[A-Z0-9_-]+\.[A-Z0-9]+$', fpath, re.IGNORECASE) and (os.path.isfile(base + '/www' + fpath) or fpath == '/jinjafx.html'):
+        elif re.search(r'^/(?:[A-Z0-9_.-]+\/)*[A-Z0-9_.-]+\.(?:js|css|html|png)$', fpath, re.IGNORECASE) and (os.path.isfile(base + '/www' + fpath) or fpath == '/jinjafx.html'):
           if fpath.endswith('.js'):
             ctype = 'text/javascript'
           elif fpath.endswith('.css'):
@@ -447,18 +445,16 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         else:
           r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
-      script_src = "'self' https://cdnjs.cloudflare.com"
-
-      if allowjs:
-        script_src += " 'unsafe-inline'"
-
       headers = {
         'X-Content-Type-Options': 'nosniff',
         'Referrer-Policy': 'strict-origin-when-cross-origin'
       }
 
       if not nocsp:
-        headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src " + script_src + "; connect-src 'self' https://cdnjs.cloudflare.com; img-src data: *; frame-ancestors 'none'"
+        if allowjs:
+          headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src data: *; frame-ancestors 'none'"
+        else:
+          headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; img-src data: *; frame-ancestors 'none'"
 
       etag = '"' + hashlib.sha224(repr(headers).encode('utf-8') + b'|' + r[0].encode('utf-8') + b'; ' + r[2]).hexdigest() + '"'
 
@@ -478,7 +474,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
         self.send_header('Content-Type', r[0])
         self.send_header('Content-Length', str(len(r[2])))
 
-      if versioned and not nocache:
+      if versioned:
         self.send_header('Cache-Control', 'public, max-age=31536000')
 
       elif not cache:
@@ -499,7 +495,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       if not head:
         self.wfile.write(r[2])
 
-    except ConnectionResetError, BrokenPipeError:
+    except (ConnectionResetError, BrokenPipeError):
       self.exception = True
 
     except Exception:
@@ -514,7 +510,7 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       self.send_header('Allow', 'OPTIONS, HEAD, GET, POST')
       self.end_headers()
 
-    except ConnectionResetError, BrokenPipeError:
+    except (ConnectionResetError, BrokenPipeError):
       self.exception = True
 
     except Exception:
@@ -1200,26 +1196,12 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
       self.end_headers()
       self.wfile.write(r[2])
 
-    except ConnectionResetError, BrokenPipeError:
+    except (ConnectionResetError, BrokenPipeError):
       self.exception = True
 
     except Exception:
       log(traceback.format_exc())
       self.exception = True
-
-class JinjaFxThread(threading.Thread):
-  def __init__(self, s, addr):
-    threading.Thread.__init__(self)
-    self.s = s
-    self.addr = addr
-    self.daemon = True
-    self.start()
-
-  def run(self):
-    httpd = JinjaFxServer(self.addr, JinjaFxRequest, False)
-    httpd.socket = self.s
-    httpd.server_bind = self.server_close = lambda self: None
-    httpd.serve_forever()
 
 class StoppableJinjaFx(threading.Thread):
   def __init__(self, jinjafx, template, data, gvars, ret):
@@ -1243,7 +1225,7 @@ class StoppableJinjaFx(threading.Thread):
   def stop(self):
     ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.ident), ctypes.py_object(SystemExit))
 
-def main(rflag=[0]):
+def main():
   global aws_s3_url
   global aws_access_key
   global aws_secret_key
@@ -1259,7 +1241,6 @@ def main(rflag=[0]):
   global verify
   global allowjs
   global nocsp
-  global nocache
   global verbose
   global pandoc
 
@@ -1286,13 +1267,12 @@ def main(rflag=[0]):
     group2_ex = parser.add_mutually_exclusive_group()
     group2_ex.add_argument('-allowjs', action='store_true', default=False)
     group2_ex.add_argument('-nocsp', action='store_true', default=False)
-    parser.add_argument('-nocache', action='store_true', default=False)
     parser.add_argument('-v', action='store_true', default=False)
     args = parser.parse_args()
     allowjs = args.allowjs
     nocsp = args.nocsp
-    nocache = args.nocache
     verify = not args.insecure
+    repository = args.r
     verbose = args.v
 
     if not verify:
@@ -1349,44 +1329,27 @@ def main(rflag=[0]):
 
     timelimit = args.tl
 
-    def signal_handler(*args):
-      rflag[0] = 2
-
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-
     if args.ml:
       soft, hard = resource.getrlimit(resource.RLIMIT_AS)
       resource.setrlimit(resource.RLIMIT_AS, (args.ml * 1024 * 1024, hard))
 
     update_versioned_links(base + '/www')
+
     log(f'Starting JinjaFx Server (PID is {os.getpid()}) on http://{args.l}:{args.p}...')
+    httpd = JinjaFxServer((args.l, args.p), JinjaFxRequest)
 
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    s.bind((args.l, args.p))
-    s.listen()
+    def signal_handler(*args):
+      log(f'Terminating JinjaFx Server...')
+      threading.Thread(target=httpd.shutdown).start()
 
-    rflag[0] = 1
-    threads = []
-    repository = args.r
-
-    for i in range(n_threads):
-      threads.append(JinjaFxThread(s, (args.l, args.p)))
-
-    while rflag[0] < 2:
-      time.sleep(0.1)
-
-    log(f'Terminating JinjaFx Server...')
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    httpd.serve_forever()
 
   except Exception as e:
     error = jinjafx._format_error(e)
     print(error.replace('__init__.py:', 'jinjafx_server.py:'), file=sys.stderr)
     sys.exit(-2)
-
-  finally:
-    if rflag[0] > 0:
-      s.close()
 
 def log(t, ae=''):
   global logring
@@ -1422,19 +1385,13 @@ def update_versioned_links(d):
 
       with open(d + '/' + fn, 'rt') as fh:
         for ln in fh:
-          m = re.search(r'(?:href|src)="/([a-f0-9]{8})/(.+?)"', ln)
-          if m:
-            if nocache:
-              if m.group(1) != '00000000':
-                ln = re.sub(m.group(1), '00000000', ln)
-                changed = True
-            else:
-              with open(d + '/' + m.group(2), 'rb') as fh2:
-                h = hashlib.sha256(fh2.read()).hexdigest()[:8]
+          if m := re.search(r'(?:href|src)="/([a-f0-9]{8})/(.+?)"', ln):
+            with open(d + '/' + m.group(2), 'rb') as fh2:
+              h = hashlib.sha256(fh2.read()).hexdigest()[:8]
 
-                if h != m.group(1):
-                  ln = re.sub(m.group(1), h, ln)
-                  changed = True
+              if h != m.group(1):
+                ln = re.sub(m.group(1), h, ln)
+                changed = True
 
           html.append(ln)
 
