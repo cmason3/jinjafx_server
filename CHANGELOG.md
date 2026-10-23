@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [26.7.0] - In Development
+### [26.7.0] - October 23, 2026
 - Fixed an issue where clients could use up all the listener threads - moved to `ThreadingHTTPServer`
 - Removed `-nocache` argument as it wasn't really needed with `If-None-Match` headers
 - Moved all external JavaScript dependencies local to avoid CDN requirement
