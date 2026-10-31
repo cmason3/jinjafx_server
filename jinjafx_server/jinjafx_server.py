@@ -28,7 +28,7 @@ import jinjafx, os, io, signal, threading, yaml, json, base64, time, datetime, r
 import re, argparse, hashlib, traceback, glob, hmac, uuid, struct, binascii, gzip, requests, ctypes, subprocess
 import cmarkgfm, emoji, jsonschema
 
-__version__ = '26.7.0'
+__version__ = '26.7.1'
 
 llock = threading.RLock()
 rlock = threading.RLock()
@@ -452,9 +452,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
 
       if not nocsp:
         if allowjs:
-          headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src data: *; frame-ancestors 'none'"
+          headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; connect-src 'self' https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline'; img-src data: *; frame-ancestors 'none'"
         else:
-          headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; img-src data: *; frame-ancestors 'none'"
+          headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; connect-src 'self' https://cdnjs.cloudflare.com; img-src data: *; frame-ancestors 'none'"
 
       etag = '"' + hashlib.sha224(repr(headers).encode('utf-8') + b'|' + r[0].encode('utf-8') + b'; ' + r[2]).hexdigest() + '"'
 

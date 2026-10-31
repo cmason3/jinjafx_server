@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### [26.7.1] - Under Development
+- Fixed a Content-Security-Policy error with CloudFlare
+
 ### [26.7.0] - October 23, 2026
 - Fixed an issue where clients could use up all the listener threads - moved to `ThreadingHTTPServer`
 - Removed `-nocache` argument as it wasn't really needed with `If-None-Match` headers
@@ -590,6 +593,7 @@
 - Initial release
 
 
+[26.7.1]: https://github.com/cmason3/jinjafx_server/compare/26.7.0...26.7.1
 [26.7.0]: https://github.com/cmason3/jinjafx_server/compare/26.6.2...26.7.0
 [26.6.2]: https://github.com/cmason3/jinjafx_server/compare/26.6.1...26.6.2
 [26.6.1]: https://github.com/cmason3/jinjafx_server/compare/26.6.0...26.6.1
