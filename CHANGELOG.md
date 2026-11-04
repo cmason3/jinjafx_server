@@ -2,6 +2,8 @@
 
 ### [26.7.1] - Under Development
 - Fixed a Content-Security-Policy error with CloudFlare
+- Reduced `maxHighlightLength` to 512 from the default of 10,000 to make it more responsive with long lines
+- Updated Pandoc to 3.13 in Dockerfile
 
 ### [26.7.0] - October 23, 2026
 - Fixed an issue where clients could use up all the listener threads - moved to `ThreadingHTTPServer`
