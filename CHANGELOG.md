@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### [26.7.1] - Under Development
+### [26.7.1] - November 5, 2026
 - Fixed a Content-Security-Policy error with CloudFlare
 - Reduced `maxHighlightLength` to 512 from the default of 10,000 to make it more responsive with long lines
 - Updated Pandoc to 3.13 in Dockerfile
