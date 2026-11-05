@@ -1,5 +1,10 @@
 ## CHANGELOG
 
+### [26.7.1] - November 5, 2026
+- Fixed a Content-Security-Policy error with CloudFlare
+- Reduced `maxHighlightLength` to 512 from the default of 10,000 to make it more responsive with long lines
+- Updated Pandoc to 3.13 in Dockerfile
+
 ### [26.7.0] - October 23, 2026
 - Fixed an issue where clients could use up all the listener threads - moved to `ThreadingHTTPServer`
 - Removed `-nocache` argument as it wasn't really needed with `If-None-Match` headers
@@ -590,6 +595,7 @@
 - Initial release
 
 
+[26.7.1]: https://github.com/cmason3/jinjafx_server/compare/26.7.0...26.7.1
 [26.7.0]: https://github.com/cmason3/jinjafx_server/compare/26.6.2...26.7.0
 [26.6.2]: https://github.com/cmason3/jinjafx_server/compare/26.6.1...26.6.2
 [26.6.1]: https://github.com/cmason3/jinjafx_server/compare/26.6.0...26.6.1
