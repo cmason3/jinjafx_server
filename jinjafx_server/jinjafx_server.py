@@ -411,22 +411,27 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
             else:
               r = [ 'text/plain', 429, '429 Too Many Requests\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
-        elif re.search(r'^/(?:[A-Z0-9_.-]+\/)*[A-Z0-9_.-]+\.(?:js|css|html|png)$', fpath, re.IGNORECASE) and (os.path.isfile(base + '/www' + fpath) or fpath == '/jinjafx.html'):
-          if fpath.endswith('.js'):
-            ctype = 'text/javascript'
-          elif fpath.endswith('.css'):
-            ctype = 'text/css'
-          elif fpath.endswith('.png'):
-            ctype = 'image/png'
-          else:
-            ctype = 'text/html'
+        elif re.search(r'^/(?:[A-Z0-9_.-]+\/)*[A-Z0-9_.-]+\.(?:js|css|html|png)$', fpath, re.IGNORECASE):
+          www_root = os.path.realpath(os.path.join(base, 'www'))
+          requested_path = os.path.realpath(os.path.join(www_root, fpath.lstrip('/')))
+          in_www_root = os.path.commonpath([www_root, requested_path]) == www_root
 
-          if fpath == '/jinjafx.html':
-            r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+          if (fpath == '/jinjafx.html') or (in_www_root and os.path.isfile(requested_path)):
+            if fpath.endswith('.js'):
+              ctype = 'text/javascript'
+            elif fpath.endswith('.css'):
+              ctype = 'text/css'
+            elif fpath.endswith('.png'):
+              ctype = 'image/png'
+            else:
+              ctype = 'text/html'
 
-          else:
-            with open(base + '/www' + fpath, 'rb') as f:
-              r = [ ctype, 200, f.read(), sys._getframe().f_lineno ]
+            if fpath == '/jinjafx.html':
+              r = [ 'text/plain', 200, 'OK\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
+
+            else:
+              with open(requested_path, 'rb') as f:
+                r = [ ctype, 200, f.read(), sys._getframe().f_lineno ]
 
               if fpath == '/index.html':
                 if repository or aws_s3_url or github_url:
@@ -441,6 +446,9 @@ class JinjaFxRequest(BaseHTTPRequestHandler):
                   r[2] = r[2].decode('utf-8').replace('{{ pandoc_class }}', '').encode('utf-8')
                 else:
                   r[2] = r[2].decode('utf-8').replace('{{ pandoc_class }}', ' hide').encode('utf-8')
+
+          else:
+            r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
 
         else:
           r = [ 'text/plain', 404, '404 Not Found\r\n'.encode('utf-8'), sys._getframe().f_lineno ]
