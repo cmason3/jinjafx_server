@@ -3,6 +3,7 @@
 ### [26.7.1] - November 5, 2026
 - Fixed a Content-Security-Policy error with CloudFlare
 - Reduced `maxHighlightLength` to 512 from the default of 10,000 to make it more responsive with long lines
+- Fixed a non-issue identified by CodeQL
 - Updated Pandoc to 3.13 in Dockerfile
 
 ### [26.7.0] - October 23, 2026
