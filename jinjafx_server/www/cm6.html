@@ -46,6 +46,12 @@
         color: white;
         background: #008bd9;
       }
+      .cm-editor {
+        height: 100%;
+      }
+      .cm-gutter {
+        min-width: 25px;
+      }
     </style>
   </head>
   <body>
@@ -63,20 +69,20 @@
           <div id="top-start" class="view">
             <div class="badge lb-data overflow-hidden">D<br />A<br />T<br />A<br />.<br />C<br />S<br />V<br /></div>
             <div class="overflow-auto border">
-              <div id="data"></div>
+              <div id="data" class="h-100"></div>
             </div>
           </div>
           <div id="top-end">
             <div id="top-end-top" class="view">
               <div class="badge lb-gvars overflow-hidden">G<br />L<br />O<br />B<br />A<br />L<br />.<br />Y<br />M<br />L<br /></div>
               <div class="overflow-auto border">
-                <div id="gvars"></div>
+                <div id="gvars" class="h-100"></div>
               </div>
             </div>
             <div id="top-end-bottom" class="view">
               <div class="badge lb-vars overflow-hidden">V<br />A<br />R<br />S<br />.<br />Y<br />M<br />L<br /></div>
               <div class="overflow-auto border">
-                <div id="vars"></div>
+                <div id="vars" class="h-100"></div>
               </div>
             </div>
           </div>
@@ -84,7 +90,7 @@
         <div id="bottom" class="view">
           <div class="badge lb-template overflow-hidden">T<br />E<br />M<br />P<br />L<br />A<br />T<br />E<br />.<br />J<br />2<br /></div>
           <div class="overflow-auto border">
-            <div id="template"></div>
+            <div id="template" class="h-100"></div>
           </div>
         </div>
       </div>
@@ -99,7 +105,7 @@
     </div>
     <script src="/0547c89c/libs/split.js/1.6.5/split.min.js"></script>
     <script src="/c6f67021/libs/bootstrap/5.3.8/js/bootstrap.bundle.min.js"></script>
-    <script src="/e3b0c442/js/cm6.bundle.js"></script>
+    <script src="/656f7da3/js/cm6.bundle.min.js"></script>
     <script>
       (() => {
         window.addEventListener('load', () => {
@@ -124,10 +130,10 @@
             minSize: 25 
           });
 
-          cm6.createEditorView(document.getElementById('data'));
-          cm6.createEditorView(document.getElementById('gvars'));
-          cm6.createEditorView(document.getElementById('vars'));
-          cm6.createEditorView(document.getElementById('template'));
+          cm6.createDataView(document.getElementById('data'));
+          cm6.createVarsView(document.getElementById('gvars'));
+          cm6.createVarsView(document.getElementById('vars'));
+          cm6.createTemplateView(document.getElementById('template'));
         });
       })();
     </script>
