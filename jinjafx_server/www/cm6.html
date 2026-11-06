@@ -8,7 +8,6 @@
     <style>
       * {
         font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-        font-size: 14px;
       }
       #header {
         height: 75px;
@@ -16,9 +15,15 @@
       #content {
         min-height: 250px;
         height: calc(100vh - 75px - 50px);
+        font-size: small;
       }
       #footer {
         height: 50px;
+      }
+      .view {
+        display: grid;
+        grid-template-columns: 20px auto;
+        height: 100%;
       }
       .gutter {
         background-color: #eee;
@@ -33,21 +38,12 @@
         background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
         cursor: row-resize;
       }
-      .labels {
-        width: 20px;
-        height: 100%;
+      .lb-data, .lb-vars {
         color: white;
-      }
-      .lb-data {
         background: #00a9d8;
       }
-      .lb-gvars {
-        background: #008bd9;
-      }
-      .lb-vars {
-        background: #00a9d8;
-      }
-      .lb-template {
+      .lb-gvars, .lb-template {
+        color: white;
         background: #008bd9;
       }
     </style>
@@ -62,23 +58,34 @@
           <h4>Header 2</h4>
         </div>
       </div>
-      <div id="content" class="p-2 text-bg-secondary">
-        <div id="top" class="d-flex text-bg-danger">
-          <div id="top-start">
-            <h4>Top Start</h4>
+      <div id="content" class="p-2">
+        <div id="top" class="d-flex">
+          <div id="top-start" class="view">
+            <div class="badge lb-data overflow-hidden">D<br />A<br />T<br />A<br />.<br />C<br />S<br />V<br /></div>
+            <div class="overflow-auto border">
+              <div id="data"></div>
+            </div>
           </div>
           <div id="top-end">
-            <div id="top-end-top">
-              <h4>Top End Top</h4>
+            <div id="top-end-top" class="view">
+              <div class="badge lb-gvars overflow-hidden">G<br />L<br />O<br />B<br />A<br />L<br />.<br />Y<br />M<br />L<br /></div>
+              <div class="overflow-auto border">
+                <div id="gvars"></div>
+              </div>
             </div>
-            <div id="top-end-bottom">
-              <h4>Top End Bottom</h4>
+            <div id="top-end-bottom" class="view">
+              <div class="badge lb-vars overflow-hidden">V<br />A<br />R<br />S<br />.<br />Y<br />M<br />L<br /></div>
+              <div class="overflow-auto border">
+                <div id="vars"></div>
+              </div>
             </div>
           </div>
         </div>
-        <div id="bottom" class="overflow-auto text-bg-info">
-          <div class="badge lb-template labels float-start">T<br />E<br />M<br />P<br />L<br />A<br />T<br />E<br />.<br />J<br />2<br /></div>
-          <div id="template"></div>
+        <div id="bottom" class="view">
+          <div class="badge lb-template overflow-hidden">T<br />E<br />M<br />P<br />L<br />A<br />T<br />E<br />.<br />J<br />2<br /></div>
+          <div class="overflow-auto border">
+            <div id="template"></div>
+          </div>
         </div>
       </div>
       <div id="footer" class="d-flex align-items-center p-2 text-bg-warning">
@@ -100,23 +107,26 @@
             direction: 'vertical',
             sizes: [50, 50],
             snapOffset: 0,
-            minSize: 120
+            minSize: 100
           });
 
           Split(['#top-start', '#top-end'], {
             direction: 'horizontal',
             sizes: [50, 50],
             snapOffset: 0,
-            minSize: 300
+            minSize: 100
           });
 
           Split(['#top-end-top', '#top-end-bottom'], {
             direction: 'vertical',
             sizes: [50, 50],
             snapOffset: 0,
-            minSize: 50
+            minSize: 25 
           });
 
+          cm6.createEditorView(document.getElementById('data'));
+          cm6.createEditorView(document.getElementById('gvars'));
+          cm6.createEditorView(document.getElementById('vars'));
           cm6.createEditorView(document.getElementById('template'));
         });
       })();
