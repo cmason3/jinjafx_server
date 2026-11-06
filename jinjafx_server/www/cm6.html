@@ -54,7 +54,7 @@
       }
     </style>
   </head>
-  <body>
+  <body class="d-none">
     <div id="main" class="container-fluid p-0">
       <div id="header" class="d-flex align-items-center p-2 text-bg-primary">
         <div>
@@ -103,7 +103,7 @@
         </div>
       </div>
     </div>
-    <script src="/0547c89c/libs/split.js/1.6.5/split.min.js"></script>
+    <script src="/1b58d6d5/libs/split.js/1.6.5/split.min.js"></script>
     <script src="/c6f67021/libs/bootstrap/5.3.8/js/bootstrap.bundle.min.js"></script>
     <script src="/656f7da3/js/cm6.bundle.min.js"></script>
     <script>
@@ -134,6 +134,10 @@
           cm6.createVarsView(document.getElementById('gvars'));
           cm6.createVarsView(document.getElementById('vars'));
           cm6.createTemplateView(document.getElementById('template'));
+
+          setTimeout(() => {
+            document.body.classList.remove('d-none');
+          }, 250);
         });
       })();
     </script>
