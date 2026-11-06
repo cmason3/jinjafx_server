@@ -130,13 +130,14 @@
             minSize: 25 
           });
 
-          cm6.createDataView(document.getElementById('data'));
-          cm6.createVarsView(document.getElementById('gvars'));
-          cm6.createVarsView(document.getElementById('vars'));
-          cm6.createTemplateView(document.getElementById('template'));
+          let data = cm6.createDataView(document.getElementById('data'));
+          let gvars = cm6.createVarsView(document.getElementById('gvars'));
+          let vars = cm6.createVarsView(document.getElementById('vars'));
+          let template = cm6.createTemplateView(document.getElementById('template'));
 
           setTimeout(() => {
             document.body.classList.remove('d-none');
+            template.focus();
           }, 250);
         });
       })();
