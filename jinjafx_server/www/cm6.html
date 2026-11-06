@@ -38,12 +38,14 @@
         background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
         cursor: row-resize;
       }
-      .lb-data, .lb-vars {
+      .labels {
         color: white;
+        line-height: 0.8rem;
+      }
+      .lb-data, .lb-vars {
         background: #00a9d8;
       }
       .lb-gvars, .lb-template {
-        color: white;
         background: #008bd9;
       }
       .cm-editor {
@@ -67,20 +69,20 @@
       <div id="content" class="p-2">
         <div id="top" class="d-flex">
           <div id="top-start" class="view">
-            <div class="badge lb-data overflow-hidden">D<br />A<br />T<br />A<br />.<br />C<br />S<br />V<br /></div>
+            <div class="badge labels lb-data overflow-hidden">D<br />A<br />T<br />A<br />.<br />C<br />S<br />V<br /></div>
             <div class="overflow-auto border">
               <div id="data" class="h-100"></div>
             </div>
           </div>
           <div id="top-end">
             <div id="top-end-top" class="view">
-              <div class="badge lb-gvars overflow-hidden">G<br />L<br />O<br />B<br />A<br />L<br />.<br />Y<br />M<br />L<br /></div>
+              <div class="badge labels lb-gvars overflow-hidden">G<br />L<br />O<br />B<br />A<br />L<br />.<br />Y<br />M<br />L<br /></div>
               <div class="overflow-auto border">
                 <div id="gvars" class="h-100"></div>
               </div>
             </div>
             <div id="top-end-bottom" class="view">
-              <div class="badge lb-vars overflow-hidden">V<br />A<br />R<br />S<br />.<br />Y<br />M<br />L<br /></div>
+              <div class="badge labels lb-vars overflow-hidden">V<br />A<br />R<br />S<br />.<br />Y<br />M<br />L<br /></div>
               <div class="overflow-auto border">
                 <div id="vars" class="h-100"></div>
               </div>
@@ -88,7 +90,7 @@
           </div>
         </div>
         <div id="bottom" class="view">
-          <div class="badge lb-template overflow-hidden">T<br />E<br />M<br />P<br />L<br />A<br />T<br />E<br />.<br />J<br />2<br /></div>
+          <div class="badge labels lb-template overflow-hidden">T<br />E<br />M<br />P<br />L<br />A<br />T<br />E<br />.<br />J<br />2<br /></div>
           <div class="overflow-auto border">
             <div id="template" class="h-100"></div>
           </div>
