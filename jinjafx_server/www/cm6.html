@@ -9,16 +9,19 @@
       * {
         font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
       }
+      #main {
+        background-color: #eee;
+      }
       #header {
-        height: 75px;
+        height: 70px;
       }
       #content {
         min-height: 250px;
-        height: calc(100vh - 75px - 50px);
-        font-size: small;
+        height: calc(100vh - 70px - 70px);
+        font-size: 14px;
       }
       #footer {
-        height: 50px;
+        height: 70px;
       }
       .view {
         display: grid;
@@ -40,7 +43,8 @@
       }
       .labels {
         color: white;
-        line-height: 0.8rem;
+        font-size: 10px;
+        line-height: 0.7rem;
       }
       .lb-data, .lb-vars {
         background: #00a9d8;
@@ -50,6 +54,7 @@
       }
       .cm-editor {
         height: 100%;
+        background: white;
       }
       .cm-gutter {
         min-width: 25px;
@@ -68,20 +73,20 @@
       </div>
       <div id="content" class="p-2">
         <div id="top" class="d-flex">
-          <div id="top-start" class="view">
+          <div id="cdata" class="view">
             <div class="badge labels lb-data overflow-hidden">D<br />A<br />T<br />A<br />.<br />C<br />S<br />V<br /></div>
             <div class="overflow-auto border">
               <div id="data" class="h-100"></div>
             </div>
           </div>
-          <div id="top-end">
-            <div id="top-end-top" class="view">
+          <div id="cvars">
+            <div id="xgvars" class="view d-none">
               <div class="badge labels lb-gvars overflow-hidden">G<br />L<br />O<br />B<br />A<br />L<br />.<br />Y<br />M<br />L<br /></div>
               <div class="overflow-auto border">
-                <div id="gvars" class="h-100"></div>
+                <div id="t_gvars" class="h-100"></div>
               </div>
             </div>
-            <div id="top-end-bottom" class="view">
+            <div id="xlvars" class="view">
               <div class="badge labels lb-vars overflow-hidden">V<br />A<br />R<br />S<br />.<br />Y<br />M<br />L<br /></div>
               <div class="overflow-auto border">
                 <div id="vars" class="h-100"></div>
@@ -89,7 +94,7 @@
             </div>
           </div>
         </div>
-        <div id="bottom" class="view">
+        <div id="ctemplate" class="view">
           <div class="badge labels lb-template overflow-hidden">T<br />E<br />M<br />P<br />L<br />A<br />T<br />E<br />.<br />J<br />2<br /></div>
           <div class="overflow-auto border">
             <div id="template" class="h-100"></div>
@@ -105,35 +110,37 @@
         </div>
       </div>
     </div>
-    <script src="/1b58d6d5/libs/split.js/1.6.5/split.min.js"></script>
+    <script src="/ac3341f7/libs/split.js/1.6.5a/split.js"></script>
     <script src="/c6f67021/libs/bootstrap/5.3.8/js/bootstrap.bundle.min.js"></script>
     <script src="/656f7da3/js/cm6.bundle.min.js"></script>
     <script>
       (() => {
         window.addEventListener('load', () => {
-          Split(['#top', '#bottom'], {
+          Split(['#top', '#ctemplate'], {
             direction: 'vertical',
-            sizes: [50, 50],
+            sizes: [40, 60],
             snapOffset: 0,
             minSize: 100
           });
 
-          Split(['#top-start', '#top-end'], {
+          Split(['#cdata', '#cvars'], {
             direction: 'horizontal',
             sizes: [50, 50],
             snapOffset: 0,
-            minSize: 100
+            minSize: 200
           });
 
-          Split(['#top-end-top', '#top-end-bottom'], {
+          /*
+          Split(['#xgvars', '#xlvars'], {
             direction: 'vertical',
             sizes: [50, 50],
             snapOffset: 0,
             minSize: 25 
           });
+          */
 
           let data = cm6.createDataView(document.getElementById('data'));
-          let gvars = cm6.createVarsView(document.getElementById('gvars'));
+          let gvars = cm6.createVarsView(document.getElementById('t_gvars'));
           let vars = cm6.createVarsView(document.getElementById('vars'));
           let template = cm6.createTemplateView(document.getElementById('template'));
 
