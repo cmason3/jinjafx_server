@@ -9,6 +9,18 @@
       * {
         font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
       }
+      html {
+        font-size: 14px;
+      }
+      textarea {
+        resize: none;
+      }
+      a:link {
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
       #main {
         background-color: #eee;
       }
@@ -18,7 +30,6 @@
       #content {
         min-height: 250px;
         height: calc(100vh - 70px - 70px);
-        font-size: 14px;
       }
       #footer {
         height: 70px;
@@ -47,66 +58,137 @@
         line-height: 0.7rem;
       }
       .lb-data, .lb-vars {
-        background: #00a9d8;
+        background-color: #00a9d8;
       }
       .lb-gvars, .lb-template {
-        background: #008bd9;
+        background-color: #008bd9;
       }
       .cm-editor {
         height: 100%;
-        background: white;
+        background-color: white;
       }
       .cm-gutter {
         min-width: 25px;
+      }
+      .info {
+        position: absolute;
+        z-index: 2;
+        right: 15px;
+        top: 15px;
+        bottom: 15px;
+        width: 50%;
+        visibility: hidden;
+      }
+      .info-inner {
+        border-radius: 0.5rem;
+        border: 0.5px solid #cc0;
+        box-shadow: 10px 10px 8px #888;
+        background-color: #ffffcc;
+        padding: 10px;
+        overflow-y: auto;
+        max-height: 100%;
+      }
+      .fade-out {
+        opacity: 0;
+        visibility: hidden;
+        transition: visibility 0s linear 500ms, opacity 500ms;
       }
     </style>
   </head>
   <body class="d-none">
     <div id="main" class="container-fluid p-0">
-      <div id="header" class="d-flex align-items-center p-2 text-bg-primary">
+      <div id="header" class="d-flex align-items-center p-3">
         <div>
-          <h4>Header 1</h4>
+          <a href="/" tabindex="-1">
+            <svg width="48" height="48" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+              <rect x="32" y="32" width="250" height="250" fill="#0057b8" stroke="#001f3f" />
+              <rect x="304" y="162" width="120" height="120" fill="#0057b8" stroke="#001f3f" />
+              <rect x="142" y="304" width="140" height="140" fill="#0057b8" stroke="#001f3f" />
+              <rect x="304" y="304" width="177" height="177" fill="#0057b8" stroke="#001f3f" />
+            </svg>
+          </a>
+        </div>
+        <div>
+          <h5 class="m-0 ms-2"><a class="text-decoration-none text-reset" href="/" tabindex="-1">
+            <span class="fw-bold">JinjaFx</span><br />
+            <span class="small text-black ms-2">Jinja2&nbsp;Templating&nbsp;Tool</span>
+          </a></h5>
         </div>
         <div class="ms-auto">
           <h4>Header 2</h4>
         </div>
       </div>
-      <div id="content" class="p-2">
+      <div id="content" class="ps-3 pe-3">
         <div id="top" class="d-flex">
           <div id="cdata" class="view">
             <div class="badge labels lb-data overflow-hidden">D<br />A<br />T<br />A<br />.<br />C<br />S<br />V<br /></div>
-            <div class="overflow-auto border">
+            <div class="overflow-auto border position-relative">
               <div id="data" class="h-100"></div>
             </div>
+            <!--
+            <div class="position-relative">
+              <textarea id="data"></textarea>
+            </div>
+            -->
           </div>
           <div id="cvars">
             <div id="xgvars" class="view d-none">
               <div class="badge labels lb-gvars overflow-hidden">G<br />L<br />O<br />B<br />A<br />L<br />.<br />Y<br />M<br />L<br /></div>
-              <div class="overflow-auto border">
+              <div class="overflow-auto border position-relative">
                 <div id="t_gvars" class="h-100"></div>
               </div>
+              <!--
+              <div class="position-relative">
+                <textarea id="t_gvars"></textarea>
+              </div>
+              -->
             </div>
             <div id="xlvars" class="view">
               <div class="badge labels lb-vars overflow-hidden">V<br />A<br />R<br />S<br />.<br />Y<br />M<br />L<br /></div>
-              <div class="overflow-auto border">
+              <div class="overflow-auto border position-relative">
                 <div id="vars" class="h-100"></div>
               </div>
+              <!--
+              <div class="position-relative">
+                <textarea id="vars"></textarea>
+              </div>
+              -->
             </div>
           </div>
         </div>
         <div id="ctemplate" class="view">
           <div class="badge labels lb-template overflow-hidden">T<br />E<br />M<br />P<br />L<br />A<br />T<br />E<br />.<br />J<br />2<br /></div>
-          <div class="overflow-auto border">
+
+          <div class="overflow-auto border position-relative">
             <div id="template" class="h-100"></div>
+            <span id="template_info" class="info">
+              <div class="info-inner">
+                <h3>Outputs</h3><hr>
+                <p>JinjaFx can create different outputs from the same template using the following syntax:</p>
+              </div>
+            </span>
           </div>
+
+          <!--
+          <div class="position-relative">
+            <textarea id="template" class="h-100 w-100"></textarea>
+            <span id="template_info" class="info">
+              <div class="info-inner">
+                <h3>Outputs</h3><hr>
+                <p>JinjaFx can create different outputs from the same template using the following syntax:</p>
+              </div>
+            </span>
+          </div>
+          -->
+
         </div>
       </div>
-      <div id="footer" class="d-flex align-items-center p-2 text-bg-warning">
+      <div id="footer" class="d-flex align-items-center p-3">
         <div>
-          <h4>Footer 1</h4>
+          <h5 id="status"></h5>
         </div>
         <div class="ms-auto">
-          <h4>Footer 2</h4>
+          <h6>JinjaFx v{{ jinjafx.version }}<br /><a class="small" href="https://github.com/cmason3/jinjafx" tabindex="-1" rel="noopener" target="_blank">https://github.com/cmason3/jinjafx</a></h6>
         </div>
       </div>
     </div>
@@ -115,6 +197,35 @@
     <script src="/656f7da3/js/cm6.bundle.min.js"></script>
     <script>
       (() => {
+        var tid = 0;
+        var sobj = undefined;
+
+        function quote(str) {
+          str = str.replace(/&/g, "&amp;");
+          str = str.replace(/>/g, "&gt;");
+          str = str.replace(/</g, "&lt;");
+          str = str.replace(/"/g, "&quot;");
+          str = str.replace(/'/g, "&apos;");
+          return str;
+        }
+
+        function set_status(color, title, message, delay, mline) {
+          clearTimeout(tid);
+          if (typeof delay !== 'undefined') {
+            tid = setTimeout(function() { sobj.innerHTML = "" }, delay);
+          
+          } else {
+            tid = setTimeout(function() { sobj.innerHTML = "" }, 5000);
+          }
+          sobj.style.color = color;
+          if (typeof mline !== 'undefined') {
+            sobj.innerHTML = "<strong>" + quote(title) + "</strong><br /><span class=\"small\">" + quote(message) + "</span>";
+          
+          } else {
+            sobj.innerHTML = "<strong>" + quote(title) + "</strong> " + quote(message);
+          }
+        }
+
         window.addEventListener('load', () => {
           Split(['#top', '#ctemplate'], {
             direction: 'vertical',
@@ -144,10 +255,19 @@
           let vars = cm6.createVarsView(document.getElementById('vars'));
           let template = cm6.createTemplateView(document.getElementById('template'));
 
+          sobj = document.getElementById('status');
+
           setTimeout(() => {
             document.body.classList.remove('d-none');
+            document.getElementById('template_info').style.visibility = 'visible';
             template.focus();
+            set_status('green', 'Revision 1', 'Updated a long time ago', 30000, true);
           }, 250);
+
+          setTimeout(() => {
+            document.getElementById('template_info').classList.add('fade-out');
+            document.getElementById('template_info').style.zIndex = -1000;
+          }, 10000);
         });
       })();
     </script>
