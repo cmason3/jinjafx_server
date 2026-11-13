@@ -1,3 +1,9 @@
+* {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+html {
+  font-size: 14px;
+}
 body {
   color: rgb(179, 176, 214);
   background: rgb(41, 40, 59);

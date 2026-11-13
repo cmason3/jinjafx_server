@@ -117,6 +117,9 @@ a:hover {
 .table {
   --bs-table-bg: transparent;
 }
+.fs-85 {
+  font-size: 85%;
+}
 .info {
   position: absolute;
   z-index: 2;

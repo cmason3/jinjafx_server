@@ -1878,6 +1878,7 @@ function getStatusText(code) {
 
       document.getElementById('header').onclick = onDataBlur;
       document.getElementById('footer').onclick = onDataBlur;
+      document.getElementById('template_info').onclick = onDataBlur;
 
       document.getElementById("csv").onclick = function() {
         window.cmData.getWrapperElement().style.display = 'block';

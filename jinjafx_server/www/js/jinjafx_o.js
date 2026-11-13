@@ -20,6 +20,7 @@
 
       sobj = document.getElementById("ostatus");
 
+      /*
       document.getElementById('copy').onclick = function() {
         sobj.innerHTML = '';
         try {
@@ -136,6 +137,7 @@
         var t = document.getElementById('t_' + document.querySelector('.tab-content > .active').getAttribute('id'));
         t.focus();
       };
+      */
 
       if (Object.keys(dt).length !== 0) {
         var _qs = [];
@@ -187,7 +189,10 @@
                     if (sort_keys.hasOwnProperty(o)) {
                       if (sort_keys[o] != '0') {
                         document.title = "Error";
-                        document.body.innerHTML = "<div id=\"status\" class=\"alert alert-danger\"><strong><h4>JinjaFx Error</h4></strong>Duplicate Outputs with Different Numerical Sort Keys is Prohibited</div>";
+                        document.getElementById('status').classList.add('alert-danger');
+                        document.getElementById('status').classList.remove('alert-primary');
+                        document.getElementById('status').innerHTML = '<h4>JinjaFx Error</h4><pre>Duplicate Outputs with Different Numerical Sort Keys is Prohibited</pre>';
+                        document.getElementById('status').classList.remove('wait');
                         return;
                       }
                     }
@@ -201,7 +206,10 @@
                       if (sort_keys.hasOwnProperty(m[2])) {
                         if (sort_keys[m[2]] != m[1]) {
                           document.title = "Error";
-                          document.body.innerHTML = "<div id=\"status\" class=\"alert alert-danger\"><strong><h4>JinjaFx Error</h4></strong>Duplicate Outputs with Different Numerical Sort Keys is Prohibited</div>";
+                          document.getElementById('status').classList.add('alert-danger');
+                          document.getElementById('status').classList.remove('alert-primary');
+                          document.getElementById('status').innerHTML = '<h4>JinjaFx Error</h4><pre>Duplicate Outputs with Different Numerical Sort Keys is Prohibited</pre>';
+                          document.getElementById('status').classList.remove('wait');
                           return;
                         }
                       }
@@ -274,26 +282,18 @@
 
                 sessionStorage.setItem('jinjafx.outputs', JSON.stringify(outputs));
 
-                document.body.style.display = 'none';
-                document.getElementById('status').style.display = 'none';
+                document.getElementById('status').classList.add('d-none');
                 document.getElementById('summary').innerHTML = 'Generated at ' + dayjs().format('HH:mm') + ' on ' + dayjs().format('Do MMMM YYYY') + '<br />in ' + Math.ceil(obj.elapsed).toLocaleString() + ' milliseconds';
-                document.getElementById('tabs').innerHTML = tabs;
-                document.getElementById('nav-links').innerHTML = links;
-                document.getElementById('wrap').classList.remove('d-none');
-                document.getElementById('footer').classList.remove('d-none');
+                // document.getElementById('tabs').innerHTML = tabs;
+                // document.getElementById('nav-links').innerHTML = links;
 
                 document.title = 'Outputs' + ((dataset != 'Default') ? ' (' + dataset + ')' : '');
 
                 if (oc > 1) {
-                  document.getElementById('pills').classList.remove('d-none');
+                  // document.getElementById('pills').classList.remove('d-none');
                 }
 
-                window.onresize = function() {
-                  document.getElementById("row").style.height = (window.innerHeight - 200) + "px";
-                };
-
-                window.onresize();
-                document.body.style.display = 'block';
+                document.getElementById('main').classList.remove('d-none');
 
                 function toggle_docx() {
                   var e = document.getElementsByClassName('nav-link active');
@@ -333,25 +333,37 @@
               }
               else {
                 document.title = "Error";
-                document.body.innerHTML = "<div id=\"status\" class=\"alert alert-danger\"><strong><h4>JinjaFx Error</h4></strong><pre>"+ window.opener.quote(obj.error) + "</pre></div>";
+                document.getElementById('status').classList.add('alert-danger');
+                document.getElementById('status').classList.remove('alert-primary');
+                document.getElementById('status').innerHTML = '<h4>JinjaFx Error</h4><pre>' + window.opener.quote(obj.error) + '</pre>';
+                document.getElementById('status').classList.remove('wait');
               }
             }
             catch (e) {
               console.log(e);
               document.title = "Error";
-              document.body.innerHTML = "<div id=\"status\" class=\"alert alert-danger\"><strong><h4>Internal Error</h4></strong>" + window.opener.quote(e) + "</div>";
+              document.getElementById('status').classList.add('alert-danger');
+              document.getElementById('status').classList.remove('alert-primary');
+              document.getElementById('status').innerHTML = '<h4>Internal Error</h4><pre>' + window.opener.quote(e) + '</pre>';
+              document.getElementById('status').classList.remove('wait');
             }
           }
           else {
             document.title = "Error";
             var sT = (this.statusText.length == 0) ? window.opener.getStatusText(this.status) : this.statusText;
-            document.body.innerHTML = "<div id=\"status\" class=\"alert alert-danger\"><strong><h4>HTTP ERROR " + this.status + "</h4></strong>"+ sT + "</div>";
+            document.getElementById('status').classList.add('alert-danger');
+            document.getElementById('status').classList.remove('alert-primary');
+            document.getElementById('status').innerHTML = '<h4>HTTP ERROR ' + this.status + '</h4><pre>' + window.opener.quote(sT) + '</pre>';
+            document.getElementById('status').classList.remove('wait');
           }
         };
         xHR.timeout = 0;
         xHR.onerror = function() {
           document.title = "Error";
-          document.body.innerHTML = "<div id=\"status\" class=\"alert alert-danger\"><strong><h4>JinjaFx Error</h4></strong>XMLHttpRequest.onError()</div>";
+          document.getElementById('status').classList.add('alert-danger');
+          document.getElementById('status').classList.remove('alert-primary');
+          document.getElementById('status').innerHTML = '<h4>JinjaFx Error</h4><pre>XMLHttpRequest.onError()</pre>';
+          document.getElementById('status').classList.remove('wait');
         };
         xHR.setRequestHeader("Content-Type", "application/json");
 
@@ -366,12 +378,18 @@
       }
       else {
         document.title = "Error";
-        document.body.innerHTML = "<div id=\"status\" class=\"alert alert-danger\"><strong><h4>JinjaFx Error</h4></strong>DataTemplate Expired</div>";
+        document.getElementById('status').classList.add('alert-danger');
+        document.getElementById('status').classList.remove('alert-primary');
+        document.getElementById('status').innerHTML = '<h4>JinjaFx Error</h4><pre>DataTemplate Expired</pre>';
+        document.getElementById('status').classList.remove('wait');
       }
     }
     else {
       document.title = "Error";
-      document.body.innerHTML = "<div id=\"status\" class=\"alert alert-danger\"><strong><h4>JinjaFx Error</h4></strong>DataTemplate Expired</div>";
+      document.getElementById('status').classList.add('alert-danger');
+      document.getElementById('status').classList.remove('alert-primary');
+      document.getElementById('status').innerHTML = '<h4>JinjaFx Error</h4><pre>DataTemplate Expired</pre>';
+      document.getElementById('status').classList.remove('wait');
     }
   };
 })();

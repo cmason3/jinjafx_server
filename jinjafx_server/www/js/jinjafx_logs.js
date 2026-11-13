@@ -1,5 +1,5 @@
 (function() {
-  var container = document.querySelector('pre');
+  var container = null;
   var lastEventId = null;
 
   function quote(str) {
@@ -25,6 +25,7 @@
 
   window.addEventListener('load', () => {
     let qs = new URLSearchParams(window.location.search);
+    container = document.querySelector('pre');
 
     if (qs.has('key')) {
       document.cookie = 'JinjaFx-WebLog-Key=' + qs.get('key') + '; max-age=86400; path=/';

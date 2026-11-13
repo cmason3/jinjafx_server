@@ -104,7 +104,7 @@
         }
       }
 
-      document.getElementById('container').innerHTML = dtx;
+      document.querySelector('pre').innerHTML = dtx;
 
       if (window.showSaveFilePicker) {
         document.getElementById('saveas').onclick = async() => {

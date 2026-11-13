@@ -2,32 +2,34 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=1536, user-scalable=no">
     <title>Generating...</title>
     <link rel="shortcut icon" href="/874f2915/jinjafx.png">
     <link rel="stylesheet" href="/8f8173cb/libs/bootstrap/5.3.8/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/ea73c0c8/css/jinjafx.css">
-    <link rel="stylesheet" href="/6239af43/css/jinjafx_o.css">
+    <link rel="stylesheet" href="/c37846ca/css/jinjafx_o.css">
   </head>
   <body>
-    <div id="status" class="alert alert-primary wait fw-bold">Generating Output...</div>
-    <div id="wrap" class="d-none">
-      <div id="header" class="p-3">
-        <a href="/">
-          <svg class="float-start me-10" width="48" height="48" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-            <rect x="32" y="32" width="250" height="250" fill="#0057b8" stroke="#001f3f" />
-            <rect x="304" y="162" width="120" height="120" fill="#0057b8" stroke="#001f3f" />
-            <rect x="142" y="304" width="140" height="140" fill="#0057b8" stroke="#001f3f" />
-            <rect x="304" y="304" width="177" height="177" fill="#0057b8" stroke="#001f3f" />
-          </svg>
-        </a>
-        <h5 id="title">
-          <a class="text-decoration-none text-reset" href="/">
-            <span class="fw-bold">JinjaFx</span><br />
-            <span class="small text-black">&nbsp;Jinja2&nbsp;Templating&nbsp;Tool</span>
+    <div id="status" class="container-fluid m-0 alert alert-primary wait min-vh-100">
+      <h4>Generating Output...</h4>
+    </div>
+    <div id="main" class="container-fluid p-0 d-none">
+      <div id="header" class="d-flex align-items-center p-3">
+        <div>
+          <a href="/" tabindex="-1">
+            <svg width="48" height="48" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+              <rect x="32" y="32" width="250" height="250" fill="#0057b8" stroke="#001f3f" />
+              <rect x="304" y="162" width="120" height="120" fill="#0057b8" stroke="#001f3f" />
+              <rect x="142" y="304" width="140" height="140" fill="#0057b8" stroke="#001f3f" />
+              <rect x="304" y="304" width="177" height="177" fill="#0057b8" stroke="#001f3f" />
+            </svg>
           </a>
-        </h5>
-        <div class="btn-toolbar ms-auto d-flex" role="group">
+        </div>
+        <div>
+          <h5 class="m-0 ms-2"><a class="text-decoration-none text-reset" href="/" tabindex="-1">
+            <span class="fw-bold">JinjaFx</span><br />
+            <span class="small text-black ms-2">Jinja2&nbsp;Templating&nbsp;Tool</span>
+          </a></h5>
+        </div>
+        <div id="buttons" class="btn-toolbar ms-auto d-flex align-items-center" role="group">
           <button id="copy" class="btn btn-secondary text-white me-2" type="button" title="Copy Output to Clipboard">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
@@ -58,29 +60,35 @@
             </svg>&nbsp;Download
           </button>
         </div>
-        <div class="clearfix"></div>
       </div>
-      <div id="main" class="container-fluid">
-        <div id="content">
-          <div id="row" class="row g-0">
-            <div class="col h-100">
-              <div id="tabs" class="tab-content h-100"></div>
-            </div>
-            <div id="pills" class="col-auto h-100 ms-10 d-none">
-              <h4>&nbsp;</h4>
-              <div class="nosb h-100">
-                <ul id="nav-links" class="nav nav-pills flex-column"></ul>
-              </div>
+      <div id="content" class="ps-3 pe-3 text-bg-danger">
+      <!--
+        <div id="tabs" class="tab-content"></div>
+        <div id="pills" class="d-none">
+          <div class="nosb">
+            <ul id="nav-links" class="nav nav-pills flex-column"></ul>
+          </div>
+        </div>
+        <div id="row" class="row g-0 h-100">
+          <div class="col h-100">
+            <div id="tabs" class="tab-content h-100"></div>
+          </div>
+          <div id="pills" class="col-auto h-100 ms-10 d-none">
+            <h4>&nbsp;</h4>
+            <div class="nosb h-100">
+              <ul id="nav-links" class="nav nav-pills flex-column"></ul>
             </div>
           </div>
         </div>
+      -->
       </div>
-      <div id="push"></div>
-    </div>
-    <div id="footer" class="d-none">
-      <div class="container-fluid">
-        <h5 id="ostatus" class="float-start"></h5>
-        <span id="summary" class="float-end text-end fs-85"></span>
+      <div id="footer" class="d-flex align-items-center p-3">
+        <div>
+          <h5 id="ostatus"></h5>
+        </div>
+        <div class="ms-auto text-end">
+          <span id="summary" class="fs-85"></span>
+        </div>
       </div>
     </div>
     <div id="warning_modal" class="modal fade" tabindex="-1" role="dialog">
@@ -104,6 +112,6 @@
     <script src="/0198dd0b/libs/dayjs/1.11.23/dayjs.min.js"></script>
     <script src="/731a8c82/libs/dayjs/1.11.23/plugin/advancedFormat.min.js"></script>
     <script src="/7f839b2d/libs/jszip/3.10.2/jszip.min.js"></script>
-    <script src="/adef2f29/js/jinjafx_o.js"></script>
+    <script src="/4578701b/js/jinjafx_o.js"></script>
   </body>
 </html>
