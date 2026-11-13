@@ -1,5 +1,10 @@
 ## CHANGELOG
 
+### [27.1.0] - In Development
+- Lots of internal CSS and layout changes in preparation for the transition from CodeMirror 5 to CodeMirror 6
+- Fixed an issue in `split.js` where it wouldn't size panes correctly if the parent element was hidden - https://github.com/nathancahill/split/issues/798
+- Updated Pandoc to 3.14 in Dockerfile
+
 ### [26.7.1] - November 5, 2026
 - Fixed a Content-Security-Policy error with CloudFlare
 - Reduced `maxHighlightLength` to 512 from the default of 10,000 to make it more responsive with long lines
@@ -596,6 +601,7 @@
 - Initial release
 
 
+[27.1.0]: https://github.com/cmason3/jinjafx_server/compare/26.7.1...27.1.0
 [26.7.1]: https://github.com/cmason3/jinjafx_server/compare/26.7.0...26.7.1
 [26.7.0]: https://github.com/cmason3/jinjafx_server/compare/26.6.2...26.7.0
 [26.6.2]: https://github.com/cmason3/jinjafx_server/compare/26.6.1...26.6.2
