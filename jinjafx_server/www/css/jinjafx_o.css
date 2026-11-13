@@ -17,18 +17,22 @@ html {
 #footer {
   height: 70px;
 }
-.wait, .wait * {
-  cursor: wait !important;
-}
 a:link {
   text-decoration: none;
 }
 a:hover {
   text-decoration: underline;
 }
+.wait, .wait * {
+  cursor: wait !important;
+}
 .btn:focus, .btn:active:focus {
   outline: none !important;
   box-shadow: none !important;
+}
+.outputs {
+  display: grid;
+  grid-template-columns: auto max-content;
 }
 textarea.output {
   font-size: 12px;
@@ -67,6 +71,7 @@ pre#print_pre {
 .fs-85 {
   font-size: 85%;
 }
+/*
 .nosb {
   overflow-y: scroll;
   scrollbar-width: none;
@@ -75,6 +80,7 @@ pre#print_pre {
 .nosb::-webkit-scrollbar {
   width: 0px;
 }
+*/
 @media print {
   div#header, div#footer {
     display: none;
