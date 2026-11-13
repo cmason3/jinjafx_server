@@ -1318,7 +1318,7 @@ function getStatusText(code) {
 
   function remove_info() {
     document.getElementById('template_info').classList.add('fade-out');
-    document.getElementById('template_info').style.zIndex = 'auto';
+    document.getElementById('template_info').style.zIndex = -1000;
     document.getElementById('stemplates').style.visibility = 'visible';
   }
 
@@ -1876,7 +1876,8 @@ function getStatusText(code) {
         }).show();
       };
 
-      document.getElementById('main').onclick = onDataBlur;
+      document.getElementById('header').onclick = onDataBlur;
+      document.getElementById('footer').onclick = onDataBlur;
 
       document.getElementById("csv").onclick = function() {
         window.cmData.getWrapperElement().style.display = 'block';
