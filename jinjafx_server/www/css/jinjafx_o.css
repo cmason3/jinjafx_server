@@ -1,3 +1,29 @@
+@media print {
+  #main {
+    display: none;
+  }
+  #print_pre {
+    display: block;
+  }
+}
+textarea.joutput {
+  font-size: 12px;
+  resize: none;
+  padding: 8px;
+  outline: none;
+}
+iframe.joutput {
+  padding: 0px;
+}
+#pills {
+  min-width: 200px;
+}
+#print_pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  padding: 10px;
+  display: none;
+}
 .wait, .wait * {
   cursor: wait !important;
 }
@@ -19,40 +45,14 @@
   height: 100%;
   width: 100%;
 }
-textarea.joutput {
-  font-size: 12px;
-  resize: none;
-  padding: 8px;
-  outline: none;
-}
-iframe.joutput {
-  padding: 0px;
-}
-#print_pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  padding: 10px;
-  display: none;
-}
 .directory {
   font-weight: bold;
   margin-bottom: 0px;
-}
-#pills {
-  min-width: 200px;
 }
 .ms-10 {
   margin-left: 10px;
 }
 .hide {
   display: none !important;
-}
-@media print {
-  #main {
-    display: none;
-  }
-  #print_pre {
-    display: block;
-  }
 }
 
