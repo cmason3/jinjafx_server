@@ -1,3 +1,6 @@
+h4 {
+  font-weight: bold;
+}
 .wait, .wait * {
   cursor: wait !important;
 }
