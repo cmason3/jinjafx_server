@@ -20,7 +20,6 @@
 
       sobj = document.getElementById("ostatus");
 
-      /*
       document.getElementById('copy').onclick = function() {
         sobj.innerHTML = '';
         try {
@@ -137,7 +136,6 @@
         var t = document.getElementById('t_' + document.querySelector('.tab-content > .active').getAttribute('id'));
         t.focus();
       };
-      */
 
       if (Object.keys(dt).length !== 0) {
         var _qs = [];
