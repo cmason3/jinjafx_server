@@ -1,34 +1,5 @@
-* {
-  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-}
-html {
-  font-size: 14px;
-}
-#main {
-  background-color: #eee;
-}
-#header {
-  height: 70px;
-}
-#content {
-  min-height: 250px;
-  height: calc(100vh - 70px - 70px);
-}
-#footer {
-  height: 70px;
-}
-a:link {
-  text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
-}
 .wait, .wait * {
   cursor: wait !important;
-}
-.btn:focus, .btn:active:focus {
-  outline: none !important;
-  box-shadow: none !important;
 }
 .outputs {
   display: grid;
@@ -57,9 +28,10 @@ textarea.joutput {
 iframe.joutput {
   padding: 0px;
 }
-pre#print_pre {
+#print_pre {
   white-space: pre-wrap;
   word-wrap: break-word;
+  padding: 10px;
   display: none;
 }
 .directory {
@@ -72,8 +44,8 @@ pre#print_pre {
 .ms-10 {
   margin-left: 10px;
 }
-.fs-85 {
-  font-size: 85%;
+.hide {
+  display: none !important;
 }
 .nosb {
   overflow-y: scroll;
@@ -84,10 +56,10 @@ pre#print_pre {
   width: 0px;
 }
 @media print {
-  div#header, div#footer {
+  #main {
     display: none;
   }
-  pre#print_pre {
+  #print_pre {
     display: block;
   }
 }

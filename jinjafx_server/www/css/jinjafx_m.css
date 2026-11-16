@@ -1,32 +1,7 @@
-* {
-  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-}
-html {
-  font-size: 14px;
-}
 textarea {
   height: 100%;
   width: 100%;
   resize: none;
-}
-a:link {
-  text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
-}
-#main {
-  background-color: #eee;
-}
-#header {
-  height: 70px;
-}
-#content {
-  min-height: 250px;
-  height: calc(100vh - 70px - 70px);
-}
-#footer {
-  height: 70px;
 }
 #overlay {
   position: fixed;
@@ -117,9 +92,6 @@ a:hover {
 .table {
   --bs-table-bg: transparent;
 }
-.fs-85 {
-  font-size: 85%;
-}
 .info {
   position: absolute;
   z-index: 2;
@@ -171,35 +143,6 @@ a:hover {
 }
 .caret-off::after {
   display: none !important;
-}
-.btn-primary {
-  --bs-btn-color: #fff;
-  --bs-btn-disabled-color: #fff;
-  --bs-btn-hover-color: #fff;
-  --bs-btn-active-color: #fff;
-  --bs-btn-bg: #0057b8;
-  --bs-btn-disabled-bg: #0057b8;
-  --bs-btn-hover-bg: #004a9c;
-  --bs-btn-active-bg: #004693;
-  --bs-btn-border-color: #0057b8;
-  --bs-btn-disabled-border-color: #0057b8;
-  --bs-btn-hover-border-color: #004693;
-  --bs-btn-active-border-color: #00418a;
-  --bs-btn-focus-shadow-rgb: 38, 112, 195;
-}
-.btn-warn-opaque:disabled {
-  color: #535353 !important;
-  border-color: #ffd75e !important;
-  background-color: #ffd75e !important;
-  opacity: 1 !important;
-}
-.btn-curved {
-  border-top-left-radius: 0.3rem !important;
-  border-bottom-left-radius: 0.3rem !important;
-}
-.btn:focus, .btn:active:focus {
-  outline: none !important;
-  box-shadow: none !important;
 }
 .code-block {
   border: 1px dashed gray;

@@ -1,9 +1,3 @@
-* {
-  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-}
-html {
-  font-size: 14px;
-}
 pre {
   height: 100%;
   white-space: pre-wrap;
@@ -15,8 +9,4 @@ pre {
   z-index: 2;
   right: 12px;
   top: 12px;
-}
-.btn:focus, .btn:active:focus {
-  outline: none !important;
-  box-shadow: none !important;
 }
