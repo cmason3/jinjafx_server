@@ -189,7 +189,7 @@
                         document.title = "Error";
                         document.getElementById('status').classList.add('alert-danger');
                         document.getElementById('status').classList.remove('alert-primary');
-                        document.getElementById('status').innerHTML = '<h4>JinjaFx Error</h4><pre>Duplicate Outputs with Different Numerical Sort Keys is Prohibited</pre>';
+                        document.getElementById('status').innerHTML = '<h4 class="fw-bold">JinjaFx Error</h4><pre>Duplicate Outputs with Different Numerical Sort Keys is Prohibited</pre>';
                         document.getElementById('status').classList.remove('wait');
                         return;
                       }
@@ -206,7 +206,7 @@
                           document.title = "Error";
                           document.getElementById('status').classList.add('alert-danger');
                           document.getElementById('status').classList.remove('alert-primary');
-                          document.getElementById('status').innerHTML = '<h4>JinjaFx Error</h4><pre>Duplicate Outputs with Different Numerical Sort Keys is Prohibited</pre>';
+                          document.getElementById('status').innerHTML = '<h4 class="fw-bold">JinjaFx Error</h4><pre>Duplicate Outputs with Different Numerical Sort Keys is Prohibited</pre>';
                           document.getElementById('status').classList.remove('wait');
                           return;
                         }
@@ -237,10 +237,10 @@
 
                   tabs += '<div id="o' + oid + '" class="ocontainer tab-pane fade' + ((oid == 1) ? ' show active' : '') + '">';
                   if (dflag) {
-                    tabs += '<h4>' + e[e.length - 1] + '</h4>';
+                    tabs += '<h4 class="fw-bold">' + e[e.length - 1] + '</h4>';
                   }
                   else {
-                    tabs += '<h4>' + g + '</h4>';
+                    tabs += '<h4 class="fw-bold">' + g + '</h4>';
                   }
 
                   var tc = window.opener.d(obj.outputs[output]);
@@ -333,7 +333,7 @@
                 document.title = "Error";
                 document.getElementById('status').classList.add('alert-danger');
                 document.getElementById('status').classList.remove('alert-primary');
-                document.getElementById('status').innerHTML = '<h4>JinjaFx Error</h4><pre>' + window.opener.quote(obj.error) + '</pre>';
+                document.getElementById('status').innerHTML = '<h4 class="fw-bold">JinjaFx Error</h4><pre>' + window.opener.quote(obj.error) + '</pre>';
                 document.getElementById('status').classList.remove('wait');
               }
             }
@@ -342,7 +342,7 @@
               document.title = "Error";
               document.getElementById('status').classList.add('alert-danger');
               document.getElementById('status').classList.remove('alert-primary');
-              document.getElementById('status').innerHTML = '<h4>Internal Error</h4><pre>' + window.opener.quote(e) + '</pre>';
+              document.getElementById('status').innerHTML = '<h4 class="fw-bold">Internal Error</h4><pre>' + window.opener.quote(e) + '</pre>';
               document.getElementById('status').classList.remove('wait');
             }
           }
@@ -351,7 +351,7 @@
             var sT = (this.statusText.length == 0) ? window.opener.getStatusText(this.status) : this.statusText;
             document.getElementById('status').classList.add('alert-danger');
             document.getElementById('status').classList.remove('alert-primary');
-            document.getElementById('status').innerHTML = '<h4>HTTP ERROR ' + this.status + '</h4><pre>' + window.opener.quote(sT) + '</pre>';
+            document.getElementById('status').innerHTML = '<h4 class="fw-bold">HTTP ERROR ' + this.status + '</h4><pre>' + window.opener.quote(sT) + '</pre>';
             document.getElementById('status').classList.remove('wait');
           }
         };
@@ -360,7 +360,7 @@
           document.title = "Error";
           document.getElementById('status').classList.add('alert-danger');
           document.getElementById('status').classList.remove('alert-primary');
-          document.getElementById('status').innerHTML = '<h4>JinjaFx Error</h4><pre>XMLHttpRequest.onError()</pre>';
+          document.getElementById('status').innerHTML = '<h4 class="fw-bold">JinjaFx Error</h4><pre>XMLHttpRequest.onError()</pre>';
           document.getElementById('status').classList.remove('wait');
         };
         xHR.setRequestHeader("Content-Type", "application/json");
@@ -378,7 +378,7 @@
         document.title = "Error";
         document.getElementById('status').classList.add('alert-danger');
         document.getElementById('status').classList.remove('alert-primary');
-        document.getElementById('status').innerHTML = '<h4>JinjaFx Error</h4><pre>DataTemplate Expired</pre>';
+        document.getElementById('status').innerHTML = '<h4 class="fw-bold">JinjaFx Error</h4><pre>DataTemplate Expired</pre>';
         document.getElementById('status').classList.remove('wait');
       }
     }
@@ -386,7 +386,7 @@
       document.title = "Error";
       document.getElementById('status').classList.add('alert-danger');
       document.getElementById('status').classList.remove('alert-primary');
-      document.getElementById('status').innerHTML = '<h4>JinjaFx Error</h4><pre>DataTemplate Expired</pre>';
+      document.getElementById('status').innerHTML = '<h4 class="fw-bold">JinjaFx Error</h4><pre>DataTemplate Expired</pre>';
       document.getElementById('status').classList.remove('wait');
     }
   };
