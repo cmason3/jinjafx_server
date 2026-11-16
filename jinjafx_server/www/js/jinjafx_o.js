@@ -237,21 +237,21 @@
                   var g = window.opener.quote(oname)
                   var e = g.split(/\/+/);
 
-                  tabs += '<div id="o' + oid + '" class="h-100 tab-pane fade' + ((oid == 1) ? ' show active' : '') + '">';
+                  tabs += '<div id="o' + oid + '" class="ocontainer tab-pane fade' + ((oid == 1) ? ' show active' : '') + '">';
                   if (dflag) {
-                    tabs += '<h4 class="fw-bold">' + e[e.length - 1] + '</h4>';
+                    tabs += '<h4>' + e[e.length - 1] + '</h4>';
                   }
                   else {
-                    tabs += '<h4 class="fw-bold">' + g + '</h4>';
+                    tabs += '<h4>' + g + '</h4>';
                   }
 
                   var tc = window.opener.d(obj.outputs[output]);
                   if (oformat == 'html') {
                     let x = '<script>var jinjafx = { \'outputs\': JSON.parse(sessionStorage.getItem(\'jinjafx.outputs\')) };</script>';
-                    tabs += '<iframe id="t_o' + oid + '" class="output" srcdoc="' + x + tc.replace(/&/g, '&amp;').replace(/"/g, "&quot;") + '"></iframe>';
+                    tabs += '<iframe id="t_o' + oid + '" class="h-100 joutput" srcdoc="' + x + tc.replace(/&/g, '&amp;').replace(/"/g, "&quot;") + '"></iframe>';
                   }
                   else {
-                    tabs += '<textarea id="t_o' + oid + '" class="output" readonly>' + window.opener.quote(tc) + '</textarea>';
+                    tabs += '<textarea id="t_o' + oid + '" class="h-100 joutput" readonly>' + window.opener.quote(tc) + '</textarea>';
                   }
 
                   outputs[g] = btoa(tc);
@@ -264,7 +264,7 @@
                         links += '<div class="directory">' + dir + '/</div>'
                       }
                       else {
-                        links += '<div class="mt-3 directory">' + dir + '/</div>'
+                        links += '<div class="directory">' + dir + '/</div>'
                       }
                       section = dir;
                     }
@@ -284,13 +284,13 @@
 
                 document.getElementById('status').classList.add('d-none');
                 document.getElementById('summary').innerHTML = 'Generated at ' + dayjs().format('HH:mm') + ' on ' + dayjs().format('Do MMMM YYYY') + '<br />in ' + Math.ceil(obj.elapsed).toLocaleString() + ' milliseconds';
-                // document.getElementById('tabs').innerHTML = tabs;
-                // document.getElementById('nav-links').innerHTML = links;
+                document.getElementById('tabs').innerHTML = tabs;
+                document.getElementById('nav-links').innerHTML = links;
 
                 document.title = 'Outputs' + ((dataset != 'Default') ? ' (' + dataset + ')' : '');
 
                 if (oc > 1) {
-                  // document.getElementById('pills').classList.remove('d-none');
+                  document.getElementById('pills').classList.remove('d-none');
                 }
 
                 document.getElementById('main').classList.remove('d-none');

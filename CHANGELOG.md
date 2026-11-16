@@ -4,6 +4,7 @@
 - Lots of internal CSS and layout changes in preparation for the transition from CodeMirror 5 to CodeMirror 6
 - Fixed an issue in `split.js` where it wouldn't size panes correctly if the parent element was hidden - https://github.com/nathancahill/split/issues/798
 - Updated Pandoc to 3.14 in Dockerfile
+- Updated `bootstrap` to 5.3.9
 
 ### [26.7.1] - November 5, 2026
 - Fixed a Content-Security-Policy error with CloudFlare

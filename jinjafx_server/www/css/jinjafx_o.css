@@ -34,24 +34,28 @@ a:hover {
   display: grid;
   grid-template-columns: auto max-content;
 }
-textarea.output {
-  font-size: 12px;
-  background: #fff;
+.ocontainer {
   height: 100%;
+  flex-direction: column;
+}
+.tab-content > .active {
+  display: flex;
+}
+.joutput {
+  background-color: #fff;
   border: 1px solid lightgray;
-  width: 100%;
   overflow-y: auto;
+  height: 100%;
+  width: 100%;
+}
+textarea.joutput {
+  font-size: 12px;
   resize: none;
   padding: 8px;
   outline: none;
 }
-iframe.output {
-  background-color: #fff;
-  border: 1px solid lightgray;
+iframe.joutput {
   padding: 0px;
-  overflow-y: auto;
-  height: 100%;
-  width: 100%;
 }
 pre#print_pre {
   white-space: pre-wrap;
@@ -71,7 +75,6 @@ pre#print_pre {
 .fs-85 {
   font-size: 85%;
 }
-/*
 .nosb {
   overflow-y: scroll;
   scrollbar-width: none;
@@ -80,7 +83,6 @@ pre#print_pre {
 .nosb::-webkit-scrollbar {
   width: 0px;
 }
-*/
 @media print {
   div#header, div#footer {
     display: none;
