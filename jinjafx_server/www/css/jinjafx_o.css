@@ -6,6 +6,11 @@
     display: block;
   }
 }
+@media only screen and (max-width: 700px) {
+  .expanded-text {
+    display: none;
+  }
+}
 textarea.joutput {
   font-size: 12px;
   resize: none;

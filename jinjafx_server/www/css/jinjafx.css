@@ -4,11 +4,6 @@
 html {
   font-size: 14px;
 }
-@media only screen and (max-width: 925px) {
-  .btn-text {
-    display: none;
-  }
-}
 #main {
   background-color: #eee;
 }
