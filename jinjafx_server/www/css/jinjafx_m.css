@@ -3,12 +3,12 @@ textarea {
   width: 100%;
   resize: none;
 }
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 1075px) {
   .expanded-text {
     display: none;
   }
 }
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 675px) {
   .expanded-text2 {
     display: none;
   }
